@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 160 24% 6%;
+    --foreground: 40 30% 92%;
+    --card: 160 20% 9%;
+    --card-foreground: 40 30% 92%;
+    --popover: 160 20% 9%;
+    --popover-foreground: 40 30% 92%;
+    --primary: 40 70% 58%;
+    --primary-foreground: 160 30% 8%;
+    --secondary: 168 28% 16%;
+    --secondary-foreground: 40 30% 92%;
+    --muted: 160 16% 14%;
+    --muted-foreground: 42 14% 66%;
+    --accent: 172 42% 40%;
+    --accent-foreground: 40 30% 96%;
+    --destructive: 8 70% 55%;
+    --destructive-foreground: 40 30% 96%;
+    --border: 160 16% 18%;
+    --input: 160 16% 18%;
+    --ring: 40 70% 58%;
+    --radius: 0.4rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: ui-sans-serif, "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 20% -10%, rgba(217, 164, 65, 0.10), transparent),
+      radial-gradient(ellipse 60% 40% at 90% 10%, rgba(47, 182, 168, 0.10), transparent);
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: Georgia, "Times New Roman", serif;
+    letter-spacing: -0.01em;
+  }
+  .font-mono-tech {
+    font-family: ui-monospace, "SFMono-Regular", "Cascadia Mono", Consolas, monospace;
+  }
+  .grain::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.05;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+@keyframes drift {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2.4s ease-in-out infinite;
+}
+
+.animate-drift {
+  animation: drift 5s ease-in-out infinite;
+}
