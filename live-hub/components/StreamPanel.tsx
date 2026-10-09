@@ -1,7 +1,8 @@
 'use client';
 import { useState } from 'react';
 import { useHub } from '@/lib/HubContext';
-import { setLs, ls } from '@/lib/storage';
+import { ls } from '@/lib/storage';
+import { getCrewKey, pushShared, setCrewKey } from '@/lib/sharedState';
 
 interface Channels { [k: string]: string }
 
@@ -27,7 +28,7 @@ function chLink(k: string, val: string): string {
 }
 
 export function StreamPanel() {
-  const { t, lang, journey, notify, bump } = useHub();
+  const { t, lang, journey, notify, bump, integrations } = useHub();
   const ru = lang === 'ru';
   const [platTab, setPlatTab] = useState('twitch');
   const [chOpen, setChOpen] = useState(false);
@@ -52,7 +53,24 @@ export function StreamPanel() {
   }
 
   const chDraftV = chDraft || ch;
-  const saveChannels = () => { setLs('gtrpht_channels', chDraftV); setChOpen(false); setChDraft(null); bump(); notify(t.chToast); };
+  const [intDraft, setIntDraft] = useState<{ payUrl: string; posUrl: string } | null>(null);
+  const intV = intDraft || { payUrl: integrations.payUrl || '', posUrl: integrations.posUrl || '' };
+  const [keyDraft, setKeyDraft] = useState<string | null>(null);
+  const keyV = keyDraft ?? (chOpen ? getCrewKey() : '');
+  const [saving, setSaving] = useState(false);
+  const saveChannels = async () => {
+    const bad = [intV.payUrl, intV.posUrl].some((u) => u && !/^https:\/\//i.test(u.trim()));
+    if (bad) { notify(ru ? 'Ссылки оплаты и GPS должны начинаться с https://' : 'Pay and GPS links must start with https://'); return; }
+    setCrewKey(keyV);
+    setSaving(true);
+    const res = await pushShared({ channels: chDraftV, integrations: { payUrl: intV.payUrl.trim(), posUrl: intV.posUrl.trim() } });
+    setSaving(false);
+    bump();
+    if (res === 'ok') { setChOpen(false); setChDraft(null); setIntDraft(null); setKeyDraft(null); notify(ru ? 'Сохранено для всех зрителей' : 'Saved for every viewer'); }
+    else if (res === 'unauthorized') notify(ru ? 'Неверный ключ экипажа — сохранено только на этом устройстве' : 'Wrong crew key — saved on this device only');
+    else if (res === 'invalid') notify(ru ? 'Сервер отклонил данные — проверь ссылки' : 'Server rejected the data — check the links');
+    else notify(ru ? 'Нет связи с сервером — сохранено только на этом устройстве' : 'Server unreachable — saved on this device only');
+  };
 
   const share = (() => {
     const u = typeof location !== 'undefined' ? location.href.split('#')[0] : '';
@@ -127,7 +145,17 @@ export function StreamPanel() {
               <input value={chDraftV[k] || ''} onChange={(e) => setChDraft({ ...chDraftV, [k]: e.target.value })} placeholder={ph} style={{ flex: 1, background: '#101013', border: '1px solid #26262B', color: '#ECE9E4', padding: '8px 10px', fontSize: 12, fontFamily: "'JetBrains Mono',monospace", outline: 'none', minWidth: 0 }} />
             </div>
           ))}
-          <button onClick={saveChannels} style={{ background: '#E5372C', border: 'none', color: '#0D0D0F', fontFamily: "'Unbounded',sans-serif", fontWeight: 700, fontSize: 11, letterSpacing: '.08em', padding: 11, cursor: 'pointer' }}>{t.chSave}</button>
+          {([['payUrl', ru ? 'ОПЛАТА' : 'PAY URL', 'https://… (донаты «Весов»)'], ['posUrl', 'GPS URL', 'https://… {lat,lng,ts}']] as const).map(([k, n, ph]) => (
+            <div key={k} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, letterSpacing: '.14em', color: '#8E8C94', width: 74, flex: 'none' }}>{n}</span>
+              <input value={intV[k]} onChange={(e) => setIntDraft({ ...intV, [k]: e.target.value })} placeholder={ph} inputMode="url" autoCapitalize="none" autoCorrect="off" style={{ flex: 1, background: '#101013', border: '1px solid #26262B', color: '#ECE9E4', padding: '8px 10px', fontSize: 12, fontFamily: "'JetBrains Mono',monospace", outline: 'none', minWidth: 0 }} />
+            </div>
+          ))}
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', borderTop: '1px solid #1E1E23', paddingTop: 8 }}>
+            <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, letterSpacing: '.14em', color: '#FF6A5B', width: 74, flex: 'none' }}>{ru ? 'КЛЮЧ' : 'CREW KEY'}</span>
+            <input type="password" value={keyV} onChange={(e) => setKeyDraft(e.target.value)} placeholder={ru ? 'ключ экипажа' : 'crew key'} autoCapitalize="none" autoCorrect="off" autoComplete="current-password" style={{ flex: 1, background: '#101013', border: '1px solid #3A2522', color: '#ECE9E4', padding: '8px 10px', fontSize: 12, fontFamily: "'JetBrains Mono',monospace", outline: 'none', minWidth: 0 }} />
+          </div>
+          <button onClick={saveChannels} disabled={saving} style={{ background: '#E5372C', border: 'none', color: '#0D0D0F', fontFamily: "'Unbounded',sans-serif", fontWeight: 700, fontSize: 11, letterSpacing: '.08em', padding: 11, cursor: 'pointer', minHeight: 44, opacity: saving ? 0.6 : 1 }}>{saving ? '…' : t.chSave}</button>
         </div>
       )}
 

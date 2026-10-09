@@ -277,12 +277,12 @@ export function getDict(lang: 'ru' | 'en'): Dict {
 
 // Per-city photo slideshow sources (order matches Dict.places / cityQuiz).
 export const PLACE_SRCS: string[][] = [
-  ['assets/places/phuket/01-big-buddha.png', 'assets/places/phuket/05-neon-night.png', 'assets/places/phuket/02-longtail-sunset.png', 'assets/places/phuket/04-villas.png', 'assets/places/phuket/03-aerial-beach.png'],
-  ['assets/places/samui/01-scene.png', 'assets/places/samui/02-scene.png', 'assets/places/samui/03-scene.png'],
-  ['assets/places/phangan/01-scene.png', 'assets/places/phangan/02-scene.png', 'assets/places/phangan/03-scene.png'],
-  ['assets/places/chiangmai/01-scene.png', 'assets/places/chiangmai/02-scene.png', 'assets/places/chiangmai/03-scene.png'],
-  ['assets/places/ayutthaya/01-scene.png', 'assets/places/ayutthaya/02-scene.png', 'assets/places/ayutthaya/03-scene.png'],
-  ['assets/places/bangkok/01-scene.png', 'assets/places/bangkok/02-scene.png', 'assets/places/bangkok/03-scene.png'],
+  ['assets/places/phuket/01-big-buddha.jpg', 'assets/places/phuket/05-neon-night.jpg', 'assets/places/phuket/02-longtail-sunset.jpg', 'assets/places/phuket/04-villas.jpg', 'assets/places/phuket/03-aerial-beach.jpg'],
+  ['assets/places/samui/01-scene.jpg', 'assets/places/samui/02-scene.jpg', 'assets/places/samui/03-scene.jpg'],
+  ['assets/places/phangan/01-scene.jpg', 'assets/places/phangan/02-scene.jpg', 'assets/places/phangan/03-scene.jpg'],
+  ['assets/places/chiangmai/01-scene.jpg', 'assets/places/chiangmai/02-scene.jpg', 'assets/places/chiangmai/03-scene.jpg'],
+  ['assets/places/ayutthaya/01-scene.jpg', 'assets/places/ayutthaya/02-scene.jpg', 'assets/places/ayutthaya/03-scene.jpg'],
+  ['assets/places/bangkok/01-scene.jpg', 'assets/places/bangkok/02-scene.jpg', 'assets/places/bangkok/03-scene.jpg'],
 ];
 
 // 7-stage timeline schedule. NOTE: s/e boundary dates are kept exactly as in the

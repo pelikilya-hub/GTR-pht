@@ -15,7 +15,7 @@ const eslintConfig = defineConfig([
     // Vendored runtime (ported canvas/WebRTC custom elements, served as static assets).
     "public/vendor/**",
     // The Cloudflare Worker has its own tsconfig / lint surface.
-    "worker/**",
+    "worker/**", ".wrangler/**",
   ]),
 ]);
 

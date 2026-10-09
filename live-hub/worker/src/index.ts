@@ -7,14 +7,22 @@
  *  /api/rt/tracks       POST  → publish (local) or pull (remote) tracks on a session
  *  /api/rt/renegotiate  PUT   → finish a renegotiation with the client's answer
  *  /api/rt/tracks/close PUT   → close tracks
+ *  /api/state           GET   → shared hub state (stream channels, pay/GPS URLs, position, crew status, logbook)
+ *  /api/state           PUT   → crew-only partial update of the shared state
+ *  /api/pos             POST  → crew-only GPS push (plain {lat,lng,ts} or OwnTracks {_type:'location',lat,lon,tst})
+ *  /api/crew/check      GET   → 204 if the X-Crew-Key header matches CREW_KEY, else 401
  *  /ws/:room            WS    → room signaling (presence, track announcements, tally, commands)
  *  everything else            → static assets from ./out (the Next.js export)
  *
  * The Realtime App Secret and TURN key never leave this Worker.
+ * CREW_KEY gates everything that can change what viewers see: camera/pult roles in a room,
+ * publishing tracks to the SFU, and writes to the shared state.
  */
 
 export interface Env {
   ROOM: DurableObjectNamespace;
+  HUB: DurableObjectNamespace;
+  CREW_KEY?: string;
   ASSETS: Fetcher;
   ALLOWED_ROOMS?: string;
   REALTIME_APP_ID?: string;
@@ -28,7 +36,7 @@ const RT_BASE = 'https://rtc.live.cloudflare.com/v1';
 const CORS: Record<string, string> = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET,POST,PUT,OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Headers': 'Content-Type, X-Crew-Key, Authorization',
 };
 
 function json(data: unknown, status = 200, extra: Record<string, string> = {}): Response {
@@ -40,6 +48,82 @@ function bad(msg: string, status = 400): Response {
 function roomAllowed(env: Env, room: string): boolean {
   const list = (env.ALLOWED_ROOMS || 'gtrpht').split(',').map((s) => s.trim().toLowerCase()).filter(Boolean);
   return list.includes(room.toLowerCase());
+}
+
+function safeEqual(a: string, b: string): boolean {
+  const x = new TextEncoder().encode(a), y = new TextEncoder().encode(b);
+  let diff = x.length ^ y.length;
+  for (let i = 0; i < Math.max(x.length, y.length); i++) diff |= (x[i] ?? 0) ^ (y[i] ?? 0);
+  return diff === 0;
+}
+/** No CREW_KEY configured → open (local dev). Configured → header, bearer or ?key= must match. */
+function isCrew(env: Env, req: Request, url: URL): boolean {
+  if (!env.CREW_KEY) return true;
+  const auth = req.headers.get('Authorization') || '';
+  const k = req.headers.get('X-Crew-Key') || (auth.startsWith('Bearer ') ? auth.slice(7) : '') || url.searchParams.get('key') || '';
+  return !!k && safeEqual(k, env.CREW_KEY);
+}
+
+/* ── shared state validation ── */
+const CH_KEYS = ['twitch', 'youtube', 'kick', 'vk', 'telegram', 'tiktok'];
+const STATUS_CODES = ['drive', 'base', 'ferry', 'live', 'stop'];
+const POST_TYPES = ['post', 'mat', 'hyp', 'obs'];
+const str = (v: unknown, max: number) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
+const httpUrl = (v: unknown) => { const s = str(v, 500); return !s || /^https:\/\//i.test(s) ? s : null; };
+const num = (v: unknown) => (typeof v === 'number' ? v : typeof v === 'string' ? parseFloat(v) : NaN);
+
+interface HubPatch {
+  channels?: Record<string, string>;
+  integrations?: { payUrl?: string; posUrl?: string };
+  pos?: { lat: number; lng: number; ts: number; by?: string; src?: string } | null;
+  status?: { code: string; ts: number; by?: string } | null;
+  posts?: { id: string; ts: number; member: string; type: string; text: string; link?: string }[];
+}
+
+function validatePatch(b: Record<string, unknown>): HubPatch | string {
+  const out: HubPatch = {};
+  if (b.channels !== undefined) {
+    if (!b.channels || typeof b.channels !== 'object') return 'channels must be an object';
+    const c: Record<string, string> = {};
+    for (const k of CH_KEYS) c[k] = str((b.channels as Record<string, unknown>)[k], 200);
+    out.channels = c;
+  }
+  if (b.integrations !== undefined) {
+    const i = (b.integrations || {}) as Record<string, unknown>;
+    const payUrl = httpUrl(i.payUrl), posUrl = httpUrl(i.posUrl);
+    if (payUrl === null || posUrl === null) return 'payUrl / posUrl must be https:// URLs';
+    out.integrations = { payUrl, posUrl };
+  }
+  if (b.pos !== undefined) {
+    if (b.pos === null) out.pos = null;
+    else {
+      const p = b.pos as Record<string, unknown>;
+      const lat = num(p.lat), lng = num(p.lng);
+      if (!isFinite(lat) || !isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) return 'pos.lat / pos.lng invalid';
+      out.pos = { lat, lng, ts: isFinite(num(p.ts)) ? num(p.ts) : Date.now(), by: str(p.by, 24), src: 'gps' };
+    }
+  }
+  if (b.status !== undefined) {
+    if (b.status === null) out.status = null;
+    else {
+      const st = b.status as Record<string, unknown>;
+      if (!STATUS_CODES.includes(String(st.code))) return 'status.code must be one of ' + STATUS_CODES.join(',');
+      out.status = { code: String(st.code), ts: isFinite(num(st.ts)) ? num(st.ts) : Date.now(), by: str(st.by, 24) };
+    }
+  }
+  if (b.posts !== undefined) {
+    if (!Array.isArray(b.posts)) return 'posts must be an array';
+    out.posts = b.posts.slice(0, 50).map((x, i) => {
+      const p = (x || {}) as Record<string, unknown>;
+      const type = POST_TYPES.includes(String(p.type)) ? String(p.type) : 'post';
+      return { id: str(p.id, 40) || String(Date.now()) + '-' + i, ts: isFinite(num(p.ts)) ? num(p.ts) : Date.now(), member: str(p.member, 24), type, text: str(p.text, 1200), link: httpUrl(p.link) || '' };
+    });
+  }
+  return out;
+}
+
+function hubStub(env: Env) {
+  return env.HUB.get(env.HUB.idFromName('gtrpht'));
 }
 
 async function rtFetch(env: Env, path: string, method: string, body?: unknown): Promise<Response> {
@@ -57,7 +141,36 @@ async function handleApi(req: Request, env: Env, url: URL): Promise<Response> {
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });
   const p = url.pathname;
 
-  if (p === '/api/health') return json({ ok: true, sfu: !!env.REALTIME_APP_ID, turn: !!env.TURN_KEY_ID, hook: !!env.MAKE_WEBHOOK_URL });
+  if (p === '/api/health') return json({ ok: true, sfu: !!env.REALTIME_APP_ID, turn: !!env.TURN_KEY_ID, hook: !!env.MAKE_WEBHOOK_URL, crew: !!env.CREW_KEY });
+
+  if (p === '/api/crew/check') return isCrew(env, req, url) ? new Response(null, { status: 204, headers: CORS }) : bad('crew key required', 401);
+
+  if (p === '/api/state' && req.method === 'GET') {
+    const r = await hubStub(env).fetch('https://hub/state');
+    return new Response(r.body, { status: r.status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', ...CORS } });
+  }
+  if (p === '/api/state' && (req.method === 'PUT' || req.method === 'POST')) {
+    if (!isCrew(env, req, url)) return bad('crew key required', 401);
+    const raw = await req.text();
+    if (raw.length > 128 * 1024) return bad('payload too large', 413);
+    let body: Record<string, unknown>;
+    try { body = JSON.parse(raw); } catch { return bad('invalid JSON'); }
+    const patch = validatePatch(body || {});
+    if (typeof patch === 'string') return bad(patch);
+    const r = await hubStub(env).fetch('https://hub/state', { method: 'PUT', body: JSON.stringify(patch) });
+    return new Response(r.body, { status: r.status, headers: { 'Content-Type': 'application/json', ...CORS } });
+  }
+  if (p === '/api/pos' && req.method === 'POST') {
+    if (!isCrew(env, req, url)) return bad('crew key required', 401);
+    const b = (await req.json().catch(() => null)) as Record<string, unknown> | null;
+    if (!b) return bad('invalid JSON');
+    // OwnTracks: {_type:'location', lat, lon, tst(sec), tid}; plain: {lat, lng, ts(ms), by}
+    const own = b._type === 'location';
+    const patch = validatePatch({ pos: { lat: b.lat, lng: own ? b.lon : b.lng ?? b.lon, ts: own ? num(b.tst) * 1000 : b.ts, by: b.by ?? b.tid ?? 'gps' } });
+    if (typeof patch === 'string') return bad(patch);
+    await hubStub(env).fetch('https://hub/state', { method: 'PUT', body: JSON.stringify(patch) });
+    return own ? json([]) : json({ ok: true, pos: patch.pos });
+  }
 
   if (p === '/api/hook' && req.method === 'POST') {
     const body = await req.text();
@@ -88,8 +201,10 @@ async function handleApi(req: Request, env: Env, url: URL): Promise<Response> {
   if (p === '/api/rt/session' && req.method === 'POST') return rtFetch(env, '/sessions/new', 'POST');
 
   if (p === '/api/rt/tracks' && req.method === 'POST') {
-    const body = (await req.json().catch(() => null)) as { sessionId?: string } | null;
+    const body = (await req.json().catch(() => null)) as { sessionId?: string; tracks?: { location?: string }[] } | null;
     if (!body?.sessionId) return bad('sessionId required');
+    // Publishing (local tracks) is crew-only; pulling remote tracks is open to every viewer.
+    if ((body.tracks || []).some((t) => t && t.location === 'local') && !isCrew(env, req, url)) return bad('crew key required', 401);
     const { sessionId, ...rest } = body;
     return rtFetch(env, `/sessions/${encodeURIComponent(sessionId)}/tracks/new`, 'POST', rest);
   }
@@ -119,6 +234,8 @@ export default {
       const room = m[1].toLowerCase();
       if (!roomAllowed(env, room)) return bad('room not allowed', 403);
       if (req.headers.get('Upgrade')?.toLowerCase() !== 'websocket') return bad('expected websocket', 426);
+      const role = url.searchParams.get('role') || 'view';
+      if (role !== 'view' && !isCrew(env, req, url)) return bad('crew key required', 401);
       const id = env.ROOM.idFromName(room);
       return env.ROOM.get(id).fetch(req);
     }
@@ -242,5 +359,35 @@ export class RoomSignal implements DurableObject {
   async webSocketError(ws: WebSocket) {
     const me = this.peerOf(ws);
     if (me) this.broadcast({ type: 'leave', id: me.id }, me.id);
+  }
+}
+
+/* ───────────────────────── Shared hub state (Durable Object) ─────────────────────────
+ * One instance ("gtrpht"). Holds what the crew configures for every visitor: stream channels,
+ * pay / GPS endpoint URLs, the last real position, crew status and the logbook.
+ * Input is validated in the Worker before it gets here.
+ */
+interface HubStateData {
+  v: number;
+  channels?: Record<string, string>;
+  integrations?: { payUrl?: string; posUrl?: string };
+  pos?: unknown;
+  status?: unknown;
+  posts?: unknown[];
+}
+
+export class HubState implements DurableObject {
+  constructor(private ctx: DurableObjectState) {}
+
+  async fetch(req: Request): Promise<Response> {
+    const cur = ((await this.ctx.storage.get<HubStateData>('state')) || { v: 0 }) as HubStateData;
+    if (req.method === 'PUT') {
+      const patch = (await req.json()) as Partial<HubStateData>;
+      const next: HubStateData = { ...cur, ...patch, v: Date.now() };
+      if (patch.integrations) next.integrations = { ...(cur.integrations || {}), ...patch.integrations };
+      await this.ctx.storage.put('state', next);
+      return new Response(JSON.stringify(next), { headers: { 'Content-Type': 'application/json' } });
+    }
+    return new Response(JSON.stringify(cur), { headers: { 'Content-Type': 'application/json' } });
   }
 }

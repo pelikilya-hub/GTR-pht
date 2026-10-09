@@ -34,20 +34,44 @@ from git) — see `public/assets/README.md`.
    | `REALTIME_APP_ID`, `REALTIME_APP_SECRET` | Cloudflare → Realtime → **SFU** → Create app |
    | `TURN_KEY_ID`, `TURN_KEY_TOKEN` | Cloudflare → Realtime → **TURN** → Create key (recommended; without it clients fall back to STUN-only) |
    | `MAKE_WEBHOOK_URL` | Make.com → scenario → Custom Webhook URL (event relay for donations / votes / invites) |
+   | `CREW_KEY` | any long passphrase you choose — the crew types it once per device on `/camera`, `/pult` and in the channel editor |
 
-   The Realtime/Make values are uploaded to the Worker as secrets after each deploy (`wrangler secret bulk`);
+   The Realtime/Make/crew values are uploaded to the Worker as secrets after each deploy (`wrangler secret bulk`);
    missing ones are skipped with a warning. Plain var (in `wrangler.jsonc`): `ALLOWED_ROOMS=gtrpht`.
 3. Push to the default branch (or **Actions → Deploy Live Hub → Run workflow**). Without the two Cloudflare
    secrets the workflow only builds and typechecks; with them it deploys, uploads secrets and curls `/api/health`.
    First deploy also applies the Durable Object migration (`RoomSignal`).
 
-Health check once live: `https://bangtaostyle.com/api/health` → `{"ok":true,"sfu":true,"turn":true,"hook":true}`.
+Health check once live: `https://bangtaostyle.com/api/health` → `{"ok":true,"sfu":true,"turn":true,"hook":true,"crew":true}`.
 
 ### Alternative — Cloudflare Workers Builds (git-connected)
 
 Dashboard → Workers & Pages → Create → Workers → Import a repository → `pelikilya-hub/GTR-pht`,
 root directory `live-hub`, build `npm run build`, deploy `npx wrangler deploy`, project name `gtrpht-live-hub`.
 Secrets then go to the Worker's *Settings → Variables & Secrets*. Both paths deploy the same Worker; use one.
+
+## Shared state & crew key
+
+Everything the crew configures for all visitors lives in the `HubState` Durable Object:
+stream channels, pay / GPS URLs, last position, crew status, logbook. Browsers pull `/api/state` on load,
+every 20 s and when the tab regains focus.
+
+- **Channel editor** (stream block → «НАСТРОИТЬ КАНАЛЫ»): channels + pay URL + GPS URL + crew key → saved for everyone.
+- **GPS push**: point OwnTracks (HTTP mode) or any tracker at `https://bangtaostyle.com/api/pos?key=<CREW_KEY>`;
+  accepts `{lat,lng,ts}` or OwnTracks `{_type:"location",lat,lon,tst}`.
+- **Crew status / logbook** (no UI yet): `PUT /api/state` with header `X-Crew-Key`, e.g.
+  `{"status":{"code":"drive","by":"ilia"}}` or `{"posts":[{"member":"ilia","type":"post","text":"…"}]}`.
+- `CREW_KEY` also gates camera/pult roles in the room and publishing to the SFU, so a visitor cannot hijack a camera slot.
+  Viewers (multiview) never need it.
+
+## Assets
+
+| Path | Source |
+|---|---|
+| `assets/scales/themis.png` | extracted from the Claude Design bundle |
+| `assets/places/**.jpg` | Wikimedia Commons, free licenses — authors on `/credits/` (`lib/photoCredits.json`) |
+| `assets/audio/night-drive.mp3` | synthesized fallback loop; drop the real `midnight-circuit.mp3` next to it and the player uses it automatically |
+| `assets/ilia/night-lounge-graded.png` | **missing** — crew portrait from the design, add it to show the photo on the crew card |
 
 ## Pages
 
@@ -56,6 +80,7 @@ Secrets then go to the Worker's *Settings → Variables & Secrets*. Both paths d
 | `/` | public | the Live Hub (map, telemetry, stream, scales, …). *GTR CAM · LIVE* tab = multiview of the room |
 | `/camera` | crew (iPhone) | transmitter: pick slot CAM 1–4 → **В ЭФИР** → publishes to the SFU |
 | `/pult` | director (iPad/Mac) | all cameras, program window, tally, flip / quality / mic commands |
+| `/credits` | public | photo attributions |
 
 ## Realtime architecture
 

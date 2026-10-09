@@ -7,6 +7,7 @@ import { useAuth } from './useAuth';
 import { getDict, Dict } from './i18n';
 import { deriveJourney, Journey } from './journey';
 import { ls } from './storage';
+import { pullShared } from './sharedState';
 
 interface Integrations { payUrl?: string; posUrl?: string; tgToken?: string; tgChat?: string; discord?: string; custom?: string }
 
@@ -62,6 +63,18 @@ export function HubProvider({ children }: { children: React.ReactNode }) {
     const onStorage = () => bump();
     window.addEventListener('storage', onStorage);
     return () => window.removeEventListener('storage', onStorage);
+  }, []);
+
+  // Shared state from the Worker (channels, pay/GPS URLs, position, status, logbook):
+  // on load, every 20s, and whenever the tab comes back to the foreground.
+  useEffect(() => {
+    let alive = true;
+    const pull = () => { pullShared().then((changed) => { if (alive && changed) bump(); }); };
+    pull();
+    const iv = setInterval(pull, 20000);
+    const onVis = () => { if (document.visibilityState === 'visible') pull(); };
+    document.addEventListener('visibilitychange', onVis);
+    return () => { alive = false; clearInterval(iv); document.removeEventListener('visibilitychange', onVis); };
   }, []);
 
   // GPS endpoint polling (OwnTracks/Traccar-style JSON {lat,lng,ts}), every 30s.
