@@ -1,4 +1,4 @@
-name: Fetch city photos (one-off)
+name: Shoot live site (diagnostics)
 
 on:
   push:
@@ -8,16 +8,18 @@ permissions:
   contents: write
 
 jobs:
-  photos:
+  shoot:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Download free-licensed city photos from Wikimedia Commons
-        run: python3 .github/scripts/commons_photos.py _photos
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with: { node-version: 22 }
+      - run: npm i --no-save playwright@1.56.1 && npx playwright install --with-deps chromium
+      - run: node .github/scripts/shoot.mjs
       - name: Commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898+github-actions[bot]@users.noreply.github.com"
-          git add -f _photos
-          git commit -m "city photos from Wikimedia Commons" || echo "nothing to commit"
+          git add -f _shots
+          git commit -m "live site screenshots" || true
           git push origin HEAD:claude/fetch-design-assets
