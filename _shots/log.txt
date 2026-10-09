@@ -1,0 +1,18 @@
+[iphone] shot 2 failed: page.screenshot: Timeout 20000ms exceeded.
+Call log:
+  - taking page screenshot
+
+[iphone] info: {"title":"СКОРО · GTR|PHT","font":true,"canvas":true,"hidden":44}
+[desktop] shot 1 failed: page.screenshot: Timeout 20000ms exceeded.
+Call log:
+  - taking page screenshot
+
+[desktop] map shot failed: elementHandle.screenshot: Timeout 20000ms exceeded.
+Call log:
+  - taking element screenshot
+  - waiting for fonts to load...
+  - fonts loaded
+  - attempting scroll into view action
+    - waiting for element to be stable
+
+[desktop] info: {"title":"СКОРО · GTR|PHT","font":true,"canvas":true,"hidden":15}
