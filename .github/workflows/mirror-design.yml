@@ -1,4 +1,4 @@
-name: Mirror design bundle (one-off)
+name: Fetch city photos (one-off)
 
 on:
   push:
@@ -8,29 +8,16 @@ permissions:
   contents: write
 
 jobs:
-  mirror:
+  photos:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Download Netlify deploy of the design
-        run: |
-          set -x
-          S=https://gtr-pht-live-hub-cd-46edea59f6.netlify.app
-          mkdir -p _mirror && cd _mirror
-          curl -sSL -D headers.txt -o index.html "$S/" || true
-          ls -la; head -c 600 index.html; echo
-          # recursive grab of everything same-host the page references
-          wget -q -e robots=off -r -l 3 -p -np -nH -P site "$S/" || true
-          for p in assets/audio/midnight-circuit.mp3 assets/scales/themis.png assets/ilia/night-lounge-graded.png \
-                   gtr-deity.js gtr-matrix-photo.js gtr-rtc.js image-slot.js support.js; do
-            mkdir -p "direct/$(dirname "$p")"; curl -sSL -f -o "direct/$p" "$S/$p" || rm -f "direct/$p"
-          done
-          find . -type f -printf '%s\t%p\n' | sort -k2 > manifest.txt
-          cat manifest.txt
-      - name: Commit mirror
+      - name: Download free-licensed city photos from Wikimedia Commons
+        run: python3 .github/scripts/commons_photos.py _photos
+      - name: Commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898+github-actions[bot]@users.noreply.github.com"
-          git add -f _mirror
-          git commit -m "mirror design bundle from Netlify" || echo "nothing to commit"
+          git add -f _photos
+          git commit -m "city photos from Wikimedia Commons" || echo "nothing to commit"
           git push origin HEAD:claude/fetch-design-assets

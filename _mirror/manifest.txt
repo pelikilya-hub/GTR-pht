@@ -1,4 +1,0 @@
-439	./headers.txt
-4433347	./index.html
-0	./manifest.txt
-4433347	./site/index.html
