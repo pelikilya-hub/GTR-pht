@@ -1,0 +1,10 @@
+health_before={"ok":true,"sfu":true,"turn":true,"hook":true,"crew":true}
+turn_fields={"success":true,"fields":["created","modified","name","secret","uid"]}
+got_id=yes got_token=yes
+✨ Successfully created secret for key: TURN_KEY_ID
+✨ Successfully created secret for key: TURN_KEY_TOKEN
+✨ 2 secrets successfully created
+["CREW_KEY","MAKE_WEBHOOK_URL","REALTIME_APP_ID","REALTIME_APP_SECRET","TURN_KEY_ID","TURN_KEY_TOKEN"]
+health_after={"ok":true,"sfu":true,"turn":true,"hook":true,"crew":true}
+turn_api={"turn":true,"n":2}
+sfu_session={"has_session":true,"error":null}
