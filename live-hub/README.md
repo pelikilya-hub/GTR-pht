@@ -14,8 +14,8 @@ npm run typecheck:worker
 npm run lint
 ```
 
-Binary assets (not in git, drop them in before building): `public/assets/{ilia,places,audio,scales}` —
-see `public/assets/README.md`.
+Binary assets go in `public/assets/{ilia,places,audio,scales}` and **must be committed** (Cloudflare builds
+from git) — see `public/assets/README.md`.
 
 ## Production — Cloudflare Workers Builds (git-connected, no CLI needed)
 

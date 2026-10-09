@@ -1,6 +1,7 @@
-# Binary assets (not committed)
+# Binary assets
 
-Drop the design bundle's `project/assets/*` here before building:
+Cloudflare builds straight from git, so these files must be **committed**. Drop the design
+bundle's `project/assets/*` here, then `git add live-hub/public/assets && git commit`:
 
 ```
 public/assets/
@@ -12,5 +13,5 @@ public/assets/
 ```
 
 Paths are referenced from `lib/i18n.ts` (`PLACE_SRCS`), `components/Crew.tsx`,
-`components/Scales.tsx` and `lib/useAudioPlayer.ts`. Missing files degrade gracefully
-(empty matrix-photo frames, silent player) — the site still builds and runs.
+`components/Scales.tsx` and `lib/useAudioPlayer.ts`. Missing files degrade gracefully (empty matrix-photo frames, silent player) — the site still
+builds and runs, so a deploy without them is safe but visually incomplete.

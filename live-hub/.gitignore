@@ -42,7 +42,3 @@ next-env.d.ts
 
 # cloudflare
 .wrangler/
-
-# binary design assets live outside git (see public/assets/README.md)
-public/assets/**
-!public/assets/README.md
