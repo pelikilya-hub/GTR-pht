@@ -1,7 +1,12 @@
 'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-const TRACK = { title: 'MIDNIGHT CIRCUIT', src: '/assets/audio/midnight-circuit.mp3' };
+// The design's soundtrack first; if that file is not deployed, a bundled synthwave loop
+// (public/assets/audio/night-drive.mp3) keeps the player and the beat-sync visuals alive.
+const TRACKS = [
+  { title: 'MIDNIGHT CIRCUIT', src: '/assets/audio/midnight-circuit.mp3' },
+  { title: 'NIGHT DRIVE', src: '/assets/audio/night-drive.mp3' },
+];
 
 declare global {
   interface Window {
@@ -17,9 +22,11 @@ export function useAudioPlayer() {
   const [playing, setPlaying] = useState(false);
   const [t, setT] = useState(0);
   const [d, setD] = useState(0);
+  const [title, setTitle] = useState(TRACKS[0].title);
 
   useEffect(() => {
-    const a = new Audio(TRACK.src);
+    let ti = 0;
+    const a = new Audio(TRACKS[0].src);
     audioRef.current = a;
     a.preload = 'auto';
     a.loop = true;
@@ -48,12 +55,25 @@ export function useAudioPlayer() {
       wireBeat();
     };
     const onPause = () => setPlaying(false);
+    const onError = () => {
+      if (ti >= TRACKS.length - 1) return;
+      ti += 1;
+      const wasPlaying = !a.paused;
+      a.src = TRACKS[ti].src;
+      setTitle(TRACKS[ti].title);
+      try { localStorage.removeItem('gtrpht_track_pos'); } catch { /* ignore */ }
+      a.load();
+      if (wasPlaying || playRequested) a.play().catch(() => {});
+    };
+    let playRequested = false;
+    a.addEventListener('error', onError);
     a.addEventListener('timeupdate', onTime);
     a.addEventListener('loadedmetadata', onMeta);
     a.addEventListener('play', onPlay);
     a.addEventListener('pause', onPause);
 
     const kick = () => {
+      playRequested = true;
       if (a.paused) a.play().catch(() => {});
       window.removeEventListener('pointerdown', kick);
     };
@@ -98,6 +118,7 @@ export function useAudioPlayer() {
       a.removeEventListener('loadedmetadata', onMeta);
       a.removeEventListener('play', onPlay);
       a.removeEventListener('pause', onPause);
+      a.removeEventListener('error', onError);
       window.removeEventListener('pointerdown', kick);
     };
   }, []);
@@ -118,5 +139,5 @@ export function useAudioPlayer() {
     [d],
   );
 
-  return { title: TRACK.title, playing, t, d, toggle, seek };
+  return { title, playing, t, d, toggle, seek };
 }

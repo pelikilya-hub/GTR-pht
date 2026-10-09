@@ -7,7 +7,7 @@ name: Deploy Live Hub (Cloudflare)
 #   CLOUDFLARE_API_TOKEN   token with "Edit Cloudflare Workers" template + Zone:DNS:Edit on bangtaostyle.com
 #   CLOUDFLARE_ACCOUNT_ID  Cloudflare dashboard → Workers & Pages → Account ID
 # Optional Worker secrets (uploaded after the deploy when set):
-#   REALTIME_APP_ID, REALTIME_APP_SECRET, TURN_KEY_ID, TURN_KEY_TOKEN, MAKE_WEBHOOK_URL
+#   CREW_KEY, REALTIME_APP_ID, REALTIME_APP_SECRET, TURN_KEY_ID, TURN_KEY_TOKEN, MAKE_WEBHOOK_URL
 
 on:
   push:
@@ -31,9 +31,9 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
@@ -70,13 +70,17 @@ jobs:
           TURN_KEY_ID: ${{ secrets.TURN_KEY_ID }}
           TURN_KEY_TOKEN: ${{ secrets.TURN_KEY_TOKEN }}
           MAKE_WEBHOOK_URL: ${{ secrets.MAKE_WEBHOOK_URL }}
+          CREW_KEY: ${{ secrets.CREW_KEY }}
         run: |
           node -e '
-            const names = ["REALTIME_APP_ID","REALTIME_APP_SECRET","TURN_KEY_ID","TURN_KEY_TOKEN","MAKE_WEBHOOK_URL"];
+            const names = ["CREW_KEY","REALTIME_APP_ID","REALTIME_APP_SECRET","TURN_KEY_ID","TURN_KEY_TOKEN","MAKE_WEBHOOK_URL"];
             const out = {};
             for (const n of names) if (process.env[n]) out[n] = process.env[n];
             process.stdout.write(JSON.stringify(out));
           ' > /tmp/secrets.json
+          if [ -z "$CREW_KEY" ]; then
+            echo "::warning::CREW_KEY is not set — /camera, /pult and the channel editor are open to anyone."
+          fi
           if [ "$(cat /tmp/secrets.json)" = "{}" ]; then
             echo "::warning::No Worker secrets set in GitHub — /api/health will report sfu:false, turn:false, hook:false."
           else

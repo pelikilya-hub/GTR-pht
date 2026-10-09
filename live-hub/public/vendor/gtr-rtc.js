@@ -24,8 +24,22 @@ var API_BASE=(function(){ try{ var o=window.__GTR_API_BASE; if(o) return String(
 function el(tag,css,props){ var n=document.createElement(tag); if(css)n.style.cssText=css; if(props)Object.assign(n,props); return n; }
 function statusDot(col,blink){ return 'display:inline-block;width:7px;height:7px;border-radius:50%;background:'+col+(blink?';animation:gtrBlink 1.1s infinite':''); }
 function wsUrl(room,qs){ var proto=location.protocol==='https:'?'wss:':'ws:'; var base=API_BASE?API_BASE.replace(/^http/,'ws'):proto+'//'+location.host; return base+'/ws/'+encodeURIComponent(room)+'?'+qs; }
+/* Crew key: cameras and the pult must prove they are the crew (server secret CREW_KEY).
+   Asked once per device, kept in localStorage. Viewers never need it. */
+function crewKey(){ try{ return localStorage.getItem('gtrpht_crew_key')||''; }catch(e){ return ''; } }
+async function ensureCrew(){
+  for(var i=0;i<3;i++){
+    var r=null; try{ r=await fetch(API_BASE+'/api/crew/check',{headers:{'X-Crew-Key':crewKey()},cache:'no-store'}); }catch(e){ return true; }
+    if(r.ok||r.status!==401) return true;
+    var k=window.prompt(i?'Ключ не подошёл. Ключ экипажа GTR|PHT:':'Ключ экипажа GTR|PHT (один раз на устройство):');
+    if(k==null) return false;
+    try{ localStorage.setItem('gtrpht_crew_key',k.trim()); }catch(e){}
+  }
+  return false;
+}
 async function api(path,method,body){
-  var r=await fetch(API_BASE+path,{method:method||'GET',headers:body?{'Content-Type':'application/json'}:undefined,body:body?JSON.stringify(body):undefined});
+  var hd={}; if(body) hd['Content-Type']='application/json'; var ck=crewKey(); if(ck) hd['X-Crew-Key']=ck;
+  var r=await fetch(API_BASE+path,{method:method||'GET',headers:hd,body:body?JSON.stringify(body):undefined});
   var txt=await r.text(); var j=null; try{ j=txt?JSON.parse(txt):null; }catch(e){}
   if(!r.ok){ var e=new Error((j&&(j.error||j.errorDescription))||('HTTP '+r.status)); e.status=r.status; throw e; }
   return j;
@@ -51,7 +65,7 @@ class Signal{
   constructor(room,role,slot,name,handlers){ this.room=room; this.role=role; this.slot=slot||''; this.name=name||''; this.h=handlers||{}; this.ws=null; this.id=null; this.open=false; this.closed=false; this._retry=0; }
   connect(){
     if(this.closed) return;
-    var self=this; var qs='role='+this.role+'&slot='+encodeURIComponent(this.slot)+'&name='+encodeURIComponent(this.name);
+    var self=this; var qs='role='+this.role+'&slot='+encodeURIComponent(this.slot)+'&name='+encodeURIComponent(this.name)+(this.role!=='view'&&crewKey()?'&key='+encodeURIComponent(crewKey()):'');
     var ws=new WebSocket(wsUrl(this.room,qs)); this.ws=ws;
     ws.onopen=function(){ self.open=true; self._retry=0; if(self.h.open) self.h.open(); };
     ws.onmessage=function(ev){ var m=null; try{ m=JSON.parse(ev.data); }catch(e){ return; } if(m&&m.type==='hello') self.id=m.id; if(self.h.msg) self.h.msg(m); };
@@ -140,6 +154,7 @@ class GTRCamera extends HTMLElement{
         this.video.srcObject=this.stream; this.video.play().catch(()=>{}); this.noCam.style.display='none'; this.updateHUD();
       }
     }catch(e){ this.setStatus('КАМЕРА НЕ ДАНА: '+e.message+'. Разреши доступ в настройках браузера.'); return; }
+    if(!(await ensureCrew())){ this.setStatus('✗ Нужен ключ экипажа — эфир не запущен'); return; }
     this.bigBtn.textContent='⏳ ПОДКЛЮЧЕНИЕ…'; this.bigBtn.style.background='#333';
     try{
       this.setStatus('ПОДКЛЮЧЕНИЕ К REALTIME SFU…');
@@ -169,7 +184,8 @@ class GTRCamera extends HTMLElement{
       this.liveLabel.textContent='В ЭФИРЕ'; this.liveLabel.style.color=RED2;
       if(navigator.wakeLock) navigator.wakeLock.request('screen').then(w=>{this._wake=w;}).catch(()=>{});
     }catch(e){
-      this.setStatus('✗ '+(e.status===503?'SFU не настроен на сервере (REALTIME_APP_ID/SECRET)':e.message));
+      if(e.status===401){ try{ localStorage.removeItem('gtrpht_crew_key'); }catch(_){} }
+      this.setStatus('✗ '+(e.status===503?'SFU не настроен на сервере (REALTIME_APP_ID/SECRET)':e.status===401?'Ключ экипажа не принят — нажми «В ЭФИР» ещё раз':e.message));
       this.resetBtn(); this.teardownMedia();
     }
   }
@@ -301,6 +317,8 @@ class GTRSwitcher extends HTMLElement{
   _mkBtn(label){ return el('button','background:none;border:1px solid #2A2A30;color:'+DIM+';font-family:'+MONO+';font-size:8px;letter-spacing:.08em;padding:6px 8px;cursor:pointer;min-height:36px',{textContent:label}); }
   toggleScan(){ if(this.scanning) this.stopScan(); else this.startScan(); }
   async startScan(){
+    if(this.scanning) return;
+    if(this.mode==='director'&&!(await ensureCrew())){ this.statusEl.textContent='✗ ПУЛЬТ ТОЛЬКО ДЛЯ ЭКИПАЖА — нужен ключ'; return; }
     if(this.scanning) return;
     this.scanning=true;
     this.scanBtn.textContent='■ СТОП'; this.scanBtn.style.background='#1A1A1E'; this.scanBtn.style.color=RED2;
