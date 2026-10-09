@@ -58,7 +58,7 @@ export function Places() {
   return (
     <section data-screen-label="places" style={{ maxWidth: 1280, margin: '64px auto 0', padding: '0 clamp(14px,4vw,28px)' }}>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 16, flexWrap: 'wrap' }}>
-        <h2 style={{ fontFamily: "'Unbounded',sans-serif", fontWeight: 700, fontSize: 21, letterSpacing: '.03em', margin: 0, color: '#ECE9E4', flex: 1 }}>{t.plTitle}</h2>
+        <h2 style={{ fontFamily: "'Inter Tight',sans-serif", fontWeight: 700, fontSize: 21, letterSpacing: '.03em', margin: 0, color: '#ECE9E4', flex: 1 }}>{t.plTitle}</h2>
         <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, letterSpacing: '.2em', color: '#55545C' }}>{t.plSub}</div>
       </div>
       <div className="places-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(300px,100%),1fr))', gap: 12, marginTop: 22 }}>
@@ -71,7 +71,7 @@ export function Places() {
             </div>
             <div style={{ padding: 18 }}>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
-                <div style={{ fontFamily: "'Unbounded',sans-serif", fontWeight: 700, fontSize: 16, color: '#ECE9E4', flex: 1 }}>{pl.name}</div>
+                <div style={{ fontFamily: "'Inter Tight',sans-serif", fontWeight: 700, fontSize: 16, color: '#ECE9E4', flex: 1 }}>{pl.name}</div>
                 <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, letterSpacing: '.22em', color: pl.tagCol }}>{pl.tag}</div>
               </div>
               <div style={{ fontSize: 13, lineHeight: 1.6, color: '#8E8C94', marginTop: 8 }}>{pl.desc}</div>

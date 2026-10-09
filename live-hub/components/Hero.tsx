@@ -29,19 +29,19 @@ export function Hero() {
 
       <div className="hero-copy" style={{ flex: '1 1 540px', minWidth: 320, position: 'relative', zIndex: 1 }}>
         <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11, letterSpacing: '.34em', color: '#E5372C' }}>{t.tagline}</div>
-        <h1 className="hero-h1" style={{ fontFamily: "'Unbounded',sans-serif", fontWeight: 900, fontSize: 'clamp(32px,4.4vw,56px)', lineHeight: 1.06, margin: '18px 0 0', color: '#ECE9E4' }}>
+        <h1 className="hero-h1" style={{ fontFamily: "'Inter Tight',sans-serif", fontWeight: 900, fontSize: 'clamp(32px,4.4vw,56px)', lineHeight: 1.06, margin: '18px 0 0', color: '#ECE9E4' }}>
           {t.heroA}<br /><span style={{ color: '#E5372C' }}>{t.heroB}</span>
         </h1>
         <p style={{ maxWidth: 560, fontSize: 16.5, lineHeight: 1.68, color: '#A8A6AD', margin: '22px 0 0' }}>{t.heroSub}</p>
         <div className="hero-cta-row" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 30 }}>
-          <button onClick={() => scrollToId('stream')} style={{ background: '#E5372C', border: '1px solid #E5372C', color: '#0B0B0C', fontFamily: "'Unbounded',sans-serif", fontWeight: 700, fontSize: 12.5, letterSpacing: '.08em', padding: '16px 26px', cursor: 'pointer' }}>{t.ctaWatch}</button>
-          <button onClick={() => scrollToId('tiers')} style={{ background: 'none', border: '1px solid #2E2E34', color: '#ECE9E4', fontFamily: "'Unbounded',sans-serif", fontWeight: 700, fontSize: 12.5, letterSpacing: '.08em', padding: '16px 26px', cursor: 'pointer' }}>{t.ctaJoin}</button>
-          <button onClick={() => scrollToId('scales')} style={{ background: 'none', border: '1px solid #2A4E80', color: '#8FC4FF', fontFamily: "'Unbounded',sans-serif", fontWeight: 700, fontSize: 12.5, letterSpacing: '.08em', padding: '16px 26px', cursor: 'pointer' }}>ВЕСЫ ⇄</button>
+          <button onClick={() => scrollToId('stream')} style={{ background: '#E5372C', border: '1px solid #E5372C', color: '#0B0B0C', fontFamily: "'Inter Tight',sans-serif", fontWeight: 700, fontSize: 12.5, letterSpacing: '.08em', padding: '16px 26px', cursor: 'pointer' }}>{t.ctaWatch}</button>
+          <button onClick={() => scrollToId('tiers')} style={{ background: 'none', border: '1px solid #2E2E34', color: '#ECE9E4', fontFamily: "'Inter Tight',sans-serif", fontWeight: 700, fontSize: 12.5, letterSpacing: '.08em', padding: '16px 26px', cursor: 'pointer' }}>{t.ctaJoin}</button>
+          <button onClick={() => scrollToId('scales')} style={{ background: 'none', border: '1px solid #2A4E80', color: '#8FC4FF', fontFamily: "'Inter Tight',sans-serif", fontWeight: 700, fontSize: 12.5, letterSpacing: '.08em', padding: '16px 26px', cursor: 'pointer' }}>ВЕСЫ ⇄</button>
         </div>
         <div className="hero-stats" style={{ display: 'flex', gap: 36, flexWrap: 'wrap', marginTop: 42 }}>
           {[{ v: '39', c: t.sDays }, { v: '2 830', c: t.sKm }, { v: '7', c: t.sBases }, { v: '19', c: t.sSpots }].map((s) => (
             <div key={s.c}>
-              <div style={{ fontFamily: "'Unbounded',sans-serif", fontWeight: 700, fontSize: 24, color: '#ECE9E4' }}>{s.v}</div>
+              <div style={{ fontFamily: "'Inter Tight',sans-serif", fontWeight: 700, fontSize: 24, color: '#ECE9E4' }}>{s.v}</div>
               <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, letterSpacing: '.12em', color: '#6E6C74', marginTop: 6 }}>{s.c}</div>
             </div>
           ))}
@@ -71,8 +71,8 @@ export function Hero() {
           <>
             <div style={{ marginTop: 20, display: 'flex', alignItems: 'baseline', gap: 10 }}>
               <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11, letterSpacing: '.2em', color: '#8E8C94' }}>{t.dayWord}</span>
-              <span style={{ fontFamily: "'Unbounded',sans-serif", fontWeight: 900, fontSize: 52, color: '#FF4B3E', lineHeight: 1 }}>{day}</span>
-              <span style={{ fontFamily: "'Unbounded',sans-serif", fontWeight: 700, fontSize: 20, color: '#55545C' }}>/39</span>
+              <span style={{ fontFamily: "'Inter Tight',sans-serif", fontWeight: 900, fontSize: 52, color: '#FF4B3E', lineHeight: 1 }}>{day}</span>
+              <span style={{ fontFamily: "'Inter Tight',sans-serif", fontWeight: 700, fontSize: 20, color: '#55545C' }}>/39</span>
             </div>
             <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11, letterSpacing: '.08em', color: '#A8A6AD', marginTop: 12 }}>
               {km.toLocaleString(lang === 'ru' ? 'ru-RU' : 'en-US')} / 2 830 {t.kmUnit} · {curStage}

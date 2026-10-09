@@ -19,7 +19,7 @@ export function Logbook() {
   return (
     <section data-screen-label="logbook" style={{ maxWidth: 1280, margin: '56px auto 0', padding: '0 clamp(14px,4vw,28px)' }}>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 16, flexWrap: 'wrap' }}>
-        <h2 style={{ fontFamily: "'Unbounded',sans-serif", fontWeight: 700, fontSize: 21, letterSpacing: '.03em', margin: 0, color: '#ECE9E4', flex: 1 }}>{t.jrTitle}</h2>
+        <h2 style={{ fontFamily: "'Inter Tight',sans-serif", fontWeight: 700, fontSize: 21, letterSpacing: '.03em', margin: 0, color: '#ECE9E4', flex: 1 }}>{t.jrTitle}</h2>
         <a href="#" onClick={(e) => { e.preventDefault(); notify(ru ? 'Консоль экипажа — отдельный дизайн-файл, не входит в эту сборку' : 'Crew console is a separate design file, not part of this build'); }} style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11, letterSpacing: '.14em', color: '#FF6A5B' }}>{t.jrOpen}</a>
       </div>
       <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, letterSpacing: '.2em', color: '#55545C', marginTop: 8 }}>{t.jrSub}</div>
@@ -30,7 +30,7 @@ export function Logbook() {
         {journal.map((j, i) => (
           <div key={i} style={{ border: '1px solid #26262B', background: '#101013', padding: 18 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-              <span style={{ fontFamily: "'Unbounded',sans-serif", fontWeight: 700, fontSize: 12, color: '#FF6A5B' }}>{j.member}</span>
+              <span style={{ fontFamily: "'Inter Tight',sans-serif", fontWeight: 700, fontSize: 12, color: '#FF6A5B' }}>{j.member}</span>
               <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, letterSpacing: '.16em', color: '#8E8C94', border: '1px solid #2A2A30', padding: '3px 8px' }}>{j.type}</span>
               <span style={{ flex: 1 }} />
               <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9.5, color: '#55545C' }}>{j.time}</span>

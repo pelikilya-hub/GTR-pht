@@ -12,7 +12,7 @@ export default function CreditsPage() {
   return (
     <main style={{ maxWidth: 860, margin: '0 auto', padding: '48px clamp(16px,4vw,28px) 80px', color: '#ECE9E4', background: '#0B0B0C', minHeight: '100vh' }}>
       <Link href="/" style={{ fontFamily: mono, fontSize: 10, letterSpacing: '.16em', color: '#FF6A5B' }}>← GTR|PHT</Link>
-      <h1 style={{ fontFamily: "'Unbounded',sans-serif", fontWeight: 900, fontSize: 22, margin: '18px 0 6px' }}>Photo credits</h1>
+      <h1 style={{ fontFamily: "'Inter Tight',sans-serif", fontWeight: 900, fontSize: 22, margin: '18px 0 6px' }}>Photo credits</h1>
       <p style={{ fontFamily: mono, fontSize: 11, color: '#8E8C94', lineHeight: 1.7 }}>
         City photos in the route section come from Wikimedia Commons under the licenses below.
       </p>

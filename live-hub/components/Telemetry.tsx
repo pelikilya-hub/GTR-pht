@@ -21,8 +21,8 @@ export function Telemetry() {
         <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10.5, color: '#E5372C' }}>{ictTime} ICT</div>
       </div>
       <div style={{ display: 'flex', gap: 34, marginTop: 18, flexWrap: 'wrap' }}>
-        <div><span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, letterSpacing: '.16em', color: '#55545C' }}>{t.dayWord} </span><span style={{ fontFamily: "'Unbounded',sans-serif", fontWeight: 700, fontSize: 26, color: '#ECE9E4' }}>{day}</span><span style={{ fontFamily: "'Unbounded',sans-serif", fontSize: 13, color: '#55545C' }}>/39</span></div>
-        <div><span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, letterSpacing: '.16em', color: '#55545C' }}>{t.kmDoneW}</span><span style={{ fontFamily: "'Unbounded',sans-serif", fontWeight: 700, fontSize: 26, color: '#ECE9E4' }}>{km.toLocaleString(lang === 'ru' ? 'ru-RU' : 'en-US')}</span><span style={{ fontFamily: "'Unbounded',sans-serif", fontSize: 13, color: '#55545C' }}>/2 830</span></div>
+        <div><span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, letterSpacing: '.16em', color: '#55545C' }}>{t.dayWord} </span><span style={{ fontFamily: "'Inter Tight',sans-serif", fontWeight: 700, fontSize: 26, color: '#ECE9E4' }}>{day}</span><span style={{ fontFamily: "'Inter Tight',sans-serif", fontSize: 13, color: '#55545C' }}>/39</span></div>
+        <div><span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, letterSpacing: '.16em', color: '#55545C' }}>{t.kmDoneW}</span><span style={{ fontFamily: "'Inter Tight',sans-serif", fontWeight: 700, fontSize: 26, color: '#ECE9E4' }}>{km.toLocaleString(lang === 'ru' ? 'ru-RU' : 'en-US')}</span><span style={{ fontFamily: "'Inter Tight',sans-serif", fontSize: 13, color: '#55545C' }}>/2 830</span></div>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 20 }}>
         <Bar label={t.telRoute} pct={routePct} />

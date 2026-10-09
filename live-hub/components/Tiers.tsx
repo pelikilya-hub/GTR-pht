@@ -7,7 +7,7 @@ export function Tiers() {
 
   return (
     <section id="tiers" data-screen-label="tiers" style={{ maxWidth: 1280, margin: '56px auto 0', padding: '0 clamp(14px,4vw,28px)' }}>
-      <h2 style={{ fontFamily: "'Unbounded',sans-serif", fontWeight: 700, fontSize: 21, letterSpacing: '.03em', margin: 0, color: '#ECE9E4' }}>{t.tiersTitle}</h2>
+      <h2 style={{ fontFamily: "'Inter Tight',sans-serif", fontWeight: 700, fontSize: 21, letterSpacing: '.03em', margin: 0, color: '#ECE9E4' }}>{t.tiersTitle}</h2>
       <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, letterSpacing: '.2em', color: '#55545C', marginTop: 8 }}>{t.tiersSub}</div>
       <div className="tiers-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 12, marginTop: 22 }}>
         {t.tiers.map((tr, idx) => {
@@ -18,14 +18,14 @@ export function Tiers() {
                 <div style={{ position: 'absolute', top: -9, left: 22, background: '#E5372C', color: '#0B0B0C', fontFamily: "'JetBrains Mono',monospace", fontSize: 9, fontWeight: 600, letterSpacing: '.18em', padding: '4px 10px' }}>{t.popular}</div>
               )}
               <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11, letterSpacing: '.24em', color: '#8E8C94' }}>{tr.name}</div>
-              <div style={{ marginTop: 14 }}><span style={{ fontFamily: "'Unbounded',sans-serif", fontWeight: 900, fontSize: 32, color: '#ECE9E4' }}>{fmt(tr.price)}</span><span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11, color: '#55545C' }}> {t.perMonth}</span></div>
+              <div style={{ marginTop: 14 }}><span style={{ fontFamily: "'Inter Tight',sans-serif", fontWeight: 900, fontSize: 32, color: '#ECE9E4' }}>{fmt(tr.price)}</span><span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11, color: '#55545C' }}> {t.perMonth}</span></div>
               <div style={{ fontSize: 13.5, color: '#A8A6AD', marginTop: 6 }}>{tr.desc}</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 9, marginTop: 18, flex: 1 }}>
                 {tr.perks.map((perk) => (
                   <div key={perk} style={{ display: 'flex', gap: 10, fontSize: 13.5, lineHeight: 1.5, color: '#B9B6BE' }}><span style={{ fontFamily: "'JetBrains Mono',monospace", color: '#E5372C' }}>+</span><span>{perk}</span></div>
                 ))}
               </div>
-              <button onClick={() => notify(t.toastPay)} style={{ width: '100%', marginTop: 22, background: popular ? '#E5372C' : 'transparent', border: `1px solid ${popular ? '#E5372C' : '#2E2E34'}`, color: popular ? '#0B0B0C' : '#ECE9E4', fontFamily: "'Unbounded',sans-serif", fontWeight: 700, fontSize: 11.5, letterSpacing: '.08em', padding: 14, cursor: 'pointer' }}>{t.choose}</button>
+              <button onClick={() => notify(t.toastPay)} style={{ width: '100%', marginTop: 22, background: popular ? '#E5372C' : 'transparent', border: `1px solid ${popular ? '#E5372C' : '#2E2E34'}`, color: popular ? '#0B0B0C' : '#ECE9E4', fontFamily: "'Inter Tight',sans-serif", fontWeight: 700, fontSize: 11.5, letterSpacing: '.08em', padding: 14, cursor: 'pointer' }}>{t.choose}</button>
             </div>
           );
         })}

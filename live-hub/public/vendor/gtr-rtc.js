@@ -3,10 +3,10 @@
    <gtr-director room> pult: pulls every camera, program window, tally + flip/quality/mic commands
    <gtr-multiview room> public viewer: same as director without the command rail
    No PeerJS, no third-party signaling: media → Cloudflare SFU, control → /ws/<room> (Durable Object).
-   Visual language unchanged from the design (JetBrains Mono / Unbounded, #E5372C). */
+   Visual language unchanged from the design (JetBrains Mono / 'Inter Tight', #E5372C). */
 (function(){
 'use strict';
-var MONO="'JetBrains Mono',monospace", HEAD="'Unbounded',sans-serif";
+var MONO="'JetBrains Mono',monospace", HEAD="'Inter Tight',sans-serif";
 var RED='#E5372C', RED2='#FF6A5B', INK='#ECE9E4', DIM='#8E8C94', DIM2='#55545C', BRD='#26262B', BG2='#101013';
 var QUAL=[{k:'480p',w:854,h:480},{k:'720p',w:1280,h:720},{k:'1080p',w:1920,h:1080}];
 var SLOTS=[

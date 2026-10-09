@@ -15,7 +15,7 @@ export function AudioBar() {
       <button onClick={toggle} aria-label="play" style={{ width: 38, height: 38, flex: 'none', background: '#E5372C', border: 'none', color: '#0D0D0F', fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'JetBrains Mono',monospace" }}>{playing ? '❚❚' : '▶'}</button>
       <div className="track-info" style={{ minWidth: 0, flex: 'none', width: 'clamp(100px,28vw,230px)' }}>
         <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, letterSpacing: '.26em', color: '#55545C' }}>GTR PHT · SOUNDTRACK</div>
-        <div style={{ fontFamily: "'Unbounded',sans-serif", fontWeight: 700, fontSize: 12, color: '#ECE9E4', marginTop: 3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{title}</div>
+        <div style={{ fontFamily: "'Inter Tight',sans-serif", fontWeight: 700, fontSize: 12, color: '#ECE9E4', marginTop: 3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{title}</div>
       </div>
       <div onClick={(e) => { const r = e.currentTarget.getBoundingClientRect(); seek((e.clientX - r.left) / r.width); }} style={{ flex: 1, height: 26, display: 'flex', alignItems: 'center', cursor: 'pointer', minWidth: 60 }}>
         <div style={{ position: 'relative', width: '100%', height: 3, background: '#26262B' }}>

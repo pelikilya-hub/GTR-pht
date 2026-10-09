@@ -29,7 +29,7 @@ export function Invite() {
       <div className="invite-grid" style={{ maxWidth: 1280, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(320px,100%),1fr))', gap: 48, alignItems: 'start' }}>
         <div>
           <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10.5, letterSpacing: '.3em', color: '#FF6A5B' }}>{t.invKicker}</div>
-          <h2 style={{ fontFamily: "'Unbounded',sans-serif", fontWeight: 900, fontSize: 'clamp(24px,3vw,34px)', lineHeight: 1.15, color: '#ECE9E4', margin: '14px 0 0' }}>{t.invTitle}</h2>
+          <h2 style={{ fontFamily: "'Inter Tight',sans-serif", fontWeight: 900, fontSize: 'clamp(24px,3vw,34px)', lineHeight: 1.15, color: '#ECE9E4', margin: '14px 0 0' }}>{t.invTitle}</h2>
           <p style={{ fontSize: 15, lineHeight: 1.7, color: '#A8A6AD', margin: '18px 0 0', maxWidth: 520 }}>{t.invLead}</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 26 }}>
             {t.invPoints.map((ip) => (
@@ -53,7 +53,7 @@ export function Invite() {
             </div>
             <input value={contact} onChange={(e) => setContact(e.target.value)} placeholder={t.invFContact} style={inputStyle} />
             <textarea value={msg} onChange={(e) => setMsg(e.target.value)} placeholder={t.invFMsg} rows={3} style={{ ...inputStyle, resize: 'vertical' }} />
-            <button onClick={send} style={{ background: '#E5372C', border: 'none', color: '#0D0D0F', fontFamily: "'Unbounded',sans-serif", fontWeight: 700, fontSize: 13, letterSpacing: '.08em', padding: '15px 18px', cursor: 'pointer' }}>{t.invSendBtn}</button>
+            <button onClick={send} style={{ background: '#E5372C', border: 'none', color: '#0D0D0F', fontFamily: "'Inter Tight',sans-serif", fontWeight: 700, fontSize: 13, letterSpacing: '.08em', padding: '15px 18px', cursor: 'pointer' }}>{t.invSendBtn}</button>
             <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9.5, letterSpacing: '.14em', color: '#55545C', lineHeight: 1.6 }}>{t.invNote}</div>
           </div>
         </div>
