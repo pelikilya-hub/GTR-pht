@@ -43,7 +43,7 @@ export function Boot() {
     <div className="boot-card" onClick={finish} style={{ position: 'fixed', inset: 0, zIndex: 2000, background: '#070708', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', opacity: op, transition: 'opacity .5s ease' }}>
       <div style={{ width: 'min(540px,86vw)' }}>
         <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, letterSpacing: '.3em', color: '#E5372C' }}>GTR|PHT PROTOCOL v26.08</div>
-        <div style={{ fontFamily: "'Unbounded',sans-serif", fontWeight: 900, fontSize: 'clamp(34px,6vw,52px)', letterSpacing: '.02em', color: '#ECE9E4', marginTop: 14, animation: 'omGlitch 2.6s infinite' }}>
+        <div style={{ fontFamily: "'Inter Tight',sans-serif", fontWeight: 900, fontSize: 'clamp(34px,6vw,52px)', letterSpacing: '.02em', color: '#ECE9E4', marginTop: 14, animation: 'omGlitch 2.6s infinite' }}>
           GTR<span style={{ color: '#E5372C' }}>|</span>PHT
         </div>
         <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11, letterSpacing: '.22em', color: '#8E8C94', marginTop: 10 }}>{t.bootInit}</div>

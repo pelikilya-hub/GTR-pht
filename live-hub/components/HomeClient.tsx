@@ -27,7 +27,7 @@ export default function HomeClient() {
   return (
     <HubProvider>
       <VendorScripts />
-      <div style={{ minHeight: '100vh', background: '#0B0B0C', color: '#ECE9E4', fontFamily: "'Golos Text',sans-serif" }}>
+      <div style={{ minHeight: '100vh', background: '#0B0B0C', color: '#ECE9E4', fontFamily: "'Inter',sans-serif" }}>
         <Boot />
         <Toast />
         <Topbar />

@@ -155,7 +155,7 @@ export function StreamPanel() {
             <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, letterSpacing: '.14em', color: '#FF6A5B', width: 74, flex: 'none' }}>{ru ? 'КЛЮЧ' : 'CREW KEY'}</span>
             <input type="password" value={keyV} onChange={(e) => setKeyDraft(e.target.value)} placeholder={ru ? 'ключ экипажа' : 'crew key'} autoCapitalize="none" autoCorrect="off" autoComplete="current-password" style={{ flex: 1, background: '#101013', border: '1px solid #3A2522', color: '#ECE9E4', padding: '8px 10px', fontSize: 12, fontFamily: "'JetBrains Mono',monospace", outline: 'none', minWidth: 0 }} />
           </div>
-          <button onClick={saveChannels} disabled={saving} style={{ background: '#E5372C', border: 'none', color: '#0D0D0F', fontFamily: "'Unbounded',sans-serif", fontWeight: 700, fontSize: 11, letterSpacing: '.08em', padding: 11, cursor: 'pointer', minHeight: 44, opacity: saving ? 0.6 : 1 }}>{saving ? '…' : t.chSave}</button>
+          <button onClick={saveChannels} disabled={saving} style={{ background: '#E5372C', border: 'none', color: '#0D0D0F', fontFamily: "'Inter Tight',sans-serif", fontWeight: 700, fontSize: 11, letterSpacing: '.08em', padding: 11, cursor: 'pointer', minHeight: 44, opacity: saving ? 0.6 : 1 }}>{saving ? '…' : t.chSave}</button>
         </div>
       )}
 

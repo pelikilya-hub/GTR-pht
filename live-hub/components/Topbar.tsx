@@ -16,7 +16,7 @@ export function Topbar() {
   return (
     <div style={{ position: 'sticky', top: 0, zIndex: 1100, backdropFilter: 'blur(12px)', background: 'rgba(11,11,12,.86)', borderBottom: '1px solid #1C1C20' }} className="sticky-topbar">
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 clamp(12px,3vw,28px)', minHeight: 58, display: 'flex', alignItems: 'center', gap: 'clamp(6px,1.5vw,18px)', flexWrap: 'wrap' }}>
-        <div style={{ fontFamily: "'Unbounded',sans-serif", fontWeight: 900, fontSize: 16, letterSpacing: '.05em' }}>GTR<span style={{ color: '#E5372C' }}>|</span>PHT</div>
+        <div style={{ fontFamily: "'Inter Tight',sans-serif", fontWeight: 900, fontSize: 16, letterSpacing: '.05em' }}>GTR<span style={{ color: '#E5372C' }}>|</span>PHT</div>
         <div className="hdr-ver" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9.5, letterSpacing: '.14em', color: '#55545C' }}>PROTOCOL v26.08</div>
         <div style={{ flex: 1 }} />
         <Link href="/pult" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, letterSpacing: '.14em', color: '#FF6A5B' }}>{t.consoleLink}</Link>

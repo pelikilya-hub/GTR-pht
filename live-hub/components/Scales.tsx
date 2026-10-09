@@ -256,7 +256,7 @@ export function Scales() {
     <section id="scales" data-screen-label="scales" style={{ borderTop: '1px solid #1C1C20', borderBottom: '1px solid #1C1C20', background: '#0A0A0C', marginTop: 64, padding: '56px clamp(14px,4vw,28px)' }}>
       <div style={{ maxWidth: 1280, margin: '0 auto' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 16, flexWrap: 'wrap' }}>
-          <h2 style={{ fontFamily: "'Unbounded',sans-serif", fontWeight: 700, fontSize: 21, letterSpacing: '.03em', margin: 0, color: '#ECE9E4' }}>ВЕСЫ МАРШРУТА</h2>
+          <h2 style={{ fontFamily: "'Inter Tight',sans-serif", fontWeight: 700, fontSize: 21, letterSpacing: '.03em', margin: 0, color: '#ECE9E4' }}>ВЕСЫ МАРШРУТА</h2>
           <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, letterSpacing: '.2em', color: '#55545C' }}>ДОБРО ⇄ СЧАСТЬЕ · ГОЛОСУЕТ КОШЕЛЁК</div>
           <span style={{ flex: 1 }} />
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, border: '1px solid #26262B', padding: '6px 12px' }}>
@@ -286,12 +286,12 @@ export function Scales() {
           </div>
           <div style={{ position: 'absolute', left: 0, right: 0, top: 0, height: 2, background: 'linear-gradient(90deg,transparent,rgba(229,55,44,.5),transparent)', animation: 'scScan 9s linear infinite', pointerEvents: 'none' }} />
           <div ref={beamGRef} style={{ position: 'absolute', left: '3%', top: '82.5%', width: '31%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, pointerEvents: 'none', willChange: 'transform' }}>
-            <div ref={gPctRef} style={{ fontFamily: "'Unbounded',sans-serif", fontWeight: 900, fontSize: 'clamp(16px,3vw,26px)', color: '#8FC4FF', textShadow: '0 0 18px rgba(74,158,255,.6)', lineHeight: 1 }}>{Math.round(gp * 100)}%</div>
+            <div ref={gPctRef} style={{ fontFamily: "'Inter Tight',sans-serif", fontWeight: 900, fontSize: 'clamp(16px,3vw,26px)', color: '#8FC4FF', textShadow: '0 0 18px rgba(74,158,255,.6)', lineHeight: 1 }}>{Math.round(gp * 100)}%</div>
             <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 'clamp(7px,1.1vw,9.5px)', letterSpacing: '.24em', color: '#4A9EFF' }}>ДОБРО</div>
             <div ref={gNumRef} style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 'clamp(7px,1.1vw,10px)', letterSpacing: '.04em', color: '#ECE9E4' }}>{good.toLocaleString('ru-RU')} ₽</div>
           </div>
           <div ref={beamJRef} style={{ position: 'absolute', right: '3%', top: '82.5%', width: '31%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, pointerEvents: 'none', willChange: 'transform' }}>
-            <div ref={jPctRef} style={{ fontFamily: "'Unbounded',sans-serif", fontWeight: 900, fontSize: 'clamp(16px,3vw,26px)', color: '#FF8A7C', textShadow: '0 0 18px rgba(229,55,44,.6)', lineHeight: 1 }}>{Math.round(jp * 100)}%</div>
+            <div ref={jPctRef} style={{ fontFamily: "'Inter Tight',sans-serif", fontWeight: 900, fontSize: 'clamp(16px,3vw,26px)', color: '#FF8A7C', textShadow: '0 0 18px rgba(229,55,44,.6)', lineHeight: 1 }}>{Math.round(jp * 100)}%</div>
             <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 'clamp(7px,1.1vw,9.5px)', letterSpacing: '.24em', color: '#FF6A5B' }}>СЧАСТЬЕ</div>
             <div ref={jNumRef} style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 'clamp(7px,1.1vw,10px)', letterSpacing: '.04em', color: '#ECE9E4' }}>{joy.toLocaleString('ru-RU')} ₽</div>
           </div>
@@ -312,9 +312,9 @@ export function Scales() {
 
         <div style={{ border: '1px solid #26262B', background: '#0D0D0F', padding: 18, marginTop: 14 }}>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'stretch', marginBottom: 16 }}>
-            <input value={custom} onChange={(e) => setCustom(e.target.value.replace(/[^\d]/g, ''))} placeholder="СВОЯ СУММА ₽" inputMode="numeric" style={{ flex: 1, minWidth: 130, background: '#141416', border: '1px solid #2A2A30', color: '#ECE9E4', fontFamily: "'Unbounded',sans-serif", fontWeight: 700, fontSize: 15, letterSpacing: '.06em', padding: '12px 14px', outline: 'none', textAlign: 'center' }} />
-            <button onClick={() => customGive('good')} style={{ background: 'none', border: '1px solid #2A4E80', color: '#8FC4FF', fontFamily: "'Unbounded',sans-serif", fontWeight: 700, fontSize: 11, letterSpacing: '.1em', padding: '12px 20px', cursor: 'pointer', minHeight: 44 }}>→ ДОБРО</button>
-            <button onClick={() => customGive('joy')} style={{ background: 'none', border: '1px solid #6E2A24', color: '#FF8A7C', fontFamily: "'Unbounded',sans-serif", fontWeight: 700, fontSize: 11, letterSpacing: '.1em', padding: '12px 20px', cursor: 'pointer', minHeight: 44 }}>→ СЧАСТЬЕ</button>
+            <input value={custom} onChange={(e) => setCustom(e.target.value.replace(/[^\d]/g, ''))} placeholder="СВОЯ СУММА ₽" inputMode="numeric" style={{ flex: 1, minWidth: 130, background: '#141416', border: '1px solid #2A2A30', color: '#ECE9E4', fontFamily: "'Inter Tight',sans-serif", fontWeight: 700, fontSize: 15, letterSpacing: '.06em', padding: '12px 14px', outline: 'none', textAlign: 'center' }} />
+            <button onClick={() => customGive('good')} style={{ background: 'none', border: '1px solid #2A4E80', color: '#8FC4FF', fontFamily: "'Inter Tight',sans-serif", fontWeight: 700, fontSize: 11, letterSpacing: '.1em', padding: '12px 20px', cursor: 'pointer', minHeight: 44 }}>→ ДОБРО</button>
+            <button onClick={() => customGive('joy')} style={{ background: 'none', border: '1px solid #6E2A24', color: '#FF8A7C', fontFamily: "'Inter Tight',sans-serif", fontWeight: 700, fontSize: 11, letterSpacing: '.1em', padding: '12px 20px', cursor: 'pointer', minHeight: 44 }}>→ СЧАСТЬЕ</button>
           </div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, flexWrap: 'wrap' }}>
             <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, letterSpacing: '.22em', color: '#8E8C94' }}>{'// ЛЕНТА ГИРЬ'}</div>
@@ -356,7 +356,7 @@ function SidePanel({ title, subtitle, subCol, titleCol, border, cornerCol, corne
         ? <div style={{ position: 'absolute', top: -1, left: -1, width: 14, height: 14, borderTop: `2px solid ${cornerCol}`, borderLeft: `2px solid ${cornerCol}` }} />
         : <div style={{ position: 'absolute', top: -1, right: -1, width: 14, height: 14, borderTop: `2px solid ${cornerCol}`, borderRight: `2px solid ${cornerCol}` }} />}
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
-        <div style={{ fontFamily: "'Unbounded',sans-serif", fontWeight: 900, fontSize: 17, letterSpacing: '.04em', color: titleCol }}>{title}</div>
+        <div style={{ fontFamily: "'Inter Tight',sans-serif", fontWeight: 900, fontSize: 17, letterSpacing: '.04em', color: titleCol }}>{title}</div>
         <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, letterSpacing: '.18em', color: subCol }}>{subtitle}</div>
       </div>
       <div style={{ fontSize: 13, lineHeight: 1.7, color: '#A8A6AD', marginTop: 10 }}>{desc}</div>
