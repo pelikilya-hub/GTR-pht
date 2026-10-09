@@ -1,0 +1,16 @@
+crew_key_received=yes
+make_url_received=yes
+token_verify={"success":true,"errors":[]} user_verify={"success":false}
+list_apps={"success":true,"n":2,"errors":[]}
+create_app={"success":true,"errors":[]}
+create_turn={"success":true,"errors":[]}
+keys: CREW_KEY,MAKE_WEBHOOK_URL,REALTIME_APP_ID,REALTIME_APP_SECRET,TURN_KEY_ID
+wrangler_bulk_exit=0
+✨ Successfully created secret for key: CREW_KEY
+✨ Successfully created secret for key: MAKE_WEBHOOK_URL
+✨ Successfully created secret for key: REALTIME_APP_ID
+✨ Successfully created secret for key: REALTIME_APP_SECRET
+✨ Successfully created secret for key: TURN_KEY_ID
+Finished processing secrets file:
+✨ 5 secrets successfully created
+health_after={"ok":true,"sfu":false,"turn":false,"hook":false,"crew":false}
