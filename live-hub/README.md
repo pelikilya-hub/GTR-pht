@@ -17,29 +17,37 @@ npm run lint
 Binary assets go in `public/assets/{ilia,places,audio,scales}` and **must be committed** (Cloudflare builds
 from git) — see `public/assets/README.md`.
 
-## Production — Cloudflare Workers Builds (git-connected, no CLI needed)
+## Production — GitHub Actions → `wrangler deploy` (default path)
 
-1. **Cloudflare dashboard → Workers & Pages → Create → Workers → Import a repository**
-   - Repository: `pelikilya-hub/gtr-pht`, branch: `main` (or the PR branch while testing)
-   - **Root directory:** `live-hub`
-   - **Build command:** `npm run build`
-   - **Deploy command:** `npx wrangler deploy`
-   - Project name: `gtrpht-live-hub` (must match `name` in `wrangler.jsonc`)
-2. **Settings → Variables & Secrets** — add as *Secrets*:
+`.github/workflows/deploy-live-hub.yml` builds and deploys on every push to the default branch that touches
+`live-hub/`. The custom domains `bangtaostyle.com` + `www.bangtaostyle.com` are declared in `wrangler.jsonc`
+(`routes[].custom_domain`), so the deploy creates DNS + certificate itself — nothing to click in the dashboard.
+
+1. **Cloudflare → My Profile → API Tokens → Create Token → "Edit Cloudflare Workers" template**, and add
+   `Zone → DNS → Edit` for `bangtaostyle.com` (needed once for the custom domain records).
+2. **GitHub → repo → Settings → Secrets and variables → Actions → New repository secret:**
 
    | Secret | Where to get it |
    |---|---|
-   | `REALTIME_APP_ID`, `REALTIME_APP_SECRET` | Dashboard → Realtime → **SFU** → Create app |
-   | `TURN_KEY_ID`, `TURN_KEY_TOKEN` | Dashboard → Realtime → **TURN** → Create key (recommended; without it clients fall back to STUN-only) |
+   | `CLOUDFLARE_API_TOKEN` | the token from step 1 |
+   | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare → Workers & Pages → right sidebar *Account ID* |
+   | `REALTIME_APP_ID`, `REALTIME_APP_SECRET` | Cloudflare → Realtime → **SFU** → Create app |
+   | `TURN_KEY_ID`, `TURN_KEY_TOKEN` | Cloudflare → Realtime → **TURN** → Create key (recommended; without it clients fall back to STUN-only) |
    | `MAKE_WEBHOOK_URL` | Make.com → scenario → Custom Webhook URL (event relay for donations / votes / invites) |
 
-   Plain var (already in `wrangler.jsonc`): `ALLOWED_ROOMS=gtrpht` (comma-separated room allowlist).
-3. **Settings → Domains & Routes → Add → Custom domain → `bangtaostyle.com`** (and `www.bangtaostyle.com`
-   if wanted). The zone is already on Cloudflare, so the DNS record + certificate are created automatically.
-4. Push to the connected branch → Workers Builds runs `npm run build` + `wrangler deploy`.
+   The Realtime/Make values are uploaded to the Worker as secrets after each deploy (`wrangler secret bulk`);
+   missing ones are skipped with a warning. Plain var (in `wrangler.jsonc`): `ALLOWED_ROOMS=gtrpht`.
+3. Push to the default branch (or **Actions → Deploy Live Hub → Run workflow**). Without the two Cloudflare
+   secrets the workflow only builds and typechecks; with them it deploys, uploads secrets and curls `/api/health`.
    First deploy also applies the Durable Object migration (`RoomSignal`).
 
 Health check once live: `https://bangtaostyle.com/api/health` → `{"ok":true,"sfu":true,"turn":true,"hook":true}`.
+
+### Alternative — Cloudflare Workers Builds (git-connected)
+
+Dashboard → Workers & Pages → Create → Workers → Import a repository → `pelikilya-hub/GTR-pht`,
+root directory `live-hub`, build `npm run build`, deploy `npx wrangler deploy`, project name `gtrpht-live-hub`.
+Secrets then go to the Worker's *Settings → Variables & Secrets*. Both paths deploy the same Worker; use one.
 
 ## Pages
 
