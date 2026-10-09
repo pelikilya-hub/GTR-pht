@@ -137,7 +137,7 @@ textarea.field { height: auto; min-height: 110px; padding: 14px 16px; resize: ve
 .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; margin-top: clamp(40px, 6vw, 80px); border-top: 1px solid var(--line); }
 .stats > div { padding: 22px 18px 0 0; }
 .stats b { display: block; font-family: var(--display); font-weight: 800; font-size: clamp(30px, 3.6vw, 52px); letter-spacing: -0.035em; line-height: 1; font-variant-numeric: tabular-nums; }
-.stats span { display: block; margin-top: 10px; font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.16em; color: var(--ink-3); text-transform: uppercase; }
+.stats > div > span { display: block; margin-top: 10px; font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.16em; color: var(--ink-3); text-transform: uppercase; }
 .scroll-cue { position: absolute; left: 50%; bottom: 18px; width: 1px; height: 54px; background: linear-gradient(var(--red), transparent); animation: cue 2.2s var(--ease) infinite; }
 @keyframes cue { 0% { transform: scaleY(0); transform-origin: top; } 50% { transform: scaleY(1); transform-origin: top; } 51% { transform-origin: bottom; } 100% { transform: scaleY(0); transform-origin: bottom; } }
 
@@ -165,7 +165,7 @@ textarea.field { height: auto; min-height: 110px; padding: 14px 16px; resize: ve
 .maplibregl-ctrl-group button { width: 36px !important; height: 36px !important; min-height: 36px !important; min-width: 36px !important; }
 .maplibregl-ctrl-group button + button { border-top: 1px solid var(--line-2) !important; }
 .maplibregl-ctrl-icon { filter: invert(1) opacity(0.8); }
-.city-lbl { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink); background: rgba(8, 8, 10, 0.75); border: 1px solid var(--line-2); padding: 5px 9px; border-radius: 999px; white-space: nowrap; transform: translateY(-22px); pointer-events: none; }
+.city-lbl { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink); background: rgba(8, 8, 10, 0.78); border: 1px solid var(--line-2); padding: 4px 9px; border-radius: 999px; white-space: nowrap; pointer-events: none; }
 .city-dot { width: 12px; height: 12px; border-radius: 50%; background: #2a2a30; border: 2px solid #08080a; box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25); }
 .city-dot.done { background: var(--red); box-shadow: 0 0 0 1px rgba(229, 55, 44, 0.6), 0 0 14px rgba(229, 55, 44, 0.6); }
 .car-dot { position: relative; width: 22px; height: 22px; }
@@ -251,6 +251,8 @@ textarea.field { height: auto; min-height: 110px; padding: 14px 16px; resize: ve
   .hero-cta { flex-direction: column; }
   .audio .meta-t { display: none; }
   .map-legend { display: none; }
+  .map-pos { display: none; }
+  .city-lbl { font-size: 9px; padding: 3px 7px; letter-spacing: .08em; }
 }
 @media (prefers-reduced-motion: reduce) {
   .rv, .rv-l { opacity: 1; transform: none; }
