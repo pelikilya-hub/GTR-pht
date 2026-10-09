@@ -1,35 +1,32 @@
 'use client';
 import { useHub } from '@/lib/HubContext';
-import { ImageSlot } from './ImageSlot';
+import { GtrDeity } from './GtrDeity';
+import { SectionHead } from './ui/Motion';
 
-const PHOTOS: (string | null)[] = ['/assets/ilia/night-lounge-graded.png', null, null];
-const SLOT_IDS = ['crew-ilia', 'crew-gtr', 'crew-new'];
+// Real portraits go to public/assets/crew/<id>.jpg; until then each card shows a generative glyph portrait.
+const ART = ['ilia', 'wai', 'chedi'];
 
 export function Crew() {
   const { t } = useHub();
   return (
-    <section data-screen-label="crew" style={{ maxWidth: 1280, margin: '56px auto 0', padding: '0 clamp(14px,4vw,28px)' }}>
-      <h2 style={{ fontFamily: "'Inter Tight',sans-serif", fontWeight: 700, fontSize: 21, letterSpacing: '.03em', margin: 0, color: '#ECE9E4' }}>{t.crewTitle}</h2>
-      <div className="crew-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(260px,1fr))', gap: 12, marginTop: 22 }}>
-        {t.crew.map((c, idx) => {
-          const img = PHOTOS[idx];
-          return (
-            <div key={c.name} style={{ border: '1px solid #26262B', background: '#101013' }}>
-              <div style={{ height: 260, position: 'relative', background: '#0D0D0F' }}>
-                {img
-                  ? <div style={{ position: 'absolute', inset: 0, backgroundImage: `url('${img}')`, backgroundSize: 'cover', backgroundPosition: 'center 30%' }} role="img" aria-label={c.name} />
-                  : <ImageSlot id={SLOT_IDS[idx]} shape="rect" placeholder={c.ph} />}
-              </div>
-              <div style={{ padding: 20 }}>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
-                  <div style={{ fontFamily: "'Inter Tight',sans-serif", fontWeight: 900, fontSize: 19, color: '#ECE9E4' }}>{c.name}</div>
-                  <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9.5, letterSpacing: '.2em', color: '#E5372C' }}>{c.role}</div>
+    <section className="sec" id="crew" data-screen-label="crew">
+      <div className="wrap">
+        <SectionHead kicker="CREW" title={t.crewTitle} />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(300px,100%),1fr))', gap: 14 }}>
+          {t.crew.map((c, idx) => (
+            <article key={c.name} className="panel rv" style={{ overflow: 'hidden', ['--d' as string]: `${idx * 0.06}s` }}>
+              <div style={{ height: 340, position: 'relative', background: '#09090b' }}>
+                <GtrDeity variant={ART[idx] || 'ilia'} />
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,transparent 55%,rgba(8,8,10,.95))' }} />
+                <div style={{ position: 'absolute', left: 22, bottom: 18 }}>
+                  <div className="kicker" style={{ fontSize: 10 }}>{c.role}</div>
+                  <div style={{ fontFamily: 'var(--display)', fontWeight: 900, fontSize: 40, letterSpacing: '-.04em', lineHeight: 1, marginTop: 8 }}>{c.name}</div>
                 </div>
-                <div style={{ fontSize: 13.5, lineHeight: 1.6, color: '#A8A6AD', marginTop: 10 }}>{c.desc}</div>
               </div>
-            </div>
-          );
-        })}
+              <p style={{ padding: '18px 22px 24px', margin: 0, fontSize: 15, lineHeight: 1.6, color: 'var(--ink-2)' }}>{c.desc}</p>
+            </article>
+          ))}
+        </div>
       </div>
     </section>
   );

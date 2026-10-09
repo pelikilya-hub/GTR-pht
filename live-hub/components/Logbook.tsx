@@ -1,44 +1,37 @@
 'use client';
 import { useHub } from '@/lib/HubContext';
 import { ls } from '@/lib/storage';
+import { SectionHead } from './ui/Motion';
 
 interface Post { id?: string; ts: number; member: string; type: 'post' | 'mat' | 'hyp' | 'obs'; text: string; link?: string }
 
 export function Logbook() {
-  const { t, lang, notify, now } = useHub();
+  const { t, lang, now } = useHub();
   const ru = lang === 'ru';
   const posts = ls<Post[]>('gtrpht_posts', []);
-  const journal = (Array.isArray(posts) ? posts : []).slice(0, 6).map((pp) => ({
-    member: String(pp.member || '').toUpperCase(),
-    type: t.jrTypes[pp.type] || t.jrTypes.post,
-    time: new Date(+pp.ts || now).toLocaleString(ru ? 'ru-RU' : 'en-GB', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }),
-    text: String(pp.text || ''),
-    link: String(pp.link || ''),
-  }));
-
+  const journal = (Array.isArray(posts) ? posts : []).slice(0, 6);
   return (
-    <section data-screen-label="logbook" style={{ maxWidth: 1280, margin: '56px auto 0', padding: '0 clamp(14px,4vw,28px)' }}>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 16, flexWrap: 'wrap' }}>
-        <h2 style={{ fontFamily: "'Inter Tight',sans-serif", fontWeight: 700, fontSize: 21, letterSpacing: '.03em', margin: 0, color: '#ECE9E4', flex: 1 }}>{t.jrTitle}</h2>
-        <a href="#" onClick={(e) => { e.preventDefault(); notify(ru ? 'Консоль экипажа — отдельный дизайн-файл, не входит в эту сборку' : 'Crew console is a separate design file, not part of this build'); }} style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11, letterSpacing: '.14em', color: '#FF6A5B' }}>{t.jrOpen}</a>
-      </div>
-      <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, letterSpacing: '.2em', color: '#55545C', marginTop: 8 }}>{t.jrSub}</div>
-      {journal.length === 0 && (
-        <div style={{ border: '1px dashed #2E2E34', padding: 26, marginTop: 22, fontFamily: "'JetBrains Mono',monospace", fontSize: 11, letterSpacing: '.06em', lineHeight: 1.8, color: '#6E6C74' }}>{t.jrEmptyTxt}</div>
-      )}
-      <div className="logbook-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(340px,100%),1fr))', gap: 12, marginTop: 22 }}>
-        {journal.map((j, i) => (
-          <div key={i} style={{ border: '1px solid #26262B', background: '#101013', padding: 18 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-              <span style={{ fontFamily: "'Inter Tight',sans-serif", fontWeight: 700, fontSize: 12, color: '#FF6A5B' }}>{j.member}</span>
-              <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, letterSpacing: '.16em', color: '#8E8C94', border: '1px solid #2A2A30', padding: '3px 8px' }}>{j.type}</span>
-              <span style={{ flex: 1 }} />
-              <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9.5, color: '#55545C' }}>{j.time}</span>
-            </div>
-            <div style={{ fontSize: 13.5, lineHeight: 1.6, color: '#B9B6BE', marginTop: 12, whiteSpace: 'pre-wrap' }}>{j.text}</div>
-            {j.link && <a href={j.link} target="_blank" rel="noreferrer" style={{ display: 'inline-block', fontFamily: "'JetBrains Mono',monospace", fontSize: 10.5, letterSpacing: '.08em', marginTop: 10 }}>{t.jrLink}</a>}
+    <section className="sec" id="logbook" data-screen-label="logbook">
+      <div className="wrap">
+        <SectionHead kicker={t.jrSub} title={t.jrTitle} />
+        {journal.length === 0 ? (
+          <div className="panel rv" style={{ padding: 28, color: 'var(--ink-2)', fontSize: 15, lineHeight: 1.65, maxWidth: 760 }}>{t.jrEmptyTxt}</div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(min(360px,100%),1fr))', gap: 14 }}>
+            {journal.map((j, i) => (
+              <article key={j.id || i} className="panel rv" style={{ padding: 22, ['--d' as string]: `${i * 0.05}s` }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                  <span style={{ fontFamily: 'var(--display)', fontWeight: 800, color: 'var(--red-2)' }}>{String(j.member || '').toUpperCase()}</span>
+                  <span className="chip" style={{ height: 24, fontSize: 9 }}>{t.jrTypes[j.type] || t.jrTypes.post}</span>
+                  <span style={{ flex: 1 }} />
+                  <span className="meta">{new Date(+j.ts || now).toLocaleString(ru ? 'ru-RU' : 'en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Bangkok' })}</span>
+                </div>
+                <p style={{ fontSize: 15, lineHeight: 1.6, color: 'var(--ink-2)', margin: '14px 0 0', whiteSpace: 'pre-wrap' }}>{j.text}</p>
+                {j.link && <a href={j.link} target="_blank" rel="noreferrer" className="chip" style={{ marginTop: 14 }}>{t.jrLink}</a>}
+              </article>
+            ))}
           </div>
-        ))}
+        )}
       </div>
     </section>
   );

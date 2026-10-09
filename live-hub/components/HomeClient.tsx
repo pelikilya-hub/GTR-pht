@@ -6,9 +6,10 @@ import { Toast } from '@/components/Toast';
 import { Topbar } from '@/components/Topbar';
 import { AuthModal } from '@/components/AuthModal';
 import { Hero } from '@/components/Hero';
-import { Dashboard } from '@/components/Dashboard';
+import { RouteSection } from '@/components/RouteSection';
+import { LiveSection } from '@/components/LiveSection';
+import { Cars } from '@/components/Cars';
 import { Logbook } from '@/components/Logbook';
-import { Timeline } from '@/components/Timeline';
 import { Tiers } from '@/components/Tiers';
 import { Scales } from '@/components/Scales';
 import { Crew } from '@/components/Crew';
@@ -19,33 +20,37 @@ import { Invite } from '@/components/Invite';
 import { Sponsors } from '@/components/Sponsors';
 import { AudioBar } from '@/components/AudioBar';
 import { Footer } from '@/components/Footer';
+import { RevealObserver } from '@/components/ui/Motion';
 
-// The whole hub is a live, per-second-changing dashboard (countdown, GPS,
-// donation totals) with no SEO value in server-rendered numbers — so it
-// renders client-only (app/page.tsx loads it with ssr:false).
+// Client-only (app/page.tsx loads it with ssr:false): everything here is live —
+// countdown, GPS, chat, shared state — and has no SEO value server-rendered.
 export default function HomeClient() {
   return (
     <HubProvider>
       <VendorScripts />
-      <div style={{ minHeight: '100vh', background: '#0B0B0C', color: '#ECE9E4', fontFamily: "'Inter',sans-serif" }}>
+      <RevealObserver />
+      <div className="hub">
         <Boot />
         <Toast />
         <Topbar />
         <AuthModal />
-        <Hero />
-        <Dashboard />
-        <Logbook />
-        <Timeline />
-        <Tiers />
-        <Scales />
-        <Crew />
-        <GtrReality />
-        <ContentLines />
-        <Places />
-        <Invite />
-        <Sponsors />
-        <AudioBar />
+        <main>
+          <Hero />
+          <RouteSection />
+          <LiveSection />
+          <Cars />
+          <ContentLines />
+          <Scales />
+          <Places />
+          <Logbook />
+          <GtrReality />
+          <Crew />
+          <Tiers />
+          <Invite />
+          <Sponsors />
+        </main>
         <Footer />
+        <AudioBar />
       </div>
     </HubProvider>
   );

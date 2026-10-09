@@ -1,9 +1,10 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
+import './hub.css';
 
 export const metadata: Metadata = {
   title: 'GTR|PHT LIVE HUB',
-  description: 'ПХУКЕТ → БАНГКОК · 39 дней в прямом эфире',
+  description: 'Кольцо Таиланда в прямом эфире: Пхукет → Самуи → Панган → Чиангмай → Аюттхая → Бангкок → Паттайя → Пхукет',
 };
 
 export const viewport: Viewport = {

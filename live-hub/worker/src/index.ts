@@ -12,6 +12,7 @@
  *  /api/pos             POST  → crew-only GPS push (plain {lat,lng,ts} or OwnTracks {_type:'location',lat,lon,tst})
  *  /api/crew/check      GET   → 204 if the X-Crew-Key header matches CREW_KEY, else 401
  *  /ws/:room            WS    → room signaling (presence, track announcements, tally, commands)
+ *  /chat/ws             WS    → live chat (history, rate limit, crew moderation with ?key=CREW_KEY)
  *  everything else            → static assets from ./out (the Next.js export)
  *
  * The Realtime App Secret and TURN key never leave this Worker.
@@ -22,6 +23,7 @@
 export interface Env {
   ROOM: DurableObjectNamespace;
   HUB: DurableObjectNamespace;
+  CHAT: DurableObjectNamespace;
   CREW_KEY?: string;
   ASSETS: Fetcher;
   ALLOWED_ROOMS?: string;
@@ -78,7 +80,10 @@ interface HubPatch {
   pos?: { lat: number; lng: number; ts: number; by?: string; src?: string } | null;
   status?: { code: string; ts: number; by?: string } | null;
   posts?: { id: string; ts: number; member: string; type: string; text: string; link?: string }[];
+  tour?: { start: string | null };
+  garage?: { id: string; name: string; year: string; city: string; stage: string; paid: string; note: string; img: string; ts: number }[];
 }
+const CAR_STAGES = ['hunt', 'bought', 'restore', 'parts', 'done', 'sold'];
 
 function validatePatch(b: Record<string, unknown>): HubPatch | string {
   const out: HubPatch = {};
@@ -117,6 +122,27 @@ function validatePatch(b: Record<string, unknown>): HubPatch | string {
       const p = (x || {}) as Record<string, unknown>;
       const type = POST_TYPES.includes(String(p.type)) ? String(p.type) : 'post';
       return { id: str(p.id, 40) || String(Date.now()) + '-' + i, ts: isFinite(num(p.ts)) ? num(p.ts) : Date.now(), member: str(p.member, 24), type, text: str(p.text, 1200), link: httpUrl(p.link) || '' };
+    });
+  }
+  if (b.tour !== undefined) {
+    const tr = (b.tour || {}) as Record<string, unknown>;
+    if (tr.start === null || tr.start === '' || tr.start === undefined) out.tour = { start: null };
+    else {
+      const ms = Date.parse(String(tr.start));
+      if (!isFinite(ms)) return 'tour.start must be an ISO date';
+      out.tour = { start: new Date(ms).toISOString() };
+    }
+  }
+  if (b.garage !== undefined) {
+    if (!Array.isArray(b.garage)) return 'garage must be an array';
+    out.garage = b.garage.slice(0, 40).map((x, i) => {
+      const c = (x || {}) as Record<string, unknown>;
+      const img = httpUrl(c.img) || (typeof c.img === 'string' && /^\/assets\//.test(c.img) ? c.img.slice(0, 200) : '');
+      return {
+        id: str(c.id, 40) || String(Date.now()) + '-' + i, name: str(c.name, 80), year: str(c.year, 12), city: str(c.city, 40),
+        stage: CAR_STAGES.includes(String(c.stage)) ? String(c.stage) : 'hunt', paid: str(c.paid, 40), note: str(c.note, 600), img,
+        ts: isFinite(num(c.ts)) ? num(c.ts) : Date.now(),
+      };
     });
   }
   return out;
@@ -228,6 +254,16 @@ export default {
   async fetch(req: Request, env: Env): Promise<Response> {
     const url = new URL(req.url);
     if (url.pathname.startsWith('/api/')) return handleApi(req, env, url);
+
+    if (url.pathname === '/chat/ws' || url.pathname === '/chat/ws/') {
+      if (req.headers.get('Upgrade')?.toLowerCase() !== 'websocket') return bad('expected websocket', 426);
+      const crew = !!env.CREW_KEY && !!url.searchParams.get('key') && isCrew(env, req, url);
+      const fwd = new URL(req.url);
+      fwd.searchParams.delete('key');
+      fwd.searchParams.set('crew', crew ? '1' : '0');
+      fwd.searchParams.set('ip', req.headers.get('CF-Connecting-IP') || '0');
+      return env.CHAT.get(env.CHAT.idFromName('main')).fetch(new Request(fwd.toString(), req));
+    }
 
     const m = url.pathname.match(/^\/ws\/([A-Za-z0-9_-]{1,32})\/?$/);
     if (m) {
@@ -374,6 +410,8 @@ interface HubStateData {
   pos?: unknown;
   status?: unknown;
   posts?: unknown[];
+  tour?: unknown;
+  garage?: unknown[];
 }
 
 export class HubState implements DurableObject {
@@ -390,4 +428,93 @@ export class HubState implements DurableObject {
     }
     return new Response(JSON.stringify(cur), { headers: { 'Content-Type': 'application/json' } });
   }
+}
+
+/* ───────────────────────── Live chat (Durable Object) ─────────────────────────
+ * Client → DO: {type:'msg', nick, text} · crew only: {type:'del', id} · {type:'ban', author}
+ * DO → client: {type:'hello', you, crew, history, online} · {type:'msg', m} · {type:'del', id}
+ *              {type:'online', n} · {type:'err', code, text}
+ * Authors are identified by a salted hash of the IP, never the IP itself.
+ */
+interface ChatMsg { id: string; ts: number; nick: string; text: string; crew: boolean; author: string }
+interface ChatPeer { author: string; crew: boolean; last: number; burst: number }
+
+export class ChatRoom implements DurableObject {
+  constructor(private ctx: DurableObjectState) {
+    this.ctx.setWebSocketAutoResponse(new WebSocketRequestResponsePair('ping', 'pong'));
+  }
+
+  private async hash(ip: string): Promise<string> {
+    const d = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('gtrpht-chat:' + ip));
+    return [...new Uint8Array(d)].slice(0, 6).map((b) => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  async fetch(req: Request): Promise<Response> {
+    const url = new URL(req.url);
+    const author = await this.hash(url.searchParams.get('ip') || '0');
+    const crew = url.searchParams.get('crew') === '1';
+    const pair = new WebSocketPair();
+    const [client, server] = Object.values(pair) as [WebSocket, WebSocket];
+    this.ctx.acceptWebSocket(server);
+    server.serializeAttachment({ author, crew, last: 0, burst: 0 } as ChatPeer);
+    const history = ((await this.ctx.storage.get<ChatMsg[]>('msgs')) || []).slice(-80);
+    const online = this.ctx.getWebSockets().length;
+    server.send(JSON.stringify({ type: 'hello', you: author, crew, history: history.map((m) => this.pub(m, crew)), online }));
+    this.broadcast({ type: 'online', n: online });
+    return new Response(null, { status: 101, webSocket: client });
+  }
+
+  private pub(m: ChatMsg, forCrew: boolean) {
+    return forCrew ? m : { ...m, author: m.author.slice(0, 4) };
+  }
+  private broadcast(msg: unknown) {
+    const s = JSON.stringify(msg);
+    for (const ws of this.ctx.getWebSockets()) { try { ws.send(s); } catch { /* ignore */ } }
+  }
+
+  async webSocketMessage(ws: WebSocket, raw: string | ArrayBuffer) {
+    if (typeof raw !== 'string' || raw.length > 2048) return;
+    const me = ws.deserializeAttachment() as ChatPeer;
+    let m: Record<string, unknown>;
+    try { m = JSON.parse(raw); } catch { return; }
+    const err = (code: string, text: string) => ws.send(JSON.stringify({ type: 'err', code, text }));
+
+    if (m.type === 'msg') {
+      const bans = (await this.ctx.storage.get<Record<string, number>>('bans')) || {};
+      if (!me.crew && bans[me.author] && bans[me.author] > Date.now()) return err('banned', 'chat muted');
+      const now = Date.now();
+      // 1 message / 2 s, burst of 3, then 10 s cool-down
+      if (!me.crew) {
+        if (now - me.last < 2000) { me.burst += 1; if (me.burst > 3) { ws.serializeAttachment(me); return err('slow', 'too fast'); } } else me.burst = 0;
+      }
+      const nick = String(m.nick || '').replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, 24);
+      const text = String(m.text || '').replace(/[\u0000-\u0009\u000b-\u001f\u007f]/g, '').trim().slice(0, 300);
+      if (nick.length < 2) return err('nick', 'nick too short');
+      if (!text) return;
+      me.last = now; ws.serializeAttachment(me);
+      const msg: ChatMsg = { id: now.toString(36) + Math.random().toString(36).slice(2, 6), ts: now, nick, text, crew: me.crew, author: me.author };
+      const msgs = (await this.ctx.storage.get<ChatMsg[]>('msgs')) || [];
+      msgs.push(msg);
+      await this.ctx.storage.put('msgs', msgs.slice(-200));
+      for (const peer of this.ctx.getWebSockets()) {
+        const pm = peer.deserializeAttachment() as ChatPeer;
+        try { peer.send(JSON.stringify({ type: 'msg', m: this.pub(msg, pm.crew) })); } catch { /* ignore */ }
+      }
+    } else if (m.type === 'del' && me.crew && typeof m.id === 'string') {
+      const msgs = ((await this.ctx.storage.get<ChatMsg[]>('msgs')) || []).filter((x) => x.id !== m.id);
+      await this.ctx.storage.put('msgs', msgs);
+      this.broadcast({ type: 'del', id: m.id });
+    } else if (m.type === 'ban' && me.crew && typeof m.author === 'string') {
+      const bans = (await this.ctx.storage.get<Record<string, number>>('bans')) || {};
+      bans[m.author] = Date.now() + 24 * 3600 * 1000;
+      await this.ctx.storage.put('bans', bans);
+      const msgs = ((await this.ctx.storage.get<ChatMsg[]>('msgs')) || []);
+      const gone = msgs.filter((x) => x.author === m.author).map((x) => x.id);
+      await this.ctx.storage.put('msgs', msgs.filter((x) => x.author !== m.author));
+      gone.forEach((id) => this.broadcast({ type: 'del', id }));
+    }
+  }
+
+  async webSocketClose() { this.broadcast({ type: 'online', n: Math.max(0, this.ctx.getWebSockets().length - 1) }); }
+  async webSocketError() { this.broadcast({ type: 'online', n: Math.max(0, this.ctx.getWebSockets().length - 1) }); }
 }

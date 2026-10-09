@@ -1,23 +1,26 @@
 'use client';
 import { useHub } from '@/lib/HubContext';
+import { SectionHead } from './ui/Motion';
 
 export function ContentLines() {
   const { t } = useHub();
   return (
-    <section data-screen-label="content-lines" style={{ maxWidth: 1280, margin: '64px auto 0', padding: '0 clamp(14px,4vw,28px)' }}>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 16, flexWrap: 'wrap' }}>
-        <h2 style={{ fontFamily: "'Inter Tight',sans-serif", fontWeight: 700, fontSize: 21, letterSpacing: '.03em', margin: 0, color: '#ECE9E4', flex: 1 }}>{t.lnTitle}</h2>
-        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, letterSpacing: '.2em', color: '#55545C' }}>{t.lnSub}</div>
-      </div>
-      <div className="content-lines-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))', gap: 12, marginTop: 22 }}>
-        {t.lines.map((ln) => (
-          <div key={ln.code} style={{ border: '1px solid #26262B', borderTop: `2px solid ${ln.accent}`, background: '#101013', padding: 22, display: 'flex', flexDirection: 'column', gap: 10, minHeight: 190 }}>
-            <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9.5, letterSpacing: '.26em', color: ln.accent }}>{ln.code}</div>
-            <div style={{ fontFamily: "'Inter Tight',sans-serif", fontWeight: 900, fontSize: 19, color: '#ECE9E4' }}>{ln.title}</div>
-            <div style={{ fontSize: 13, lineHeight: 1.6, color: '#8E8C94', flex: 1 }}>{ln.desc}</div>
-            <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, letterSpacing: '.2em', color: '#55545C' }}>{ln.foot}</div>
-          </div>
-        ))}
+    <section className="sec" id="lines" data-screen-label="content-lines">
+      <div className="wrap">
+        <SectionHead kicker={t.lnSub} title={t.lnTitle} />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(360px,100%),1fr))', gap: '0 32px', borderTop: '1px solid var(--line)' }}>
+          {t.lines.map((ln, i) => (
+            <div key={ln.code} className="rv" style={{ padding: '28px 26px 30px 0', borderBottom: '1px solid var(--line)', display: 'flex', flexDirection: 'column', gap: 12, minHeight: 230, ['--d' as string]: `${(i % 3) * 0.06}s` }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ width: 10, height: 10, borderRadius: 3, background: ln.accent }} />
+                <span className="meta" style={{ color: ln.accent }}>{ln.code}</span>
+              </div>
+              <div style={{ fontFamily: 'var(--display)', fontWeight: 900, fontSize: 'clamp(28px,2.6vw,38px)', letterSpacing: '-.035em', lineHeight: 1, overflowWrap: 'anywhere' }}>{ln.title}</div>
+              <div style={{ fontSize: 15, lineHeight: 1.6, color: 'var(--ink-2)', flex: 1, maxWidth: 380 }}>{ln.desc}</div>
+              <div className="meta" style={{ fontSize: 9.5 }}>{ln.foot}</div>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );

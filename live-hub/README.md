@@ -64,14 +64,25 @@ every 20 s and when the tab regains focus.
 - `CREW_KEY` also gates camera/pult roles in the room and publishing to the SFU, so a visitor cannot hijack a camera slot.
   Viewers (multiview) never need it.
 
+## Tour, chat, music
+
+- **Tour model** — `lib/tour.ts`: ring Phuket → Samui → Phangan → Chiang Mai → Ayutthaya → Bangkok → Pattaya → Phuket,
+  finish fixed at 15 Nov 2026. The start date is set in `/console`; until then the site shows "start soon".
+  Stage lengths are weights scaled between start and finish.
+- **Map** — MapLibre GL on OpenFreeMap vector tiles (no key, no billing), repainted to the product palette at load.
+- **Chat** — `ChatRoom` Durable Object at `/chat/ws`: last 200 messages, 1 msg / 2 s per visitor, crew devices
+  (with the crew key) see ✕ delete and ⊘ mute-24h on every message.
+- **Music** — every `.mp3` in `public/assets/audio/` becomes a playlist entry at build time (`scripts/gen-tracks.mjs`).
+  Upload files there on GitHub; the deploy picks them up. `night-drive.mp3` is the fallback loop and plays last.
+
 ## Assets
 
 | Path | Source |
 |---|---|
 | `assets/scales/themis.png` | extracted from the Claude Design bundle |
 | `assets/places/**.jpg` | Wikimedia Commons, free licenses — authors on `/credits/` (`lib/photoCredits.json`) |
-| `assets/audio/night-drive.mp3` | synthesized fallback loop; drop the real `midnight-circuit.mp3` next to it and the player uses it automatically |
-| `assets/ilia/night-lounge-graded.png` | **missing** — crew portrait from the design, add it to show the photo on the crew card |
+| `assets/audio/*.mp3` | your tracks (any file name) + `night-drive.mp3`, a synthesized fallback loop |
+| crew portraits | generative glyph portraits for now |
 
 ## Pages
 
@@ -80,6 +91,7 @@ every 20 s and when the tab regains focus.
 | `/` | public | the Live Hub (map, telemetry, stream, scales, …). *GTR CAM · LIVE* tab = multiview of the room |
 | `/camera` | crew (iPhone) | transmitter: pick slot CAM 1–4 → **В ЭФИР** → publishes to the SFU |
 | `/pult` | director (iPad/Mac) | all cameras, program window, tally, flip / quality / mic commands |
+| `/console` | crew | tour start date, status, GPS from the phone, logbook, garage, channels, pay link |
 | `/credits` | public | photo attributions |
 
 ## Realtime architecture
