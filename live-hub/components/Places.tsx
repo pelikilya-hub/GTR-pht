@@ -93,7 +93,7 @@ export function Places() {
                     <div style={{ fontFamily: 'var(--display)', fontWeight: 700, fontSize: 16, margin: '8px 0 10px' }}>{pl.q}</div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                       {pl.opts.map((o) => (
-                        <button key={o.oi} onClick={() => quizVote(i, o.oi)} style={{ position: 'relative', overflow: 'hidden', textAlign: 'left', padding: '10px 12px', borderRadius: 10, border: `1px solid ${o.on ? 'var(--red)' : 'var(--line-2)'}`, background: 'rgba(255,255,255,.02)', color: o.on ? '#fff' : 'var(--ink-2)', cursor: 'pointer', fontSize: 13.5, minHeight: 40 }}>
+                        <button key={o.oi} onClick={() => quizVote(i, o.oi)} style={{ position: 'relative', overflow: 'hidden', textAlign: 'left', padding: '10px 12px', border: `1px solid ${o.on ? 'var(--red)' : 'var(--line-2)'}`, background: 'rgba(255,255,255,.02)', color: o.on ? '#fff' : 'var(--ink-2)', cursor: 'pointer', fontSize: 13.5, minHeight: 40 }}>
                           <span style={{ position: 'absolute', inset: 0, width: o.w, background: 'rgba(229,55,44,.16)', transition: 'width .8s var(--ease)' }} />
                           <span style={{ position: 'relative', display: 'flex', justifyContent: 'space-between', gap: 8 }}><span>{o.label}</span><span className="mono" style={{ fontSize: 11 }}>{o.pctLbl}</span></span>
                         </button>

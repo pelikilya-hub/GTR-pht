@@ -38,7 +38,7 @@ export function GtrReality() {
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(260px,100%),1fr))', gap: 14, marginTop: 'clamp(40px,6vw,80px)' }}>
           {t.gtrForms.map((gf, i) => (
-            <div key={gf.variant} className="rv" style={{ position: 'relative', height: 420, borderRadius: 'var(--radius)', overflow: 'hidden', background: 'radial-gradient(80% 60% at 50% 40%, rgba(229,55,44,.07), transparent 70%)', ['--d' as string]: `${i * 0.06}s` }}>
+            <div key={gf.variant} className="rv" style={{ position: 'relative', height: 420, overflow: 'hidden', background: 'radial-gradient(80% 60% at 50% 40%, rgba(229,55,44,.07), transparent 70%)', ['--d' as string]: `${i * 0.06}s` }}>
               <GtrDeity variant={gf.variant} style={{ inset: 10 }} />
               <div className="meta" style={{ position: 'absolute', left: 16, bottom: 12, fontSize: 9, color: 'var(--ink-4)' }}>{gf.label}</div>
             </div>

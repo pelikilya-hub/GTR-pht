@@ -33,7 +33,7 @@ export function Cars() {
           {t.carsSteps.map((s, i) => (
             <div key={s.t} className="panel car-step rv" style={{ ['--d' as string]: `${i * 0.06}s` }}>
               <span className="num">0{i + 1}</span>
-              <span className="dot" style={{ background: i === 0 ? 'var(--red-2)' : undefined }} />
+              <span style={{ fontSize: 26, lineHeight: 1 }} aria-hidden>{['🔎', '🤝', '🔧', '⚙️', '🏁'][i]}</span>
               <h4>{s.t}</h4>
               <div style={{ fontSize: 14, lineHeight: 1.55, color: 'var(--ink-2)' }}>{s.d}</div>
             </div>
@@ -77,7 +77,7 @@ export function Cars() {
           </div>
 
           <form className="glass rv" onSubmit={submit} style={{ padding: 26, marginTop: 18, ['--d' as string]: '.1s' }}>
-            <div style={{ fontFamily: 'var(--display)', fontWeight: 800, fontSize: 28, letterSpacing: '-.02em' }}>{t.carsTipTitle}</div>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}><span style={{ fontSize: 28 }} aria-hidden>🏎️</span><div style={{ fontFamily: 'var(--display)', fontWeight: 800, fontSize: 28, letterSpacing: '-.02em', textTransform: 'uppercase' }}>{t.carsTipTitle}</div></div>
             <p style={{ color: 'var(--ink-2)', fontSize: 14.5, lineHeight: 1.6, margin: '8px 0 18px' }}>{t.carsTipLead}</p>
             <div style={{ display: 'grid', gap: 10 }}>
               <input className="field" value={tip.car} onChange={(e) => setTip({ ...tip, car: e.target.value })} placeholder={t.carsTipCar} />

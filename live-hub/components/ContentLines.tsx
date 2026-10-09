@@ -12,7 +12,7 @@ export function ContentLines() {
           {t.lines.map((ln, i) => (
             <div key={ln.code} className="rv" style={{ padding: '28px 26px 30px 0', borderBottom: '1px solid var(--line)', display: 'flex', flexDirection: 'column', gap: 12, minHeight: 230, ['--d' as string]: `${(i % 3) * 0.06}s` }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <span style={{ width: 10, height: 10, borderRadius: 3, background: ln.accent }} />
+                <span style={{ fontSize: 22, lineHeight: 1 }} aria-hidden>{['🧘', '🔥', '🏝️', '🎧', '🏎️', '🤝'][i] || '◆'}</span>
                 <span className="meta" style={{ color: ln.accent }}>{ln.code}</span>
               </div>
               <div style={{ fontFamily: 'var(--display)', fontWeight: 900, fontSize: 'clamp(28px,2.6vw,38px)', letterSpacing: '-.035em', lineHeight: 1, overflowWrap: 'anywhere' }}>{ln.title}</div>

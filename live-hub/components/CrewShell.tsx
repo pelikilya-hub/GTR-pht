@@ -7,7 +7,7 @@ export function CrewShell({ title, sub, children }: { title: string; sub: string
   return (
     <>
       <Script src="/vendor/gtr-rtc.js" strategy="afterInteractive" />
-      <div style={{ minHeight: '100vh', background: '#0B0B0C', color: '#ECE9E4', fontFamily: "'Inter',sans-serif", padding: 'clamp(12px,3vw,28px)' }}>
+      <div style={{ minHeight: '100vh', background: '#0B0B0C', color: '#ECE9E4', fontFamily: "'Golos Text',sans-serif", padding: 'clamp(12px,3vw,28px)' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap', marginBottom: 16 }}>
             <Link href="/" style={{ fontFamily: "'Inter Tight',sans-serif", fontWeight: 900, fontSize: 16, letterSpacing: '.05em', color: '#ECE9E4' }}>GTR<span style={{ color: '#E5372C' }}>|</span>PHT</Link>
