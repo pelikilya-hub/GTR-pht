@@ -1,30 +1,29 @@
 'use client';
 import { useAudioPlayer } from '@/lib/useAudioPlayer';
 
-function fmtTime(v: number): string {
-  if (!isFinite(v)) return '0:00';
-  return `${(v / 60) | 0}:${String((v | 0) % 60).padStart(2, '0')}`;
-}
+const fmt = (v: number) => (isFinite(v) ? `${(v / 60) | 0}:${String((v | 0) % 60).padStart(2, '0')}` : '0:00');
 
 export function AudioBar() {
-  const { title, playing, t, d, toggle, seek } = useAudioPlayer();
+  const { title, count, idx, playing, t, d, toggle, seek, next, prev } = useAudioPlayer();
   const pct = d > 0 ? Math.min(100, (t / d) * 100) : 0;
-  const pctStr = pct.toFixed(2) + '%';
   return (
-    <div className="audio-bar" style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 60, background: 'rgba(11,11,13,.94)', borderTop: '1px solid #26262B', backdropFilter: 'blur(10px)', padding: '10px clamp(10px,3vw,20px) calc(10px + env(safe-area-inset-bottom,0px))', display: 'flex', alignItems: 'center', gap: 'clamp(6px,2vw,14px)' }}>
-      <button onClick={toggle} aria-label="play" style={{ width: 38, height: 38, flex: 'none', background: '#E5372C', border: 'none', color: '#0D0D0F', fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'JetBrains Mono',monospace" }}>{playing ? '❚❚' : '▶'}</button>
-      <div className="track-info" style={{ minWidth: 0, flex: 'none', width: 'clamp(100px,28vw,230px)' }}>
-        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, letterSpacing: '.26em', color: '#55545C' }}>GTR PHT · SOUNDTRACK</div>
-        <div style={{ fontFamily: "'Inter Tight',sans-serif", fontWeight: 700, fontSize: 12, color: '#ECE9E4', marginTop: 3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{title}</div>
+    <div className={'glass audio' + (playing ? '' : ' paused')} data-audio-ui>
+      <button className="play" onClick={toggle} aria-label={playing ? 'pause' : 'play'}>
+        {playing
+          ? <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><rect x="2" y="1" width="3.5" height="12" rx="1" /><rect x="8.5" y="1" width="3.5" height="12" rx="1" /></svg>
+          : <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><path d="M3 1.5v11l9.5-5.5z" /></svg>}
+      </button>
+      {count > 1 && <button className="skip" onClick={prev} aria-label="previous">⏮</button>}
+      <div className="eq" aria-hidden><i /><i /><i /><i /></div>
+      <div style={{ minWidth: 0, flex: '0 1 200px' }}>
+        <div className="meta meta-t" style={{ fontSize: 9 }}>GTR|PHT · SOUNDTRACK{count > 1 ? ` · ${idx + 1}/${count}` : ''}</div>
+        <div style={{ fontFamily: 'var(--display)', fontWeight: 700, fontSize: 13.5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{title}</div>
       </div>
-      <div onClick={(e) => { const r = e.currentTarget.getBoundingClientRect(); seek((e.clientX - r.left) / r.width); }} style={{ flex: 1, height: 26, display: 'flex', alignItems: 'center', cursor: 'pointer', minWidth: 60 }}>
-        <div style={{ position: 'relative', width: '100%', height: 3, background: '#26262B' }}>
-          <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: pctStr, background: '#E5372C' }} />
-          <div style={{ position: 'absolute', top: -3, left: pctStr, width: 9, height: 9, marginLeft: -4, background: '#ECE9E4', borderRadius: '50%' }} />
-        </div>
+      <div onClick={(e) => { const r = e.currentTarget.getBoundingClientRect(); seek((e.clientX - r.left) / r.width); }} style={{ flex: 1, height: 28, display: 'flex', alignItems: 'center', cursor: 'pointer', minWidth: 40 }}>
+        <div className="bar" style={{ width: '100%', height: 3 }}><i style={{ width: pct + '%', transition: 'none' }} /></div>
       </div>
-      <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, letterSpacing: '.08em', color: '#8E8C94', flex: 'none' }}>{fmtTime(t)} / {fmtTime(d)}</div>
-      <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, letterSpacing: '.2em', color: '#3E3E46', flex: 'none' }}>{playing ? '▮▯▮ ON AIR' : 'STANDBY'}</div>
+      <span className="mono" style={{ fontSize: 10.5, color: 'var(--ink-3)', flex: 'none' }}>{fmt(t)}<span className="meta-t"> / {fmt(d)}</span></span>
+      {count > 1 && <button className="skip" onClick={next} aria-label="next">⏭</button>}
     </div>
   );
 }

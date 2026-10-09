@@ -97,28 +97,20 @@ export function HubProvider({ children }: { children: React.ReactNode }) {
     return () => clearInterval(iv);
   }, []);
 
-  // Live document title, e.g. "● ДЕНЬ 12/39 · GTR|PHT LIVE"
-  useEffect(() => {
-    try {
-      const ru = lang === 'ru';
-      let s: string;
-      if (now < Date.parse('2026-08-01T09:00:00+07:00')) s = 'T-' + Math.ceil((Date.parse('2026-08-01T09:00:00+07:00') - now) / 86400000) + ' · GTR|PHT';
-      else if (now > Date.parse('2026-09-08T21:00:00+07:00')) s = 'GTR|PHT · FINISH';
-      else {
-        const d = Math.min(39, Math.floor((now - Date.parse('2026-08-01T00:00:00+07:00')) / 86400000) + 1);
-        s = '● ' + (ru ? 'ДЕНЬ ' : 'DAY ') + d + '/39 · GTR|PHT LIVE';
-      }
-      if (document.title !== s) document.title = s;
-    } catch {
-      /* ignore */
-    }
-  }, [now, lang]);
-
   const t = useMemo(() => getDict(lang), [lang]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const journey = useMemo(() => deriveJourney(now, lang, t), [now, lang, t, gen]);
   // eslint-disable-next-line react-hooks/exhaustive-deps -- gen is a version counter, not read in the body
   const integrations = useMemo(() => ls<Integrations>('gtrpht_integrations', {}), [gen]);
+
+  // Live tab title: "● ДЕНЬ 12/30 · GTR|PHT LIVE", "T-5 · GTR|PHT", "СКОРО · GTR|PHT"
+  useEffect(() => {
+    const ru = lang === 'ru';
+    const s = journey.phase === 'live' ? '● ' + (ru ? 'ДЕНЬ ' : 'DAY ') + journey.day + '/' + journey.totalDays + ' · GTR|PHT LIVE'
+      : journey.phase === 'countdown' ? 'T-' + journey.cd.d + ' · GTR|PHT'
+        : journey.phase === 'done' ? 'GTR|PHT · FINISH' : (ru ? 'СКОРО' : 'SOON') + ' · GTR|PHT';
+    if (document.title !== s) document.title = s;
+  }, [journey.phase, journey.day, journey.totalDays, journey.cd.d, lang]);
 
   const scrollToId = (id: string) => {
     const el = document.getElementById(id);

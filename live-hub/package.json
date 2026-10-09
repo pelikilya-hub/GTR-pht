@@ -9,11 +9,12 @@
     "lint": "eslint",
     "typecheck:worker": "tsc -p worker/tsconfig.json",
     "cf:dev": "wrangler dev",
-    "cf:deploy": "wrangler deploy"
+    "cf:deploy": "wrangler deploy",
+    "prebuild": "node scripts/gen-tracks.mjs",
+    "predev": "node scripts/gen-tracks.mjs"
   },
   "dependencies": {
-    "@types/leaflet": "^1.9.22",
-    "leaflet": "^1.9.4",
+    "maplibre-gl": "^5.24.0",
     "next": "16.4.0",
     "react": "19.3.0",
     "react-dom": "19.3.0"

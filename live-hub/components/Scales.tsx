@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { SectionHead } from './ui/Motion';
 import { useHub } from '@/lib/HubContext';
 import { ls, setLs } from '@/lib/storage';
 import { fireWebhook } from '@/lib/webhooks';
@@ -253,22 +254,15 @@ export function Scales() {
   ];
 
   return (
-    <section id="scales" data-screen-label="scales" style={{ borderTop: '1px solid #1C1C20', borderBottom: '1px solid #1C1C20', background: '#0A0A0C', marginTop: 64, padding: '56px clamp(14px,4vw,28px)' }}>
-      <div style={{ maxWidth: 1280, margin: '0 auto' }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 16, flexWrap: 'wrap' }}>
-          <h2 style={{ fontFamily: "'Inter Tight',sans-serif", fontWeight: 700, fontSize: 21, letterSpacing: '.03em', margin: 0, color: '#ECE9E4' }}>ВЕСЫ МАРШРУТА</h2>
-          <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, letterSpacing: '.2em', color: '#55545C' }}>ДОБРО ⇄ СЧАСТЬЕ · ГОЛОСУЕТ КОШЕЛЁК</div>
-          <span style={{ flex: 1 }} />
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, border: '1px solid #26262B', padding: '6px 12px' }}>
-            <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#FF4B3E', animation: 'omBlink 1.4s infinite' }} />
-            <span ref={totNumRef} style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, letterSpacing: '.16em', color: '#B9B6BE' }}>{(good + joy).toLocaleString('ru-RU')} ₽ СОБРАНО</span>
-          </div>
-        </div>
-        <p style={{ fontSize: 13.5, lineHeight: 1.7, color: '#A8A6AD', margin: '14px 0 0', maxWidth: 760 }}>
-          Каждый донат — это гиря. Куда положишь, туда и качнётся маршрут. <strong style={{ color: '#4A9EFF', fontWeight: 600 }}>ДОБРО</strong> — ищем попавших в беду соотечественников и решаем их проблемы в дороге. <strong style={{ color: '#FF6A5B', fontWeight: 600 }}>СЧАСТЬЕ</strong> — приваты, вечеринки и зарытые исполнения в закрытом доступе. Весы живые: чаша тяжелее — эта линия идёт в эфир следующей.
-        </p>
-
-        <div ref={stageRef} className="scales-stage" style={{ position: 'relative', aspectRatio: '1131/1414', width: '100%', maxWidth: 660, margin: '26px auto 0', background: '#000', overflow: 'hidden', border: '1px solid #1E1E23' }}>
+    <section className="sec" id="scales" data-screen-label="scales">
+      <div className="wrap">
+        <SectionHead
+          kicker="ДОБРО ⇄ СЧАСТЬЕ · ГОЛОСУЕТ КОШЕЛЁК"
+          title={<>Весы <em>маршрута</em></>}
+          lead={<>Каждый донат — это гиря. Куда положишь, туда и качнётся маршрут. <strong style={{ color: '#8FC4FF', fontWeight: 600 }}>ДОБРО</strong> — ищем попавших в беду соотечественников и решаем их проблемы в дороге. <strong style={{ color: '#FF8A7C', fontWeight: 600 }}>СЧАСТЬЕ</strong> — приваты, вечеринки и зарытые исполнения в закрытом доступе. Чаша тяжелее — эта линия идёт в эфир следующей.</>}
+          right={<span className="chip"><span className="dot live" /><span ref={totNumRef}>{(good + joy).toLocaleString('ru-RU')} ₽ СОБРАНО</span></span>}
+        />
+        <div ref={stageRef} className="scales-stage rv" style={{ position: 'relative', aspectRatio: '1131/1414', width: '100%', maxWidth: 620, margin: '0 auto', background: '#000', overflow: 'hidden', borderRadius: 22, boxShadow: '0 40px 120px -40px rgba(229,55,44,.35)' }}>
           <div ref={tiltRef} style={{ position: 'absolute', inset: 0, transform: `rotate(${(angle * 0.115).toFixed(2)}deg)`, transformOrigin: '50% 39%', willChange: 'transform' }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/assets/scales/themis.png" alt="Весы маршрута" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
@@ -310,11 +304,11 @@ export function Scales() {
             tiers={joyTiers} barCol="#E5372C" amounts={AMOUNTS} onGive={(a) => give('joy', a)} onVote={() => vote('joy')} btnBorder="#6E2A24" btnCol="#FF8A7C" />
         </div>
 
-        <div style={{ border: '1px solid #26262B', background: '#0D0D0F', padding: 18, marginTop: 14 }}>
+        <div className="panel" style={{ padding: 20, marginTop: 14 }}>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'stretch', marginBottom: 16 }}>
-            <input value={custom} onChange={(e) => setCustom(e.target.value.replace(/[^\d]/g, ''))} placeholder="СВОЯ СУММА ₽" inputMode="numeric" style={{ flex: 1, minWidth: 130, background: '#141416', border: '1px solid #2A2A30', color: '#ECE9E4', fontFamily: "'Inter Tight',sans-serif", fontWeight: 700, fontSize: 15, letterSpacing: '.06em', padding: '12px 14px', outline: 'none', textAlign: 'center' }} />
-            <button onClick={() => customGive('good')} style={{ background: 'none', border: '1px solid #2A4E80', color: '#8FC4FF', fontFamily: "'Inter Tight',sans-serif", fontWeight: 700, fontSize: 11, letterSpacing: '.1em', padding: '12px 20px', cursor: 'pointer', minHeight: 44 }}>→ ДОБРО</button>
-            <button onClick={() => customGive('joy')} style={{ background: 'none', border: '1px solid #6E2A24', color: '#FF8A7C', fontFamily: "'Inter Tight',sans-serif", fontWeight: 700, fontSize: 11, letterSpacing: '.1em', padding: '12px 20px', cursor: 'pointer', minHeight: 44 }}>→ СЧАСТЬЕ</button>
+            <input className="field" value={custom} onChange={(e) => setCustom(e.target.value.replace(/[^\d]/g, ''))} placeholder="СВОЯ СУММА ₽" inputMode="numeric" style={{ flex: 1, minWidth: 130, textAlign: 'center', fontFamily: 'var(--display)', fontWeight: 700 }} />
+            <button onClick={() => customGive('good')} className="btn btn-sm" style={{ borderColor: '#2A4E80', color: '#8FC4FF', width: 'auto', minHeight: 48 }}>→ ДОБРО</button>
+            <button onClick={() => customGive('joy')} className="btn btn-sm" style={{ borderColor: '#6E2A24', color: '#FF8A7C', width: 'auto', minHeight: 48 }}>→ СЧАСТЬЕ</button>
           </div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, flexWrap: 'wrap' }}>
             <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, letterSpacing: '.22em', color: '#8E8C94' }}>{'// ЛЕНТА ГИРЬ'}</div>
@@ -325,7 +319,7 @@ export function Scales() {
             {(data.feed || []).map((f, i) => {
               const col = f.side === 'good' ? '#4A9EFF' : '#FF6A5B';
               return (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, borderLeft: `2px solid ${col}`, background: '#101013', padding: '9px 12px', flexWrap: 'wrap' }}>
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, borderLeft: `2px solid ${col}`, background: 'rgba(255,255,255,.025)', borderRadius: '0 10px 10px 0', padding: '10px 14px', flexWrap: 'wrap' }}>
                   <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, letterSpacing: '.1em', color: col }}>{f.side === 'good' ? 'ДОБРО' : 'СЧАСТЬЕ'}</span>
                   <span style={{ fontSize: 12.5, color: '#ECE9E4', fontWeight: 500 }}>{f.who}</span>
                   <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11, color: col }}>{f.amt ? '+' + f.amt.toLocaleString('ru-RU') + ' ₽' : 'голос'}</span>
@@ -351,10 +345,8 @@ function SidePanel({ title, subtitle, subCol, titleCol, border, cornerCol, corne
   desc: string; tiers: TierView[]; barCol: string; amounts: number[]; onGive: (a: number) => void; onVote: () => void; btnBorder: string; btnCol: string;
 }) {
   return (
-    <div style={{ border: `1px solid ${border}`, background: '#0D0D0F', padding: 20, position: 'relative' }}>
-      {cornerPos === 'tl'
-        ? <div style={{ position: 'absolute', top: -1, left: -1, width: 14, height: 14, borderTop: `2px solid ${cornerCol}`, borderLeft: `2px solid ${cornerCol}` }} />
-        : <div style={{ position: 'absolute', top: -1, right: -1, width: 14, height: 14, borderTop: `2px solid ${cornerCol}`, borderRight: `2px solid ${cornerCol}` }} />}
+    <div className="panel" style={{ borderColor: border === '#26262B' ? undefined : border, padding: 22, position: 'relative' }}>
+      <span data-pos={cornerPos} style={{ position: 'absolute', top: 22, right: 22, width: 10, height: 10, borderRadius: '50%', background: cornerCol, boxShadow: `0 0 14px ${cornerCol}` }} />
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
         <div style={{ fontFamily: "'Inter Tight',sans-serif", fontWeight: 900, fontSize: 17, letterSpacing: '.04em', color: titleCol }}>{title}</div>
         <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, letterSpacing: '.18em', color: subCol }}>{subtitle}</div>
@@ -362,7 +354,7 @@ function SidePanel({ title, subtitle, subCol, titleCol, border, cornerCol, corne
       <div style={{ fontSize: 13, lineHeight: 1.7, color: '#A8A6AD', marginTop: 10 }}>{desc}</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 16 }}>
         {tiers.map((tr, i) => (
-          <div key={i} style={{ border: `1px solid ${tr.brd}`, background: tr.bg, padding: '10px 12px' }}>
+          <div key={i} style={{ border: `1px solid ${tr.brd}`, background: tr.bg, padding: '12px 14px', borderRadius: 10 }}>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
               <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, letterSpacing: '.1em', color: tr.sumCol }}>{tr.sum}</span>
               <span style={{ fontSize: 12, color: tr.txtCol, flex: 1, minWidth: 140 }}>{tr.label}</span>
@@ -374,10 +366,10 @@ function SidePanel({ title, subtitle, subCol, titleCol, border, cornerCol, corne
       </div>
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 16 }}>
         {amounts.map((a) => (
-          <button key={a} onClick={() => onGive(a)} style={{ flex: 1, minWidth: 72, background: 'none', border: `1px solid ${btnBorder}`, color: btnCol, fontFamily: "'JetBrains Mono',monospace", fontSize: 11, letterSpacing: '.06em', padding: '12px 6px', cursor: 'pointer', minHeight: 44 }}>{a >= 1000 ? a / 1000 + 'K ₽' : a + ' ₽'}</button>
+          <button key={a} onClick={() => onGive(a)} style={{ flex: 1, minWidth: 72, background: 'none', border: `1px solid ${btnBorder}`, color: btnCol, fontFamily: 'var(--mono)', fontSize: 12, padding: '12px 6px', cursor: 'pointer', minHeight: 46, borderRadius: 999 }}>{a >= 1000 ? a / 1000 + 'K ₽' : a + ' ₽'}</button>
         ))}
       </div>
-      <button onClick={onVote} style={{ width: '100%', marginTop: 8, background: 'none', border: `1px dashed ${btnBorder}`, color: btnCol, fontFamily: "'JetBrains Mono',monospace", fontSize: 9.5, letterSpacing: '.14em', padding: 11, cursor: 'pointer', minHeight: 44 }}>ГОЛОС БЕЗ ДОНАТА · +1</button>
+      <button onClick={onVote} style={{ width: '100%', marginTop: 8, background: 'none', border: `1px dashed ${btnBorder}`, color: btnCol, fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '.14em', padding: 11, cursor: 'pointer', minHeight: 44, borderRadius: 999 }}>ГОЛОС БЕЗ ДОНАТА · +1</button>
     </div>
   );
 }

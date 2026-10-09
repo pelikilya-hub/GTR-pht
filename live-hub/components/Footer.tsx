@@ -3,12 +3,21 @@ import Link from 'next/link';
 import { useHub } from '@/lib/HubContext';
 
 export function Footer() {
-  const { t } = useHub();
+  const { t, lang } = useHub();
+  const ru = lang === 'ru';
   return (
-    <footer style={{ borderTop: '1px solid #1C1C20', marginTop: 64, padding: '36px clamp(14px,4vw,28px) calc(100px + env(safe-area-inset-bottom,0px))', textAlign: 'center' }}>
-      <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10.5, letterSpacing: '.26em', color: '#E5372C' }}>{t.f1}</div>
-      <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, letterSpacing: '.1em', color: '#55545C', marginTop: 10 }}>{t.f2}</div>
-      <Link href="/credits/" style={{ display: 'inline-block', fontFamily: "'JetBrains Mono',monospace", fontSize: 9, letterSpacing: '.14em', color: '#3E3D44', marginTop: 12 }}>PHOTO CREDITS · WIKIMEDIA COMMONS</Link>
+    <footer className="foot">
+      <div className="wrap" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(260px,100%),1fr))', gap: 32, alignItems: 'end' }}>
+        <div>
+          <div className="logo" style={{ fontSize: 'clamp(48px,8vw,110px)', letterSpacing: '-.04em', lineHeight: .9 }}>GTR<i>|</i>PHT</div>
+          <div className="meta" style={{ marginTop: 16 }}>{t.f2}</div>
+        </div>
+        <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+          {t.nav.map(([id, l]) => <a key={id} href={'#' + id} style={{ color: 'var(--ink-3)', fontSize: 14 }}>{l}</a>)}
+          <Link href="/console/" style={{ color: 'var(--red-2)', fontSize: 14 }}>{ru ? 'Консоль экипажа' : 'Crew console'}</Link>
+          <Link href="/credits/" style={{ color: 'var(--ink-4)', fontSize: 14 }}>Photo credits</Link>
+        </div>
+      </div>
     </footer>
   );
 }
