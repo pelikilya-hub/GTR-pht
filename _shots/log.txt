@@ -1,0 +1,10 @@
+[iphone] shot 2 failed: page.screenshot: Timeout 20000ms exceeded.
+Call log:
+  - taking page screenshot
+
+[iphone] info: {"title":"СКОРО · GTR|PHT","font":true,"canvas":true,"hidden":44}
+[desktop] shot 1 failed: page.screenshot: Timeout 20000ms exceeded.
+Call log:
+  - taking page screenshot
+
+[desktop] info: {"title":"СКОРО · GTR|PHT","font":true,"canvas":true,"hidden":15}
