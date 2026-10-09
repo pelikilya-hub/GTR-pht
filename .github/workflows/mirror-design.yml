@@ -1,21 +1,19 @@
-name: Probe Make relay
+name: Fetch photos (cars, drones, story)
 
 on:
   push:
     branches: [claude/fetch-design-assets]
-    paths: ['.github/workflows/mirror-design.yml']
+    paths: ['.github/workflows/mirror-design.yml', '.github/scripts/commons_photos.py']
 
 permissions:
   contents: write
 
 jobs:
-  hook:
+  photos:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+      - run: python3 .github/scripts/commons_photos.py _photos2
       - run: |
-          mkdir -p _handshake
-          code=$(curl -sS -o /dev/null -w '%{http_code} %header{x-hook}' -X POST -H 'Content-Type: application/json' https://bangtaostyle.com/api/hook -d "{\"source\":\"gtrpht-live-hub\",\"event\":\"launch_check\",\"ts\":$(date +%s000),\"page\":\"ci\",\"note\":\"relay test\"}")
-          echo "hook=$code" > _handshake/report3.txt
           git config user.name "github-actions[bot]"; git config user.email "41898+github-actions[bot]@users.noreply.github.com"
-          git add -f _handshake/report3.txt && git commit -qm "hook report" && git push -q origin HEAD:claude/fetch-design-assets
+          git add -f _photos2 && git commit -qm "photos: cars, drones, story" && git push -q origin HEAD:claude/fetch-design-assets
