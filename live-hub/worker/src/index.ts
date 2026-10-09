@@ -58,9 +58,9 @@ function safeEqual(a: string, b: string): boolean {
   for (let i = 0; i < Math.max(x.length, y.length); i++) diff |= (x[i] ?? 0) ^ (y[i] ?? 0);
   return diff === 0;
 }
-/** No CREW_KEY configured → open (local dev). Configured → header, bearer or ?key= must match. */
+/** Fail closed: without a CREW_KEY secret nobody is crew (local dev sets it in .dev.vars). */
 function isCrew(env: Env, req: Request, url: URL): boolean {
-  if (!env.CREW_KEY) return true;
+  if (!env.CREW_KEY) return false;
   const auth = req.headers.get('Authorization') || '';
   const k = req.headers.get('X-Crew-Key') || (auth.startsWith('Bearer ') ? auth.slice(7) : '') || url.searchParams.get('key') || '';
   return !!k && safeEqual(k, env.CREW_KEY);
