@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
+import { CodeText } from '../fx/CodeText';
 
 /** Adds `.in` to every `.rv`, `.rv-l`, `.split-line` that scrolls into view (also ones mounted later). */
 export function RevealObserver() {
@@ -56,12 +57,12 @@ export function SplitTitle({ lines, className, as: Tag = 'h2' }: { lines: React.
   );
 }
 
-export function SectionHead({ kicker, title, lead, right, id }: { kicker: string; title: React.ReactNode; lead?: React.ReactNode; right?: React.ReactNode; id?: string }) {
+export function SectionHead({ kicker, title, lead, right, id }: { kicker: string; title: string; lead?: React.ReactNode; right?: React.ReactNode; id?: string }) {
   return (
     <div className="sec-head" id={id}>
       <div>
         <div className="kicker rv">{kicker}</div>
-        <SplitTitle className="h2" lines={[title]} />
+        <CodeText as="h2" className="h2" text={title} />
         {lead ? <p className="lead rv" style={{ ['--d' as string]: '.1s' }}>{lead}</p> : null}
       </div>
       {right ? <div className="rv" style={{ ['--d' as string]: '.15s' }}>{right}</div> : null}

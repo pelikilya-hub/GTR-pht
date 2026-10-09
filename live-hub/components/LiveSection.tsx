@@ -93,7 +93,7 @@ export function LiveSection() {
       <div className="wrap">
         <SectionHead
           kicker={t.liveKicker}
-          title={<>{t.liveTitle2}{journey.phase === 'live' ? <> <em>LIVE</em></> : null}</>}
+          title={t.liveTitle2 + (journey.phase === 'live' ? ' LIVE' : '')}
           lead={journey.phase === 'live' ? t.liveNote : t.firstStream}
           right={
             <div className="seg">

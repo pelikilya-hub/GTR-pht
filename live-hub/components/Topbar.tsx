@@ -2,11 +2,18 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useHub } from '@/lib/HubContext';
+import { onSfxChange, setSfxEnabled, sfxEnabled, unlockSfx } from '@/lib/sfx';
 
 export function Topbar() {
   const { t, lang, setLang, journey, auth, openAuth } = useHub();
   const [scrolled, setScrolled] = useState(false);
   const [menu, setMenu] = useState(false);
+  const [snd, setSnd] = useState(true);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- read the stored preference once
+    setSnd(sfxEnabled());
+    return onSfxChange(setSnd);
+  }, []);
   const ru = lang === 'ru';
   const live = journey.phase === 'live';
 
@@ -44,6 +51,7 @@ export function Topbar() {
             <button className={ru ? 'on' : ''} onClick={() => setLang('ru')} style={{ height: 30, minHeight: 30, padding: '0 10px' }}>RU</button>
             <button className={!ru ? 'on' : ''} onClick={() => setLang('en')} style={{ height: 30, minHeight: 30, padding: '0 10px' }}>EN</button>
           </div>
+          <button className="chip" style={{ cursor: 'pointer', height: 30 }} title={ru ? 'Звуки интерфейса' : 'UI sounds'} onClick={() => { unlockSfx(); setSfxEnabled(!snd); }}>{snd ? '🔊' : '🔇'}</button>
           <button className="btn btn-sm hide-sm" onClick={() => openAuth()} style={{ minHeight: 38 }}>
             {me ? me.nick.toUpperCase().slice(0, 12) : ru ? 'Войти' : 'Sign in'}
           </button>

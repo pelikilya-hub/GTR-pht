@@ -1,7 +1,8 @@
 'use client';
 import { useHub } from '@/lib/HubContext';
 import { GtrDeity } from './GtrDeity';
-import { Count, SplitTitle } from './ui/Motion';
+import { Count } from './ui/Motion';
+import { CodeText } from './fx/CodeText';
 
 export function Hero() {
   const { t, lang, journey, scrollToId } = useHub();
@@ -34,7 +35,10 @@ export function Hero() {
               <span className="kicker">{t.tagline}</span>
               <span className="tag">🇹🇭 {ru ? 'Кольцо · осень 2026' : 'Loop · autumn 2026'}</span>
             </div>
-            <SplitTitle as="h1" lines={[t.heroA, <span key="b" className="red">{t.heroB}</span>]} />
+            <h1 aria-label={t.heroA + ' ' + t.heroB}>
+              <CodeText text={t.heroA} speed={0.8} /><br />
+              <CodeText text={t.heroB} speed={0.8} alt={false} accent="none" className="red-line" />
+            </h1>
             <p className="lead rv" style={{ ['--d' as string]: '.25s' }}>{t.heroSub}</p>
             <div className="hero-cta rv" style={{ ['--d' as string]: '.35s' }}>
               <button className="btn btn-red" onClick={() => scrollToId('live')}>

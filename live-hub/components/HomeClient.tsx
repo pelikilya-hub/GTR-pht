@@ -21,6 +21,8 @@ import { Sponsors } from '@/components/Sponsors';
 import { AudioBar } from '@/components/AudioBar';
 import { Footer } from '@/components/Footer';
 import { RevealObserver } from '@/components/ui/Motion';
+import { StoryBackdrop } from '@/components/fx/StoryBackdrop';
+import { SfxBinder } from '@/components/fx/SfxBinder';
 
 // Client-only (app/page.tsx loads it with ssr:false): everything here is live —
 // countdown, GPS, chat, shared state — and has no SEO value server-rendered.
@@ -29,6 +31,8 @@ export default function HomeClient() {
     <HubProvider>
       <VendorScripts />
       <RevealObserver />
+      <SfxBinder />
+      <StoryBackdrop />
       <div className="hub">
         <Boot />
         <Toast />
