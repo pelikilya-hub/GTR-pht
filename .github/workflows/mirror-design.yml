@@ -1,4 +1,4 @@
-name: Configure TURN secret + probe
+name: Probe Make relay
 
 on:
   push:
@@ -9,37 +9,13 @@ permissions:
   contents: write
 
 jobs:
-  turn:
+  hook:
     runs-on: ubuntu-latest
-    env:
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
-        with: { node-version: 22 }
-      - shell: bash
-        run: |
-          set -u
-          R=_handshake/report2.txt; mkdir -p _handshake; : > $R
-          echo "health_before=$(curl -sS -m 20 https://bangtaostyle.com/api/health)" >> $R
-          API=https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID
-          TK=$(curl -s -X POST -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H "Content-Type: application/json" "$API/calls/turn_keys" -d '{"name":"gtrpht-turn-2"}')
-          echo "turn_fields=$(echo "$TK" | jq -c '{success, fields: (.result|keys?)}')" >> $R
-          ID=$(echo "$TK" | jq -r '.result.uid // .result.id // empty')
-          TOK=$(echo "$TK" | jq -r '.result.key // .result.token // .result.secret // .result.api_token // empty')
-          [ -n "$TOK" ] && echo "::add-mask::$TOK"
-          echo "got_id=$([ -n "$ID" ] && echo yes || echo no) got_token=$([ -n "$TOK" ] && echo yes || echo no)" >> $R
-          K=$(mktemp -d); mkdir -p $K/w; cd $K/w && npm init -y >/dev/null && npm i -s wrangler@4 >/dev/null 2>&1
-          if [ -n "$TOK" ]; then
-            TURN_KEY_ID="$ID" TURN_KEY_TOKEN="$TOK" node -e 'require("fs").writeFileSync(process.argv[1], JSON.stringify({TURN_KEY_ID:process.env.TURN_KEY_ID,TURN_KEY_TOKEN:process.env.TURN_KEY_TOKEN}))' $K/s.json
-            npx wrangler secret bulk $K/s.json --name gtrpht-live-hub 2>&1 | grep -E "✨|✘|rror" >> $GITHUB_WORKSPACE/$R
-          fi
-          npx wrangler secret list --name gtrpht-live-hub 2>/dev/null | jq -c '[.[].name]' >> $GITHUB_WORKSPACE/$R || true
-          rm -rf $K; cd $GITHUB_WORKSPACE
-          sleep 20
-          echo "health_after=$(curl -sS -m 20 https://bangtaostyle.com/api/health)" >> $R
-          echo "turn_api=$(curl -sS -m 20 https://bangtaostyle.com/api/turn | jq -c '{turn, n: (.iceServers|length)}')" >> $R
-          echo "sfu_session=$(curl -sS -m 20 -X POST https://bangtaostyle.com/api/rt/session | jq -c '{has_session: (.sessionId != null), error}')" >> $R
+      - run: |
+          mkdir -p _handshake
+          code=$(curl -sS -o /dev/null -w '%{http_code} %header{x-hook}' -X POST -H 'Content-Type: application/json' https://bangtaostyle.com/api/hook -d "{\"source\":\"gtrpht-live-hub\",\"event\":\"launch_check\",\"ts\":$(date +%s000),\"page\":\"ci\",\"note\":\"relay test\"}")
+          echo "hook=$code" > _handshake/report3.txt
           git config user.name "github-actions[bot]"; git config user.email "41898+github-actions[bot]@users.noreply.github.com"
-          git add -f $R && git commit -qm "turn report" && git push -q origin HEAD:claude/fetch-design-assets
+          git add -f _handshake/report3.txt && git commit -qm "hook report" && git push -q origin HEAD:claude/fetch-design-assets
