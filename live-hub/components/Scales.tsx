@@ -258,7 +258,7 @@ export function Scales() {
       <div className="wrap">
         <SectionHead
           kicker="ДОБРО ⇄ СЧАСТЬЕ · ГОЛОСУЕТ КОШЕЛЁК"
-          title={<>Весы <em>маршрута</em></>}
+          title="Весы маршрута"
           lead={<>Каждый донат — это гиря. Куда положишь, туда и качнётся маршрут. <strong style={{ color: '#8FC4FF', fontWeight: 600 }}>ДОБРО</strong> — ищем попавших в беду соотечественников и решаем их проблемы в дороге. <strong style={{ color: '#FF8A7C', fontWeight: 600 }}>СЧАСТЬЕ</strong> — приваты, вечеринки и зарытые исполнения в закрытом доступе. Чаша тяжелее — эта линия идёт в эфир следующей.</>}
           right={<span className="chip"><span className="dot live" /><span ref={totNumRef}>{(good + joy).toLocaleString('ru-RU')} ₽ СОБРАНО</span></span>}
         />

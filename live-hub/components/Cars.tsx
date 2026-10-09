@@ -7,6 +7,18 @@ import { SectionHead } from './ui/Motion';
 
 export interface Car { id: string; name: string; year: string; city: string; stage: string; paid: string; note: string; img: string; ts: number }
 
+const SHOTS: [string, string, string][] = [
+  ['/assets/cars/01.jpg', 'Кладбище машин', 'Car graveyard'],
+  ['/assets/cars/02.jpg', 'Разборка · ряды кузовов', 'Breaker yard'],
+  ['/assets/cars/03.jpg', 'R34 GT-R на аукционе', 'R34 GT-R at auction'],
+  ['/assets/cars/04.jpg', 'Supra за забором', 'Supra behind the fence'],
+  ['/assets/cars/05.jpg', 'Штрафстоянка', 'Impound lot'],
+  ['/assets/cars/06.jpg', 'Находка в сарае', 'Barn find'],
+  ['/assets/cars/07.jpg', 'Горы запчастей · Бангкок', 'Parts piles · Bangkok'],
+  ['/assets/cars/08.jpg', '911 у обочины', '911 by the curb'],
+  ['/assets/cars/09.jpg', 'RX-7 под снегом', 'RX-7 in the snow'],
+];
+
 export function Cars() {
   const { t, lang, notify, auth, now } = useHub();
   const ru = lang === 'ru';
@@ -27,7 +39,16 @@ export function Cars() {
   return (
     <section className="sec" id="cars" data-screen-label="cars">
       <div className="wrap">
-        <SectionHead kicker={t.carsKicker} title={<>{t.carsTitle.split(' ').slice(0, -1).join(' ')} <em>{t.carsTitle.split(' ').slice(-1)}</em></>} lead={t.carsLead} />
+        <SectionHead kicker={t.carsKicker} title={t.carsTitle} lead={t.carsLead} />
+
+        <div className="car-mosaic">
+          {SHOTS.map(([src, ruCap, enCap], i) => (
+            <figure key={src} className="car-shot rv" style={{ ['--d' as string]: `${(i % 5) * 0.05}s` }}>
+              <img src={src} alt={ru ? ruCap : enCap} loading="lazy" />
+              <figcaption><span className="g">#{String(i + 1).padStart(2, '0')}</span> {ru ? ruCap : enCap}</figcaption>
+            </figure>
+          ))}
+        </div>
 
         <div className="car-flow">
           {t.carsSteps.map((s, i) => (
@@ -55,14 +76,7 @@ export function Cars() {
                 {garage.map((c) => (
                   <article key={c.id} className="panel car-card">
                     <div className="img">
-                      {c.img ? <img src={c.img} alt={c.name} loading="lazy" /> : (
-                        <svg viewBox="0 0 320 200" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} aria-hidden>
-                          <defs><linearGradient id={'g' + c.id} x1="0" x2="1"><stop offset="0" stopColor="#e5372c" stopOpacity=".55" /><stop offset="1" stopColor="#e5372c" stopOpacity="0" /></linearGradient></defs>
-                          <path d="M40 130h240M58 130l22-40c4-8 11-12 20-12h96c9 0 16 4 21 11l32 41" fill="none" stroke={'url(#g' + c.id + ')'} strokeWidth="3" />
-                          <circle cx="98" cy="134" r="16" fill="none" stroke="#3a3940" strokeWidth="3" /><circle cx="226" cy="134" r="16" fill="none" stroke="#3a3940" strokeWidth="3" />
-                          <text x="160" y="178" textAnchor="middle" fill="#3a3940" fontFamily="JetBrains Mono, monospace" fontSize="10" letterSpacing="3">PHOTO SOON</text>
-                        </svg>
-                      )}
+                      <img src={c.img || SHOTS[(garage.indexOf(c) + 2) % SHOTS.length][0]} alt={c.name} loading="lazy" />
                       <span className={'chip' + (c.stage === 'done' ? ' on' : '')} style={{ position: 'absolute', top: 12, left: 12, background: 'rgba(8,8,10,.7)' }}>{t.carStages[c.stage] || c.stage}</span>
                     </div>
                     <div style={{ padding: 18 }}>

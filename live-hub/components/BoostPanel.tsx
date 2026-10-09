@@ -26,18 +26,28 @@ export function BoostPanel() {
   };
 
   return (
-    <div className="panel" data-screen-label="boost" style={{ padding: 24, height: '100%' }}>
-      <div className="meta">{t.boostTitle}</div>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, flexWrap: 'wrap', marginTop: 12 }}>
-        <div style={{ fontFamily: 'var(--display)', fontWeight: 800, fontSize: 24, letterSpacing: '-.02em', flex: 1 }}>{t.boostName}</div>
-        <div className="mono" style={{ fontSize: 13, color: 'var(--red-2)' }}>{fmt(raised)} <span style={{ color: 'var(--ink-4)' }}>/ {fmt(GOAL)}</span></div>
+    <div className="drone-card" data-screen-label="boost">
+      <div className="drone-shot gtr-hover">
+        <img src="/assets/drone/01.jpg" alt="" loading="lazy" />
+        <div className="laser" />
+        <div className="hud hud-tl"><span className="g">REC</span> ● 4K·60</div>
+        <div className="hud hud-tr g">46:00 MIN</div>
+        <div className="hud hud-bl g">ALT 120M · 20KM LINK</div>
+        <div className="hud hud-br">{t.boostTitle.replace('// ', '')}</div>
+        <i className="br tl" /><i className="br tr" /><i className="br bl" /><i className="br brr" />
       </div>
-      <div className="bar" style={{ height: 6, marginTop: 16 }}><i style={{ width: boostPct + '%' }} /></div>
-      <div className="seg" style={{ marginTop: 18 }}>
-        {PRESETS.map((v) => <button key={v} className={v === sel ? 'on' : ''} onClick={() => setSel(v)}>{fmt(v)}</button>)}
+      <div style={{ padding: '20px 0 0' }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, flexWrap: 'wrap' }}>
+          <div style={{ fontFamily: 'var(--display)', fontWeight: 800, fontSize: 'clamp(22px,2.4vw,30px)', letterSpacing: '-.02em', textTransform: 'uppercase', flex: 1 }}>{t.boostName}</div>
+          <div className="g" style={{ fontSize: 20, color: 'var(--red-2)' }}>{fmt(raised)} <span style={{ color: 'var(--ink-4)' }}>/ {fmt(GOAL)}</span></div>
+        </div>
+        <div className="bar" style={{ height: 6, marginTop: 14 }}><i style={{ width: boostPct + '%' }} /></div>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 16 }}>
+          <div className="seg">{PRESETS.map((v) => <button key={v} className={v === sel ? 'on' : ''} onClick={() => setSel(v)}>{fmt(v)}</button>)}</div>
+          <button className="btn btn-red" onClick={doDonate} style={{ flex: 1, minWidth: 200 }}>{t.donate} {fmt(sel)}</button>
+        </div>
+        <div style={{ fontSize: 13.5, lineHeight: 1.6, color: 'var(--ink-3)', marginTop: 12 }}>{t.boostNote}</div>
       </div>
-      <button className="btn btn-red" onClick={doDonate} style={{ width: '100%', marginTop: 16 }}>{t.donate} {fmt(sel)}</button>
-      <div style={{ fontSize: 13, lineHeight: 1.6, color: 'var(--ink-3)', marginTop: 12 }}>{t.boostNote}</div>
     </div>
   );
 }

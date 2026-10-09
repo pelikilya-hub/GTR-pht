@@ -3,7 +3,10 @@ import { useEffect, useRef, useState } from 'react';
 import type * as ML from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { useHub } from '@/lib/HubContext';
-import { LEGS, STOPS, pathUpTo, pToLatLng, type LatLng } from '@/lib/tour';
+import { LEGS, STOPS, pathUpTo, pathRange, pToLatLng, type LatLng } from '@/lib/tour';
+import { PLACE_SRCS } from '@/lib/i18n';
+import { sfx } from '@/lib/sfx';
+import { MapReveal } from './fx/MapReveal';
 import { SectionHead } from './ui/Motion';
 
 const STYLE_URL = 'https://tiles.openfreemap.org/styles/positron';
@@ -72,7 +75,7 @@ function Telemetry() {
         <span className="meta" style={{ color: journey.srcGps ? 'var(--red-2)' : undefined }}>{journey.srcGps ? t.srcGps + (journey.pos.by ? ' · ' + journey.pos.by : '') : t.srcPlan}</span>
       </div>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 14 }}>
-        <span style={{ fontFamily: 'var(--display)', fontWeight: 800, fontSize: 40, letterSpacing: '-.03em', lineHeight: 1 }}>{journey.km.toLocaleString(loc)}</span>
+        <span className="g" style={{ fontSize: 44, lineHeight: 1 }}>{journey.km.toLocaleString(loc)}</span>
         <span className="meta">/ {journey.totalKm.toLocaleString(loc)} {t.kmUnit}</span>
       </div>
       <div className="bar" style={{ margin: '12px 0 8px' }}><i style={{ width: journey.routePct + '%' }} /></div>
@@ -94,6 +97,10 @@ export function RouteSection() {
   const carRef = useRef<ML.Marker | null>(null);
   const dotsRef = useRef<HTMLDivElement[]>([]);
   const drawn = useRef(0); // animated share of the covered path (0..p)
+  const popupRef = useRef<ML.Popup | null>(null);
+  const popupCtor = useRef<((o: ML.PopupOptions) => ML.Popup) | null>(null);
+  const journeyRef = useRef(journey);
+  useEffect(() => { journeyRef.current = journey; });
   const [ready, setReady] = useState(false);
   const p = journey.pos.p;
   const carLL: LatLng = journey.srcGps ? [journey.pos.lat, journey.pos.lng] : pToLatLng(p);
@@ -117,6 +124,7 @@ export function RouteSection() {
       });
       map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
       mapRef.current = map;
+      popupCtor.current = (opts) => new maplibregl.Popup(opts);
 
       map.on('load', () => {
         const { plan, ferry } = routeFeatures();
@@ -127,6 +135,10 @@ export function RouteSection() {
         map.addLayer({ id: 'ferry', type: 'line', source: 'ferry', layout: { 'line-cap': 'round' }, paint: { 'line-color': '#5aa9ff', 'line-width': 2, 'line-opacity': 0.75, 'line-dasharray': [0.5, 2] } });
         map.addLayer({ id: 'done-glow', type: 'line', source: 'done', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#e5372c', 'line-width': 12, 'line-blur': 10, 'line-opacity': 0.55 } });
         map.addLayer({ id: 'done', type: 'line', source: 'done', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#ff5a4b', 'line-width': 3.2 } });
+        // laser pulse running the whole ring
+        map.addSource('laser', { type: 'geojson', data: lineFC([STOPS[0].ll]) });
+        map.addLayer({ id: 'laser-glow', type: 'line', source: 'laser', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#ff3427', 'line-width': 14, 'line-blur': 12, 'line-opacity': 0.8 } });
+        map.addLayer({ id: 'laser-core', type: 'line', source: 'laser', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#ffffff', 'line-width': 2.2 } });
 
         STOPS.slice(0, -1).forEach((s, i) => {
           const el = document.createElement('div');
@@ -137,6 +149,9 @@ export function RouteSection() {
             ? 'position:absolute;top:50%;right:100%;transform:translate(-8px,-50%)'
             : 'position:absolute;top:50%;left:100%;transform:translate(8px,-50%)');
           dotsRef.current[i] = el.lastElementChild as HTMLDivElement;
+          el.style.cursor = 'pointer';
+          el.addEventListener('click', (ev) => { ev.stopPropagation(); openStop(i); });
+          el.addEventListener('mouseenter', () => sfx('tick'));
           new maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat(ll(s.ll)).addTo(map);
         });
         const car = document.createElement('div');
@@ -152,6 +167,8 @@ export function RouteSection() {
           if (reduce || ts - last < 70) return;
           last = ts; k = (k + 1) % steps.length;
           if (map.getLayer('plan')) map.setPaintProperty('plan', 'line-dasharray', steps[k]);
+          const head = ((ts / 16000) % 1) * (LEGS.length + 0.6);
+          (map.getSource('laser') as ML.GeoJSONSource | undefined)?.setData(lineFC(pathRange(head - 0.6, head)));
         };
         raf = requestAnimationFrame(tick);
         setReady(true);
@@ -180,10 +197,27 @@ export function RouteSection() {
     return () => cancelAnimationFrame(raf);
   }, [ready, p, carLL[0], carLL[1]]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  function openStop(i: number) {
+    const map = mapRef.current;
+    if (!map) return;
+    const s = STOPS[i], st = journeyRef.current.stages[i];
+    const img = PLACE_SRCS[Math.min(i, PLACE_SRCS.length - 1)]?.[0];
+    const finale = i === STOPS.length - 1;
+    sfx('ping');
+    map.flyTo({ center: ll(s.ll), zoom: finale || i === 0 ? 9 : 9.5, speed: 1.1, curve: 1.6, essential: true });
+    popupRef.current?.remove();
+    const esc = (x: string) => x.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c] as string));
+    popupRef.current = popupCtor.current?.({ closeButton: true, offset: 18, maxWidth: '300px', className: 'stop-pop' })
+      .setLngLat(ll(s.ll))
+      .setHTML(`<div class="sp-img" style="background-image:url('/${finale ? PLACE_SRCS[0][4] : img}')"></div>`
+        + `<div class="sp-body"><div class="sp-n">${st?.n || ''} · ${esc(st?.status || '')}</div>`
+        + `<div class="sp-t">${esc(st?.title || s.ru)}</div><div class="sp-d">${esc(st?.dates || '')}</div>`
+        + `<div class="sp-x">${esc(st?.base || '')}</div><div class="sp-l">→ ${esc(st?.leg || '')}</div></div>`)
+      .addTo(map) || null;
+  }
   const fly = (i: number) => {
-    const s = STOPS[i];
-    mapRef.current?.flyTo({ center: ll(s.ll), zoom: 9.5, speed: 1.2, curve: 1.5, essential: true });
     box.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => openStop(i), 350);
   };
   const overview = () => mapRef.current?.fitBounds([[97.6, 7.4], [101.4, 19.4]], { padding: (box.current?.clientWidth || 0) < 700 ? 30 : { top: 40, bottom: 40, left: 420, right: 60 } });
 
@@ -192,12 +226,13 @@ export function RouteSection() {
       <div className="wrap">
         <SectionHead
           kicker={t.routeKicker}
-          title={<>{t.routeTitle} <em>{journey.totalKm.toLocaleString(ru ? 'ru-RU' : 'en-US')} {ru ? 'км' : 'km'}</em></>}
+          title={`${t.routeTitle} ${journey.totalKm.toLocaleString(ru ? 'ru-RU' : 'en-US')} ${ru ? 'км' : 'km'}`}
           lead={t.mapHint}
           right={<button className="btn btn-sm" onClick={overview}>{ru ? 'Весь маршрут' : 'Whole route'}</button>}
         />
         <div className="map-shell rv">
           <div ref={box} style={{ position: 'absolute', inset: 0 }} />
+          <MapReveal />
           <div className="glass map-hud map-hud-desktop"><Telemetry /></div>
           <div className="glass map-pos">
             <div className="mono" style={{ fontSize: 12, color: 'var(--red-2)', letterSpacing: '.08em' }}>{journey.posLabel}</div>

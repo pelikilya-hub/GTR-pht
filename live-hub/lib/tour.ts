@@ -183,3 +183,14 @@ export function stageSpans(sched: Phase[]): StageSpan[] {
 }
 
 export const DAY_MS = DAY;
+
+/** Route polyline between two parameters a < b (for the laser pulse). */
+export function pathRange(a: number, b: number): LatLng[] {
+  a = Math.max(0, a); b = Math.min(LEGS.length, b);
+  if (b <= a) return [pToLatLng(a)];
+  const out: LatLng[] = [pToLatLng(a)];
+  const step = 0.02;
+  for (let p = Math.ceil(a / step) * step; p < b; p += step) out.push(pToLatLng(p));
+  out.push(pToLatLng(b));
+  return out;
+}
