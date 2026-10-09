@@ -13,6 +13,13 @@
   },
   "migrations": [{ "tag": "v1", "new_sqlite_classes": ["RoomSignal"] }],
   "observability": { "enabled": true },
+  // Public hostnames. The zone bangtaostyle.com is on the same Cloudflare account, so
+  // `wrangler deploy` creates the DNS records + certificate itself (no dashboard step).
+  "workers_dev": true,
+  "routes": [
+    { "pattern": "bangtaostyle.com", "custom_domain": true },
+    { "pattern": "www.bangtaostyle.com", "custom_domain": true }
+  ],
   "vars": {
     "ALLOWED_ROOMS": "gtrpht"
   }

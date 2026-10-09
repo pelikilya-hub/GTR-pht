@@ -1,0 +1,93 @@
+name: Deploy Live Hub (Cloudflare)
+
+# Builds live-hub/ and deploys the Worker (static assets + Durable Object + custom domains
+# bangtaostyle.com / www.bangtaostyle.com) with wrangler.
+#
+# Repository secrets (Settings → Secrets and variables → Actions):
+#   CLOUDFLARE_API_TOKEN   token with "Edit Cloudflare Workers" template + Zone:DNS:Edit on bangtaostyle.com
+#   CLOUDFLARE_ACCOUNT_ID  Cloudflare dashboard → Workers & Pages → Account ID
+# Optional Worker secrets (uploaded after the deploy when set):
+#   REALTIME_APP_ID, REALTIME_APP_SECRET, TURN_KEY_ID, TURN_KEY_TOKEN, MAKE_WEBHOOK_URL
+
+on:
+  push:
+    branches: [claude/thailand-route-hotels-farms-l0vw9c, main]
+    paths:
+      - 'live-hub/**'
+      - '.github/workflows/deploy-live-hub.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-live-hub
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: live-hub
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: live-hub/package-lock.json
+
+      - name: Install
+        run: npm ci --no-audit --no-fund
+
+      - name: Typecheck worker
+        run: npm run typecheck:worker
+
+      - name: Build static export
+        run: npm run build
+
+      - name: Check Cloudflare credentials
+        id: creds
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::warning::CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID are not set — build verified, deploy skipped."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Deploy Worker
+        if: steps.creds.outputs.ready == 'true'
+        run: npx wrangler deploy
+
+      - name: Upload Worker secrets
+        if: steps.creds.outputs.ready == 'true'
+        env:
+          REALTIME_APP_ID: ${{ secrets.REALTIME_APP_ID }}
+          REALTIME_APP_SECRET: ${{ secrets.REALTIME_APP_SECRET }}
+          TURN_KEY_ID: ${{ secrets.TURN_KEY_ID }}
+          TURN_KEY_TOKEN: ${{ secrets.TURN_KEY_TOKEN }}
+          MAKE_WEBHOOK_URL: ${{ secrets.MAKE_WEBHOOK_URL }}
+        run: |
+          node -e '
+            const names = ["REALTIME_APP_ID","REALTIME_APP_SECRET","TURN_KEY_ID","TURN_KEY_TOKEN","MAKE_WEBHOOK_URL"];
+            const out = {};
+            for (const n of names) if (process.env[n]) out[n] = process.env[n];
+            process.stdout.write(JSON.stringify(out));
+          ' > /tmp/secrets.json
+          if [ "$(cat /tmp/secrets.json)" = "{}" ]; then
+            echo "::warning::No Worker secrets set in GitHub — /api/health will report sfu:false, turn:false, hook:false."
+          else
+            npx wrangler secret bulk /tmp/secrets.json
+          fi
+          rm -f /tmp/secrets.json
+
+      - name: Health check
+        if: steps.creds.outputs.ready == 'true'
+        run: |
+          sleep 20
+          for u in https://bangtaostyle.com/api/health https://www.bangtaostyle.com/api/health; do
+            echo "$u"; curl -sS -m 20 -w '\nHTTP %{http_code}\n' "$u" || true
+          done
