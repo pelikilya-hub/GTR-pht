@@ -15,11 +15,13 @@ jobs:
       - uses: actions/setup-node@v5
         with: { node-version: 22 }
       - run: npm i --no-save playwright@1.56.1 && npx playwright install --with-deps chromium
+      - run: python3 .github/scripts/commons_photos.py _photos
       - run: node .github/scripts/shoot.mjs
+        continue-on-error: true
       - name: Commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898+github-actions[bot]@users.noreply.github.com"
-          git add -f _shots
+          git add -f _shots _photos
           git commit -m "live site screenshots" || true
           git push origin HEAD:claude/fetch-design-assets
