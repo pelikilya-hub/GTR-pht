@@ -1,7 +1,0 @@
-health: {"ok":true,"sfu":false,"turn":false,"hook":false,"crew":false}
-www health: {"ok":true,"sfu":false,"turn":false,"hook":false,"crew":false}
-turn: {"iceServers":[{"urls":["stun:stun.cloudflare.com:3478","stun:stun.l.google.com:19302"]}],"turn":false}
-crew check without key: 401
-state write without key: 401
-rt session: {"error":"Realtime SFU is not configured on the server (REALTIME_APP_ID / REALTIME_APP_SECRET)"}
-pages: /=200 /console/=200 /camera/=200 /pult/=200 /credits/=200 
