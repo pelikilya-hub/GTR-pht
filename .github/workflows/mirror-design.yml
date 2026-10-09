@@ -1,4 +1,4 @@
-name: Shoot live site (diagnostics)
+name: Live health check
 
 on:
   push:
@@ -8,20 +8,24 @@ permissions:
   contents: write
 
 jobs:
-  shoot:
+  health:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
-        with: { node-version: 22 }
-      - run: npm i --no-save playwright@1.56.1 && npx playwright install --with-deps chromium
-      - run: sleep 60
-      - run: node .github/scripts/shoot.mjs
-        continue-on-error: true
+      - name: Probe
+        run: |
+          mkdir -p _shots
+          {
+            echo "health: $(curl -sS -m 20 https://bangtaostyle.com/api/health)"
+            echo "www health: $(curl -sS -m 20 https://www.bangtaostyle.com/api/health)"
+            echo "turn: $(curl -sS -m 20 https://bangtaostyle.com/api/turn | head -c 160)"
+            echo "crew check without key: $(curl -sS -o /dev/null -w '%{http_code}' https://bangtaostyle.com/api/crew/check)"
+            echo "state write without key: $(curl -sS -o /dev/null -w '%{http_code}' -X PUT -d '{}' https://bangtaostyle.com/api/state)"
+            echo "rt session: $(curl -sS -m 20 -X POST https://bangtaostyle.com/api/rt/session | head -c 160)"
+            echo "pages: $(for p in / /console/ /camera/ /pult/ /credits/; do printf '%s=%s ' $p $(curl -sS -o /dev/null -w '%{http_code}' https://bangtaostyle.com$p); done)"
+          } | tee _shots/log.txt
       - name: Commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898+github-actions[bot]@users.noreply.github.com"
-          git add -f _shots
-          git commit -m "live site screenshots" || true
-          git push origin HEAD:claude/fetch-design-assets
+          git add -f _shots && git commit -m "health probe" && git push origin HEAD:claude/fetch-design-assets
