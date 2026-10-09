@@ -32,9 +32,13 @@ export interface Journey {
   startLabel: string; datesLabel: string;
 }
 
+/** Planned start until the crew sets one in /console ("start soon" there stores start:null explicitly). */
+export const DEFAULT_START = '2026-10-25T09:00:00+07:00';
+
 export function tourStart(): number | null {
-  const cfg = ls<TourConfig>('gtrpht_tour', {});
-  const ms = cfg.start ? Date.parse(cfg.start) : NaN;
+  const cfg = ls<TourConfig | null>('gtrpht_tour', null);
+  const raw = cfg == null || cfg.start === undefined ? DEFAULT_START : cfg.start;
+  const ms = raw ? Date.parse(raw) : NaN;
   return isFinite(ms) ? ms : null;
 }
 

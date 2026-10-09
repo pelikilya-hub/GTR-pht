@@ -262,7 +262,7 @@ export function Scales() {
           lead={<>Каждый донат — это гиря. Куда положишь, туда и качнётся маршрут. <strong style={{ color: '#8FC4FF', fontWeight: 600 }}>ДОБРО</strong> — ищем попавших в беду соотечественников и решаем их проблемы в дороге. <strong style={{ color: '#FF8A7C', fontWeight: 600 }}>СЧАСТЬЕ</strong> — приваты, вечеринки и зарытые исполнения в закрытом доступе. Чаша тяжелее — эта линия идёт в эфир следующей.</>}
           right={<span className="chip"><span className="dot live" /><span ref={totNumRef}>{(good + joy).toLocaleString('ru-RU')} ₽ СОБРАНО</span></span>}
         />
-        <div ref={stageRef} className="scales-stage rv" style={{ position: 'relative', aspectRatio: '1131/1414', width: '100%', maxWidth: 620, margin: '0 auto', background: '#000', overflow: 'hidden', borderRadius: 22, boxShadow: '0 40px 120px -40px rgba(229,55,44,.35)' }}>
+        <div ref={stageRef} className="scales-stage rv" style={{ position: 'relative', aspectRatio: '1131/1414', width: '100%', maxWidth: 620, margin: '0 auto', background: '#000', overflow: 'hidden', boxShadow: '0 40px 120px -40px rgba(229,55,44,.35)' }}>
           <div ref={tiltRef} style={{ position: 'absolute', inset: 0, transform: `rotate(${(angle * 0.115).toFixed(2)}deg)`, transformOrigin: '50% 39%', willChange: 'transform' }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/assets/scales/themis.png" alt="Весы маршрута" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
@@ -319,7 +319,7 @@ export function Scales() {
             {(data.feed || []).map((f, i) => {
               const col = f.side === 'good' ? '#4A9EFF' : '#FF6A5B';
               return (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, borderLeft: `2px solid ${col}`, background: 'rgba(255,255,255,.025)', borderRadius: '0 10px 10px 0', padding: '10px 14px', flexWrap: 'wrap' }}>
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, borderLeft: `2px solid ${col}`, background: 'rgba(255,255,255,.025)', padding: '10px 14px', flexWrap: 'wrap' }}>
                   <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, letterSpacing: '.1em', color: col }}>{f.side === 'good' ? 'ДОБРО' : 'СЧАСТЬЕ'}</span>
                   <span style={{ fontSize: 12.5, color: '#ECE9E4', fontWeight: 500 }}>{f.who}</span>
                   <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11, color: col }}>{f.amt ? '+' + f.amt.toLocaleString('ru-RU') + ' ₽' : 'голос'}</span>
@@ -354,7 +354,7 @@ function SidePanel({ title, subtitle, subCol, titleCol, border, cornerCol, corne
       <div style={{ fontSize: 13, lineHeight: 1.7, color: '#A8A6AD', marginTop: 10 }}>{desc}</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 16 }}>
         {tiers.map((tr, i) => (
-          <div key={i} style={{ border: `1px solid ${tr.brd}`, background: tr.bg, padding: '12px 14px', borderRadius: 10 }}>
+          <div key={i} style={{ border: `1px solid ${tr.brd}`, background: tr.bg, padding: '12px 14px' }}>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
               <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, letterSpacing: '.1em', color: tr.sumCol }}>{tr.sum}</span>
               <span style={{ fontSize: 12, color: tr.txtCol, flex: 1, minWidth: 140 }}>{tr.label}</span>
@@ -366,10 +366,10 @@ function SidePanel({ title, subtitle, subCol, titleCol, border, cornerCol, corne
       </div>
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 16 }}>
         {amounts.map((a) => (
-          <button key={a} onClick={() => onGive(a)} style={{ flex: 1, minWidth: 72, background: 'none', border: `1px solid ${btnBorder}`, color: btnCol, fontFamily: 'var(--mono)', fontSize: 12, padding: '12px 6px', cursor: 'pointer', minHeight: 46, borderRadius: 999 }}>{a >= 1000 ? a / 1000 + 'K ₽' : a + ' ₽'}</button>
+          <button key={a} onClick={() => onGive(a)} style={{ flex: 1, minWidth: 72, background: 'none', border: `1px solid ${btnBorder}`, color: btnCol, fontFamily: 'var(--mono)', fontSize: 12, padding: '12px 6px', cursor: 'pointer', minHeight: 46 }}>{a >= 1000 ? a / 1000 + 'K ₽' : a + ' ₽'}</button>
         ))}
       </div>
-      <button onClick={onVote} style={{ width: '100%', marginTop: 8, background: 'none', border: `1px dashed ${btnBorder}`, color: btnCol, fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '.14em', padding: 11, cursor: 'pointer', minHeight: 44, borderRadius: 999 }}>ГОЛОС БЕЗ ДОНАТА · +1</button>
+      <button onClick={onVote} style={{ width: '100%', marginTop: 8, background: 'none', border: `1px dashed ${btnBorder}`, color: btnCol, fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '.14em', padding: 11, cursor: 'pointer', minHeight: 44 }}>ГОЛОС БЕЗ ДОНАТА · +1</button>
     </div>
   );
 }

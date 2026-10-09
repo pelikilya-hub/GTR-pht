@@ -21,13 +21,19 @@ export function Hero() {
 
   return (
     <section className="hero" id="top" data-screen-label="hero">
+      <div className="grid-bg" aria-hidden />
+      <div className="laser" aria-hidden />
+      <div className="impulse thin strobe" aria-hidden style={{ left: '58%' }} />
       <div className="hero-art" aria-hidden>
         <GtrDeity variant="thailand" />
       </div>
       <div className="wrap" style={{ position: 'relative', width: '100%' }}>
         <div className="hero-grid">
           <div>
-            <div className="kicker rv">{t.tagline}</div>
+            <div className="rv" style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
+              <span className="kicker">{t.tagline}</span>
+              <span className="tag">🇹🇭 {ru ? 'Кольцо · осень 2026' : 'Loop · autumn 2026'}</span>
+            </div>
             <SplitTitle as="h1" lines={[t.heroA, <span key="b" className="red">{t.heroB}</span>]} />
             <p className="lead rv" style={{ ['--d' as string]: '.25s' }}>{t.heroSub}</p>
             <div className="hero-cta rv" style={{ ['--d' as string]: '.35s' }}>

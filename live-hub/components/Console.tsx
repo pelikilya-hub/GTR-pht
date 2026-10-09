@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { getCrewKey, setCrewKey, pushShared, pullShared } from '@/lib/sharedState';
 import { ls } from '@/lib/storage';
 import type { Car } from './Cars';
+import { DEFAULT_START } from '@/lib/journey';
 
 type Post = { id: string; ts: number; member: string; type: 'post' | 'mat' | 'hyp' | 'obs'; text: string; link?: string };
 const STATUSES: [string, string][] = [['drive', 'В ПУТИ'], ['base', 'НА БАЗЕ'], ['ferry', 'ПАРОМ'], ['live', 'В ЭФИРЕ'], ['stop', 'СТОП']];
@@ -42,7 +43,8 @@ export default function Console() {
   const say = (m: string) => { setMsg(m); setTimeout(() => setMsg(''), 3500); };
   const load = async () => {
     await pullShared();
-    setStart(toLocal(ls<{ start?: string | null }>('gtrpht_tour', {}).start));
+    const tr = ls<{ start?: string | null } | null>('gtrpht_tour', null);
+    setStart(toLocal(tr == null || tr.start === undefined ? DEFAULT_START : tr.start));
     setPosts(ls<Post[]>('gtrpht_posts', []));
     setGarage(ls<Car[]>('gtrpht_garage', []));
     setChannels(ls<Record<string, string>>('gtrpht_channels', {}));

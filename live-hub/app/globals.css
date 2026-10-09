@@ -1,9 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700;800;900&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700;800;900&family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 :root { color-scheme: dark; }
 * { box-sizing: border-box; }
 html, body { margin: 0; background: #0B0B0C; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
-body { font-family: 'Inter', sans-serif; color: #ECE9E4; }
+body { font-family: 'Golos Text', sans-serif; color: #ECE9E4; }
 a { color: #FF6A5B; text-decoration: none; }
 a:hover { color: #FF8A7D; }
 ::selection { background: #E5372C; color: #0B0B0C; }
