@@ -7,10 +7,12 @@ import { LEGS, STOPS, pathUpTo, pToLatLng, type LatLng } from '@/lib/tour';
 import { SectionHead } from './ui/Motion';
 
 const STYLE_URL = 'https://tiles.openfreemap.org/styles/positron';
+const LABEL_SIDE: Record<string, 'l' | 'r'> = { phuket: 'l', samui: 'r', phangan: 'l', chiangmai: 'r', ayutthaya: 'l', bangkok: 'l', pattaya: 'r' };
 const ll = (p: LatLng): [number, number] => [p[1], p[0]]; // [lat,lng] → [lng,lat]
 
 /** Repaint OpenFreeMap Positron into the product palette (graphite land, ink-blue sea, quiet labels). */
-function darken(style: ML.StyleSpecification): ML.StyleSpecification {
+function darken(style: ML.StyleSpecification, ru: boolean): ML.StyleSpecification {
+  const label = ['coalesce', ['get', ru ? 'name:ru' : 'name:en'], ['get', 'name:latin'], ['get', 'name_en'], ['get', 'name']];
   style.layers = style.layers
     .filter((l) => !/poi|housenumber|aeroway|transit|ferry/i.test(l.id))
     .map((l) => {
@@ -28,6 +30,7 @@ function darken(style: ML.StyleSpecification): ML.StyleSpecification {
         L.paint['text-color'] = /place|city|country|state/.test(id) ? '#8a8892' : '#55545c';
         L.paint['text-halo-color'] = '#08080a';
         L.paint['text-halo-width'] = 1.2;
+        if (L.layout && L.layout['text-field'] !== undefined) L.layout = { ...L.layout, 'text-field': label as unknown as string };
         if (L.paint['icon-opacity'] !== undefined) L.paint['icon-opacity'] = 0;
       }
       return L as ML.LayerSpecification;
@@ -56,6 +59,7 @@ function Telemetry() {
   const { t, lang, journey } = useHub();
   const loc = lang === 'ru' ? 'ru-RU' : 'en-US';
   const rows: [string, React.ReactNode][] = [
+    [lang === 'ru' ? 'ПОЗИЦИЯ' : 'POSITION', journey.posLabel],
     [t.telStage + ' ' + journey.stageNo, journey.curStage],
     [t.telStatus, <span key="s" style={{ color: 'var(--red-2)' }}>{journey.crewStatus}{journey.crewStatusAge ? <span style={{ color: 'var(--ink-4)' }}> · {journey.crewStatusAge}</span> : null}</span>],
     [t.telNext, journey.nextPoint],
@@ -102,7 +106,7 @@ export function RouteSection() {
       let style: ML.StyleSpecification = FALLBACK_STYLE;
       try {
         const r = await fetch(STYLE_URL);
-        if (r.ok) style = darken(await r.json());
+        if (r.ok) style = darken(await r.json(), ru);
       } catch { /* offline tiles → route still renders on a plain background */ }
       if (dead || !box.current) return;
       const narrow = box.current.clientWidth < 700;
@@ -127,8 +131,11 @@ export function RouteSection() {
         STOPS.slice(0, -1).forEach((s, i) => {
           const el = document.createElement('div');
           el.style.cssText = 'display:flex;flex-direction:column;align-items:center';
+          const side = LABEL_SIDE[s.id] || 'r';
           el.innerHTML = `<div class="city-lbl">${ru ? s.ru : s.en}</div><div class="city-dot"></div>`;
-          el.firstElementChild!.setAttribute('style', 'position:absolute;bottom:0;left:50%;transform:translate(-50%,-14px)');
+          el.firstElementChild!.setAttribute('style', side === 'l'
+            ? 'position:absolute;top:50%;right:100%;transform:translate(-8px,-50%)'
+            : 'position:absolute;top:50%;left:100%;transform:translate(8px,-50%)');
           dotsRef.current[i] = el.lastElementChild as HTMLDivElement;
           new maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat(ll(s.ll)).addTo(map);
         });
