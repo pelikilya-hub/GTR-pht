@@ -28,3 +28,7 @@ edits/2026-10-10/instagram/05-untitled-1080x1920.mp4  17138363  1080x1920  22.23
 edits/2026-10-10/instagram/covers-captions-plan.zip  3384090    
 edits/2026-10-10/instagram/02-bang-tao-style-1080x1920.mp4  22214730  1080x1920  21.6
 edits/2026-10-10/instagram/03-tin-moonshine-1080x1920.mp4  15043378  1080x1920  20.4
+edits/2026-10-10/instagram/capcut-kit-untitled.zip  27254281    
+edits/2026-10-10/instagram/capcut-kit-bang-tao-style.zip  37561830    
+edits/2026-10-10/instagram/capcut-kit-tin-moonshine.zip  25715066    
+edits/2026-10-10/instagram/capcut-kit-frozen-shadows.zip  33496685    
