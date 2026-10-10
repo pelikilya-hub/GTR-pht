@@ -12,27 +12,27 @@ type Shot = {
 };
 
 /**
- * Trailer cut: Ilia at the villa (on the phone, the poolside walk), the Tops run, party, fire show,
- * sunset — intercut with the Bangtaostyle pickup. Cuts land on the beat grid of whatever playlist
+ * Trailer cut: Ilia at the villa (poolside walk with the phone, sofa), party, fire show, sunset —
+ * intercut with the Bangtaostyle pickup. Cuts land on the beat grid of whatever playlist
  * track is playing (lib/beatmap.ts): the reel is then clocked by audio.currentTime; without sound it
  * runs its own clock at the soundtrack's 88 BPM. Shot lengths are in "units": one beat for slow
  * tracks, two beats above 120 BPM. 32 units = 8 bars per loop. `-slow` clips are motion-interpolated
  * half-speed renders, so the speed ramps into slow-mo stay smooth.
  */
 const SHOTS: Shot[] = [
-  { kind: 'video', src: '/assets/video/v-call.mp4', beats: 4, rate: [1, 0.55], fx: 'flash', pos: '52% 40%', label: 'VILLA · ON THE LINE' },
+  { kind: 'video', src: '/assets/video/v-walk-slow.mp4', beats: 2, rate: [1.05, 0.85], fx: 'flash', pos: '52% 40%', label: 'POOLSIDE · ON THE PHONE' },
   { kind: 'video', src: '/assets/video/car-2.mp4', from: 0.2, beats: 2, rate: 1.25, fx: 'whip', label: 'NIGHT DRIFT · BANGTAO STYLE' },
-  { kind: 'video', src: '/assets/video/v-walk-slow.mp4', beats: 4, rate: [1.15, 0.55], fx: 'zoom', pos: '52% 45%', label: 'POOLSIDE · SUNSET WALK' },
-  { kind: 'video', src: '/assets/video/v-tops.mp4', beats: 2, rate: 1.2, fx: 'glitch', pos: '50% 40%', label: 'TOPS RUN · SUPPLIES' },
+  { kind: 'video', src: '/assets/video/v-sofa.mp4', beats: 4, rate: [1.5, 0.5], fx: 'glitch', label: 'RECHARGE · BEFORE THE DRIVE' },
   { kind: 'video', src: '/assets/video/car-1.mp4', from: 5.6, beats: 2, fx: 'rgb', label: 'WHEELS · BTS ORANGE' },
   { kind: 'image', src: '/assets/crew/ilia-bangla.jpg', beats: 2, fx: 'flash', label: 'BANGLA ROAD · PATONG', pos: '50% 22%' },
   { kind: 'video', src: '/assets/video/v-sax.mp4', beats: 2, fx: 'whip', pos: '55% 40%', label: 'PARTY · SAX LIVE' },
   { kind: 'video', src: '/assets/video/v-fire-slow.mp4', beats: 4, rate: [1.6, 0.7], fx: 'strobe', pos: '50% 35%', label: 'FIRE SHOW · SLOW BURN' },
   { kind: 'video', src: '/assets/video/car-3.mp4', from: 0.6, beats: 2, fx: 'zoom', label: 'COAST RUN · ANDAMAN' },
-  { kind: 'video', src: '/assets/video/v-sofa.mp4', beats: 2, rate: 1.5, fx: 'glitch', label: 'RECHARGE · BEFORE THE DRIVE' },
   { kind: 'video', src: '/assets/video/night-teaser.mp4', from: 2.0, beats: 2, fx: 'rgb', label: 'POV · NIGHT SHIFT' },
+  { kind: 'video', src: '/assets/video/car-2.mp4', from: 6.0, beats: 2, fx: 'glitch', label: 'SMOKE · MOONLIGHT' },
+  { kind: 'video', src: '/assets/video/v-walk-slow.mp4', beats: 2, rate: [1.2, 0.75], fx: 'zoom', pos: '52% 40%', label: 'SUNSET · SCROLL' },
   { kind: 'video', src: '/assets/video/car-1.mp4', from: 9.0, beats: 2, rate: 1.2, fx: 'whip', label: 'HOOD · BANGTAOSTYLE.COM' },
-  { kind: 'video', src: '/assets/video/v-palms.mp4', beats: 2, fx: 'flash', pos: '45% 50%', label: 'SUNSET · PROTOCOL 10.10' },
+  { kind: 'video', src: '/assets/video/v-palms.mp4', beats: 4, rate: [1, 0.6], fx: 'flash', pos: '45% 50%', label: 'SUNSET · PROTOCOL 10.10' },
 ];
 const LOOP = SHOTS.reduce((s, x) => s + x.beats, 0);
 const STARTS = SHOTS.map((_, i) => SHOTS.slice(0, i).reduce((s, x) => s + x.beats, 0));
