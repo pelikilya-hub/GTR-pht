@@ -57,20 +57,39 @@ export function campaign(j: Journey, now: number, ru: boolean, heroA: string, he
   const T = ru ? 'ТИЗЕР' : 'TEASER';
   const warm: Record<typeof stage, Card[]> = ru ? {
     intrigue: [W(T, 'Что-то будет.', `${date}.`), W(T, 'Тачки, которых', 'нет в продаже.'), W(T, 'Виллы, которые', 'не показывают.'), W(T, 'Ночи', 'без монтажа.')],
-    reveal: [W('МАРШРУТ', '3 540 км.', '7 городов. 3 парома.'), W('МАРШРУТ', 'Пхукет → Бангкок', '→ Пхукет.'), W('ФОРМАТ', 'Эфир. Карта. Чат.', 'Ты внутри.'), W('ФОРМАТ', 'Тачки · недвижка', '· движ.')],
+    reveal: [W('МАРШРУТ', '3 540 км.', '7 городов. 3 парома.'), W('ФОРМАТ', 'Голос зрителей', 'решает, куда едем.'), W('ФОРМАТ', 'Ты внутри.', 'Каждый день в эфире.')],
     call: [W('ГОТОВНОСТЬ', 'Заряди телефон.', 'Старт на Bangla Road.'), W('ГОТОВНОСТЬ', 'Протокол 10.10', 'активируется.'), W('ГОТОВНОСТЬ', 'Включи уведомления.', 'Эфир без монтажа.')],
     today: [W('СТАРТ', 'Сегодня.', 'Bangla Road. Патонг.'), W('СТАРТ', 'Протокол 10.10', 'активирован.')],
     live: [W('В ЭФИРЕ', 'Мы в эфире.', `День ${j.day} из ${j.totalDays}.`), W('СЕЙЧАС', j.curStage || 'Кольцо Таиланда', j.posLabel), W('В ЭФИРЕ', 'Подключайся.', 'Без монтажа.')],
     done: [W('ФИНИШ', 'Кольцо', 'пройдено.'), W('ФИНИШ', 'Смотри', 'записи эфиров.')],
   } : {
     intrigue: [W(T, 'Something is coming.', `${date}.`), W(T, 'Cars that are', 'not for sale.'), W(T, 'Villas nobody', 'shows you.'), W(T, 'Nights', 'unedited.')],
-    reveal: [W('ROUTE', '3,540 km.', '7 cities. 3 ferries.'), W('ROUTE', 'Phuket → Bangkok', '→ Phuket.'), W('FORMAT', 'Stream. Map. Chat.', "You're in."), W('FORMAT', 'Cars · real estate', '· nights out.')],
+    reveal: [W('ROUTE', '3,540 km.', '7 cities. 3 ferries.'), W('FORMAT', 'Viewers vote', 'where we go.'), W('FORMAT', "You're in.", 'Live every day.')],
     call: [W('READY', 'Charge your phone.', 'Start on Bangla Road.'), W('READY', 'Protocol 10.10', 'is arming.'), W('READY', 'Turn notifications on.', 'Unedited stream.')],
     today: [W('START', 'Today.', 'Bangla Road. Patong.'), W('START', 'Protocol 10.10', 'is live.')],
     live: [W('LIVE', "We're live.", `Day ${j.day} of ${j.totalDays}.`), W('NOW', j.curStage || 'The Thailand loop', j.posLabel), W('LIVE', 'Jump in.', 'No edits.')],
     done: [W('FINISH', 'The loop', 'is done.'), W('FINISH', 'Watch', 'the recordings.')],
   };
 
+  // what the tour is — told card by card instead of a paragraph over the video
+  const meaning: Card[] = ru ? [
+    { k: 'МАРШРУТ · 1/2', a: 'Пхукет → Самуи', b: '→ Панган → Чиангмай' },
+    { k: 'МАРШРУТ · 2/2', a: 'Аюттхая → Бангкок', b: '→ Паттайя → Пхукет' },
+    { k: 'ЗАЧЕМ · ТАЧКИ', a: 'Редкие тачки.', b: 'Находим и оживляем.' },
+    { k: 'ЗАЧЕМ · НЕДВИЖКА', a: 'Недвижимость', b: 'изнутри.' },
+    { k: 'ЗАЧЕМ · ДОБРО', a: 'Добрые дела.', b: 'Отчёт за каждый рубль.' },
+    { k: 'И ЕЩЁ', a: 'Разъёб.', b: 'Ночи без сценария.' },
+    { k: 'КАК', a: 'Без монтажа.', b: 'Живая карта и чат.' },
+  ] : [
+    { k: 'ROUTE · 1/2', a: 'Phuket → Samui', b: '→ Phangan → Chiang Mai' },
+    { k: 'ROUTE · 2/2', a: 'Ayutthaya → Bangkok', b: '→ Pattaya → Phuket' },
+    { k: 'WHY · CARS', a: 'Rare cars.', b: 'Found and revived.' },
+    { k: 'WHY · REAL ESTATE', a: 'Real estate', b: 'from the inside.' },
+    { k: 'WHY · GOOD DEEDS', a: 'Good deeds.', b: 'Every baht reported.' },
+    { k: 'AND', a: 'Wild nights.', b: 'No script.' },
+    { k: 'HOW', a: 'No edits.', b: 'Live map and chat.' },
+  ];
+
   const own = custom.filter((c) => c.a?.trim()).map((c) => W(T, c.a.trim(), c.b?.trim() || undefined));
-  return [core, cast, ...(stage === 'done' ? [] : gtr), ...own, ...(count ? [count] : []), ...warm[stage]];
+  return [core, cast, ...(stage === 'done' ? [] : gtr), ...meaning, ...own, ...(count ? [count] : []), ...warm[stage]];
 }

@@ -32,7 +32,8 @@ export function Hero() {
               <span className="tag">🎬 {ru ? 'Первая съёмка · Bangla Road, Патонг' : 'First shoot · Bangla Road, Patong'}</span>
             </div>
             <HeroTitles />
-            <p className="lead rv" style={{ ['--d' as string]: '.25s' }}>{t.heroSub}</p>
+            {/* the tour's meaning now plays as title cards (HeroTitles); the paragraph stays for search + screen readers only */}
+            <p className="sr-only">{t.heroSub}</p>
             <div className="hero-cta rv" style={{ ['--d' as string]: '.35s' }}>
               <button className="btn btn-red" onClick={() => scrollToId('live')}>
                 <span className={'dot' + (phase === 'live' ? ' live' : '')} style={{ background: '#fff' }} />

@@ -52,6 +52,7 @@ export function ClassifiedPortrait() {
     const resize = () => {
       const r = canvas.getBoundingClientRect();
       dpr = Math.min(2, window.devicePixelRatio || 1);
+      if (r.width < 8 || r.height < 8) return; // not laid out yet (hidden / content-visibility) — wait for the next resize
       W = r.width; H = r.height; canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
       cell = W < 360 ? 10 : 12;
       cols = Math.ceil(W / cell); rows = Math.ceil(H / cell);
@@ -65,7 +66,7 @@ export function ClassifiedPortrait() {
 
     const draw = (ts: number) => {
       raf = requestAnimationFrame(draw);
-      if (!visible || document.hidden || ts - last < (reduce ? 1000 : lite ? 66 : 45)) return;
+      if (!visible || document.hidden || !cols || ts - last < (reduce ? 1000 : lite ? 66 : 45)) return;
       last = ts;
       const t = (ts - t0) / 1000;
       // generation sweep: rows get "written" top → bottom, then the image dissolves and is regenerated
