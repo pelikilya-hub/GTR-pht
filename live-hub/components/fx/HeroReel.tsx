@@ -2,34 +2,52 @@
 import { useEffect, useRef, useState } from 'react';
 import { sfx } from '@/lib/sfx';
 
-type Shot = { kind: 'video' | 'image'; src: string; from?: number; beats: number; label: string; pos?: string };
+type Fx = 'glitch' | 'flash' | 'whip' | 'zoom' | 'rgb' | 'strobe';
+type Shot = {
+  kind: 'video' | 'image'; src: string; from?: number; beats: number; label: string; pos?: string;
+  /** playback speed: fixed, or a ramp [start, end] eased across the shot (fast → slow-mo hits) */
+  rate?: number | [number, number];
+  /** transition into this shot */
+  fx?: Fx;
+};
 
 /**
- * Trailer cut: real footage of the Bangtaostyle pickup + Bangla Road, glitch cuts, camera HUD.
- * Cuts land on the beat grid of whatever playlist track is playing (lib/beatmap.ts): the reel is then
- * clocked by audio.currentTime; without sound it runs its own clock at the soundtrack's 88 BPM.
- * Shot lengths are in "units": one beat for slow tracks, two beats above 120 BPM, so a 142 BPM track
- * doesn't turn the edit into a strobe. 24 units per loop.
+ * Trailer cut: Ilia at the villa (on the phone, the poolside walk), the Tops run, party, fire show,
+ * sunset — intercut with the Bangtaostyle pickup. Cuts land on the beat grid of whatever playlist
+ * track is playing (lib/beatmap.ts): the reel is then clocked by audio.currentTime; without sound it
+ * runs its own clock at the soundtrack's 88 BPM. Shot lengths are in "units": one beat for slow
+ * tracks, two beats above 120 BPM. 32 units = 8 bars per loop. `-slow` clips are motion-interpolated
+ * half-speed renders, so the speed ramps into slow-mo stay smooth.
  */
 const SHOTS: Shot[] = [
-  { kind: 'video', src: '/assets/video/car-2.mp4', from: 0.2, beats: 4, label: 'NIGHT DRIFT · BANGTAO STYLE' },
-  { kind: 'video', src: '/assets/video/car-1.mp4', from: 5.6, beats: 2, label: 'WHEELS · BTS ORANGE' },
-  { kind: 'image', src: '/assets/crew/ilia-bangla.jpg', beats: 4, label: 'BANGLA ROAD · PATONG', pos: '50% 22%' },
-  { kind: 'video', src: '/assets/video/car-3.mp4', from: 0.6, beats: 4, label: 'COAST RUN · ANDAMAN' },
-  { kind: 'video', src: '/assets/video/night-teaser.mp4', from: 2.0, beats: 4, label: 'POV · NIGHT SHIFT' },
-  { kind: 'video', src: '/assets/video/car-2.mp4', from: 6.0, beats: 2, label: 'SMOKE · MOONLIGHT' },
-  { kind: 'video', src: '/assets/video/car-1.mp4', from: 9.0, beats: 4, label: 'HOOD · BANGTAOSTYLE.COM' },
+  { kind: 'video', src: '/assets/video/v-call.mp4', beats: 4, rate: [1, 0.55], fx: 'flash', pos: '52% 40%', label: 'VILLA · ON THE LINE' },
+  { kind: 'video', src: '/assets/video/car-2.mp4', from: 0.2, beats: 2, rate: 1.25, fx: 'whip', label: 'NIGHT DRIFT · BANGTAO STYLE' },
+  { kind: 'video', src: '/assets/video/v-walk-slow.mp4', beats: 4, rate: [1.15, 0.55], fx: 'zoom', pos: '52% 45%', label: 'POOLSIDE · SUNSET WALK' },
+  { kind: 'video', src: '/assets/video/v-tops.mp4', beats: 2, rate: 1.2, fx: 'glitch', pos: '50% 40%', label: 'TOPS RUN · SUPPLIES' },
+  { kind: 'video', src: '/assets/video/car-1.mp4', from: 5.6, beats: 2, fx: 'rgb', label: 'WHEELS · BTS ORANGE' },
+  { kind: 'image', src: '/assets/crew/ilia-bangla.jpg', beats: 2, fx: 'flash', label: 'BANGLA ROAD · PATONG', pos: '50% 22%' },
+  { kind: 'video', src: '/assets/video/v-sax.mp4', beats: 2, fx: 'whip', pos: '55% 40%', label: 'PARTY · SAX LIVE' },
+  { kind: 'video', src: '/assets/video/v-fire-slow.mp4', beats: 4, rate: [1.6, 0.7], fx: 'strobe', pos: '50% 35%', label: 'FIRE SHOW · SLOW BURN' },
+  { kind: 'video', src: '/assets/video/car-3.mp4', from: 0.6, beats: 2, fx: 'zoom', label: 'COAST RUN · ANDAMAN' },
+  { kind: 'video', src: '/assets/video/v-sofa.mp4', beats: 2, rate: 1.5, fx: 'glitch', label: 'RECHARGE · BEFORE THE DRIVE' },
+  { kind: 'video', src: '/assets/video/night-teaser.mp4', from: 2.0, beats: 2, fx: 'rgb', label: 'POV · NIGHT SHIFT' },
+  { kind: 'video', src: '/assets/video/car-1.mp4', from: 9.0, beats: 2, rate: 1.2, fx: 'whip', label: 'HOOD · BANGTAOSTYLE.COM' },
+  { kind: 'video', src: '/assets/video/v-palms.mp4', beats: 2, fx: 'flash', pos: '45% 50%', label: 'SUNSET · PROTOCOL 10.10' },
 ];
 const LOOP = SHOTS.reduce((s, x) => s + x.beats, 0);
 const STARTS = SHOTS.map((_, i) => SHOTS.slice(0, i).reduce((s, x) => s + x.beats, 0));
 const FREE_BPM = 88;
 
 const pad = (n: number, l = 2) => String(n).padStart(l, '0');
+const ease = (x: number) => x * x * (3 - 2 * x);
+const rateAt = (r: Shot['rate'], p: number) => (Array.isArray(r) ? r[0] + (r[1] - r[0]) * ease(p) : r ?? 1);
 const shotAt = (b: number) => { let i = SHOTS.length - 1; while (i > 0 && STARTS[i] > b) i--; return i; };
 
 export function HeroReel() {
   const [idx, setIdx] = useState(0);
   const [cut, setCut] = useState(false);
+  const [fx, setFx] = useState<Fx>('glitch');
+  const [broken, setBroken] = useState<Set<string>>(() => new Set()); // clips this browser can't play → poster still
   const [still, setStill] = useState(false);
   const [bpm, setBpm] = useState(0); // >0 while the reel is clocked by a playing track
   const sync = bpm > 0;
@@ -53,7 +71,7 @@ export function HeroReel() {
     const shot = SHOTS[idx];
     const v = vids.current[idx];
     if (shot.kind === 'video' && v) {
-      try { v.currentTime = shot.from || 0; } catch { /* not loaded yet */ }
+      try { v.currentTime = shot.from || 0; v.playbackRate = rateAt(shot.rate, 0); } catch { /* not loaded yet */ }
       if (live.current) v.play().catch(() => {});
     }
     vids.current.forEach((o, i) => { if (o && i !== idx) o.pause(); });
@@ -96,13 +114,21 @@ export function HeroReel() {
       const ks = kick.toFixed(coarse ? 1 : 2), sp = Math.min(1, (lb - STARTS[i] + frac) / SHOTS[i].beats).toFixed(coarse ? 2 : 3);
       if (ks !== lastKick) { lastKick = ks; host.style.setProperty('--kick', ks); }
       if (sp !== lastSp) { lastSp = sp; el.style.setProperty('--sp', sp); }
+      // speed ramp of the running clip
+      const cv = SHOTS[i].kind === 'video' ? vids.current[i] : null;
+      if (cv && SHOTS[i].rate !== undefined) {
+        const r = rateAt(SHOTS[i].rate, Math.min(1, (lb - STARTS[i] + frac) / SHOTS[i].beats));
+        if (Math.abs(cv.playbackRate - r) > 0.03) cv.playbackRate = r;
+      }
 
       if (i !== idxRef.current) {
         idxRef.current = i;
         setIdx(i);
+        const f = SHOTS[i].fx || 'glitch';
+        setFx(f);
         setCut(true);
         clearTimeout(cutT);
-        cutT = window.setTimeout(() => setCut(false), 240);
+        cutT = window.setTimeout(() => setCut(false), f === 'whip' || f === 'strobe' ? 340 : 260);
         if (!synced) sfx('open');
       }
       if (now - lastTc > 42 && tcRef.current) {
@@ -122,23 +148,24 @@ export function HeroReel() {
 
   const shot = SHOTS[idx];
   return (
-    <div ref={box} className={'reel' + (cut ? ' cut' : '') + (sync ? ' sync' : '')}>
+    <div ref={box} className={'reel' + (cut ? ' cut fx-' + fx : '') + (sync ? ' sync' : '')}>
       {still ? (
          
-        <img className="reel-layer on" src="/assets/video/hero-reel.jpg" alt="" />
+        <img className="reel-layer on" src="/assets/video/v-walk-slow.jpg" alt="" style={{ objectPosition: "52% 45%" }} />
       ) : SHOTS.map((s, i) => {
         const on = i === idx;
         const near = on || i === (idx + 1) % SHOTS.length;
         // only the current shot and the next one exist in the DOM: every <video> holds a decoder
         // and frame buffers, and seven of them is enough for iOS to kill the tab
         if (!near) return null;
-        return s.kind === 'video' ? (
+        return s.kind === 'video' && !broken.has(s.src) ? (
           <video key={i} ref={(el) => { vids.current[i] = el; }} className={'reel-layer' + (on ? ' on' : '')}
             src={s.src} muted playsInline loop preload="auto" aria-hidden
+            onError={() => setBroken((b) => new Set(b).add(s.src))} style={{ objectPosition: s.pos }}
             poster={s.src.replace('.mp4', '.jpg')} />
         ) : (
            
-          <img key={i} className={'reel-layer kb' + (on ? ' on' : '')} src={s.src} alt="" style={{ objectPosition: s.pos }} />
+          <img key={i} className={'reel-layer kb' + (on ? ' on' : '')} src={s.kind === 'video' ? s.src.replace('.mp4', '.jpg') : s.src} alt="" style={{ objectPosition: s.pos }} />
         );
       })}
       <div className="reel-grade" aria-hidden />
