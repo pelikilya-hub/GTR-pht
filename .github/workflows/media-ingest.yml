@@ -59,6 +59,7 @@ jobs:
           wrangler r2 object get "$BUCKET/_keys/ingest-private.pem" --file /tmp/priv.pem --remote >/dev/null
           wrangler r2 object get "$BUCKET/index.json" --file /tmp/index.json --remote >/dev/null || echo '{"files":[]}' > /tmp/index.json
           sudo apt-get -qq install -y ffmpeg >/dev/null 2>&1 || true
+          N=$(ls -1 inbox/*.enc | wc -l)
           for enc in inbox/*.enc; do
             base="${enc%.enc}"
             KEY=$(base64 -d "$base.key" | openssl pkeyutl -decrypt -inkey /tmp/priv.pem -pkeyopt rsa_padding_mode:oaep -pkeyopt rsa_oaep_md:sha256)
@@ -80,4 +81,4 @@ jobs:
           git config user.name "github-actions[bot]"; git config user.email "41898+github-actions[bot]@users.noreply.github.com"
           git rm -q inbox/*.enc inbox/*.key inbox/*.path
           git add keys/LAST_INDEX.txt
-          git commit -qm "media: ingested $(ls -1 inbox 2>/dev/null | wc -l) → R2" && git push -q origin HEAD:media-inbox
+          git commit -qm "media: ingested $N file(s) → R2" && git push -q origin HEAD:media-inbox
