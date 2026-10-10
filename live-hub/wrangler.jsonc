@@ -7,7 +7,7 @@
     "directory": "./out",
     "binding": "ASSETS",
     "not_found_handling": "404-page",
-    "run_worker_first": ["/api/*", "/ws/*", "/chat/ws", "/chat/ws/", "/assets/audio/*", "/assets/video/*"]
+    "run_worker_first": ["/api/*", "/ws/*", "/chat/ws", "/chat/ws/", "/assets/audio/*", "/assets/video/*", "/assets/scales/*"]
   },
   "durable_objects": {
     "bindings": [

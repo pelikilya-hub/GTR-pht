@@ -77,6 +77,18 @@ export function Scales() {
   interface Phys { a: number; v: number; target: number; gDisp: number | null; jDisp: number | null; gTarget: number; jTarget: number; last: number; gemKey?: string }
   const physRef = useRef<Phys | null>(null);
   const seenRef = useRef(false);
+  // Scrubbable scale video (docs/scales-video.md): one clip from full ДОБРО tilt (frame 0) through balance
+  // (middle) to full СЧАСТЬЕ tilt (last frame); the vote balance picks the frame. Optional "drop" overlays play
+  // when a weight lands. Until /assets/scales/tilt.mp4 exists the static Themis art + CSS tilt stay.
+  const vidRef = useRef<HTMLVideoElement | null>(null);
+  const dropRef = useRef<HTMLVideoElement | null>(null);
+  const [hasVideo, setHasVideo] = useState(false);
+  const [dropSide, setDropSide] = useState<'good' | 'joy' | null>(null);
+  // a cached clip can finish loading metadata before React attaches onLoadedMetadata
+  useEffect(() => {
+    const id = requestAnimationFrame(() => { const v = vidRef.current; if (v && v.readyState >= 1 && !v.error) setHasVideo(true); });
+    return () => cancelAnimationFrame(id);
+  }, []);
   const glowTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const sync = () => {
@@ -114,6 +126,7 @@ export function Scales() {
   };
 
   const kick = (side: 'good' | 'joy', amt: number) => {
+    if (hasVideo) { setDropSide(side); requestAnimationFrame(() => { const d = dropRef.current; if (d) { d.currentTime = 0; d.play().catch(() => {}); } }); }
     const P = physRef.current;
     if (!P) return;
     const mag = Math.min(2.6, 0.55 + Math.log10(Math.max(10, amt)) * 0.5);
@@ -152,7 +165,12 @@ export function Scales() {
       const settled = Math.abs(P.v) < 0.004 && Math.abs(P.target - P.a) < 0.04;
       const jitter = settled ? Math.sin(t / 1150) * 0.16 : 0;
       const ang = P.a + jitter;
-      if (tiltRef.current) tiltRef.current.style.transform = `rotate(${(ang * 0.115).toFixed(3)}deg)`;
+      const v = vidRef.current;
+      if (v && v.readyState >= 1 && isFinite(v.duration) && v.duration > 0) {
+        // angle −13…+13 → frame 0…last; seek only when it moved ≥ 1 frame and the last seek finished
+        const want = Math.max(0, Math.min(1, (ang + 13) / 26)) * Math.max(0, v.duration - 0.05);
+        if (!v.seeking && Math.abs(v.currentTime - want) > 1 / 30) v.currentTime = want;
+      } else if (tiltRef.current) tiltRef.current.style.transform = `rotate(${(ang * 0.115).toFixed(3)}deg)`;
       const drop = ang * 0.26;
       if (gGlowRef.current) gGlowRef.current.style.top = (76.6 - drop).toFixed(2) + '%';
       if (jGlowRef.current) jGlowRef.current.style.top = (76.6 + drop).toFixed(2) + '%';
@@ -265,8 +283,16 @@ export function Scales() {
         <div ref={stageRef} className="scales-stage rv" style={{ position: 'relative', aspectRatio: '1131/1414', width: '100%', maxWidth: 620, margin: '0 auto', background: '#000', overflow: 'hidden', boxShadow: '0 40px 120px -40px rgba(229,55,44,.35)' }}>
           <div ref={tiltRef} style={{ position: 'absolute', inset: 0, transform: `rotate(${(angle * 0.115).toFixed(2)}deg)`, transformOrigin: '50% 39%', willChange: 'transform' }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/assets/scales/themis.png" alt="Весы маршрута" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+            <img src="/assets/scales/themis.png" alt="Весы маршрута" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block', visibility: hasVideo ? 'hidden' : 'visible' }} />
           </div>
+          <video ref={vidRef} src="/assets/scales/tilt.mp4" poster="/assets/scales/tilt.jpg" muted playsInline preload="auto" aria-hidden
+            onLoadedMetadata={() => setHasVideo(true)} onError={() => setHasVideo(false)}
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: hasVideo ? 'block' : 'none' }} />
+          {hasVideo && dropSide && (
+            <video key={dropSide} ref={dropRef} src={`/assets/scales/drop-${dropSide}.mp4`} muted playsInline autoPlay aria-hidden
+              onEnded={() => setDropSide(null)} onError={() => setDropSide(null)}
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', mixBlendMode: 'screen', pointerEvents: 'none' }} />
+          )}
           <div ref={haloRef} style={{ position: 'absolute', left: '50%', top: '22.5%', width: '46%', aspectRatio: '1', border: '1px solid rgba(229,55,44,.16)', borderRadius: '50%', animation: 'scHalo 44s linear infinite', pointerEvents: 'none', transition: 'border-color 900ms linear' }} />
           <div ref={gemRef} style={{ position: 'absolute', left: '50%', top: '39%', width: '5.4%', aspectRatio: '1', borderRadius: '50%', background: 'radial-gradient(circle,#FF6A5B,rgba(229,55,44,.35) 55%,transparent 72%)', filter: 'blur(1px)', animation: 'scGem 2.6s ease-in-out infinite', pointerEvents: 'none', transition: 'filter 600ms ease' }} />
           <div ref={gGlowRef} style={{ position: 'absolute', left: '18.5%', top: (76.6 + (gp - jp) * 3.4).toFixed(2) + '%', transform: 'translate(-50%,-50%)', width: '34%', height: '15%', borderRadius: '50%', background: 'radial-gradient(ellipse,rgba(90,170,255,.92),rgba(50,120,230,.34) 46%,transparent 74%)', filter: 'blur(7px)', opacity: (0.3 + gp * 0.9).toFixed(2), mixBlendMode: 'screen', animation: 'scBreathe 3.4s ease-in-out infinite', transition: 'opacity 900ms linear,filter 600ms ease', willChange: 'top', pointerEvents: 'none' }} />
