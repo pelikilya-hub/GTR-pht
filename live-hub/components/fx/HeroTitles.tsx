@@ -35,15 +35,16 @@ export function HeroTitles() {
       if (a && g && !a.paused) {
         const per = g.bpm > 120 ? 16 : 8; // beats per card
         slot = Math.floor(Math.max(0, (a.currentTime - g.offset) * g.bpm / 60) / per);
-      } else { own += Math.min(dt, 0.1); slot = Math.floor(own / 5.5); }
-      const n = slot % cards.length;
+      } else { own += Math.max(0, Math.min(dt, 0.1)); slot = Math.floor(own / 5.5); } // rAF time can precede `last`
+      if (!isFinite(slot)) return;
+      const n = ((slot % cards.length) + cards.length) % cards.length;
       setI((cur) => (cur === n ? cur : n));
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
   }, [cards.length]);
 
-  const c = cards[Math.min(i, cards.length - 1)];
+  const c = cards[Math.min(Math.max(0, i), cards.length - 1)] || cards[0];
   const cast = c.a.includes('|');
   return (
     <div className="hero-titles" aria-live="off">
