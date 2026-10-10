@@ -484,3 +484,78 @@ main > section { --p: 0; --e: 1; --x: 0; }
 .hub { overflow-x: clip; }
 @media (max-width: 560px) { .logo { font-size: 15px; letter-spacing: .02em; } }
 @media (max-width: 360px) { .logo { font-size: 13px; } .top .chip { padding: 0 6px; } }
+
+/* ═══════════════ Hero trailer reel ═══════════════ */
+.hero { min-height: 100svh; margin-top: calc(var(--top-h) * -1); padding-top: var(--top-h); }
+.reel { position: absolute; inset: 0; z-index: 0; overflow: hidden; background: #000; }
+.reel-layer { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .18s linear;
+  filter: contrast(1.12) saturate(1.08) brightness(.86); }
+.reel-layer.on { opacity: 1; }
+.reel-layer.kb.on { animation: reelKB 5s ease-out forwards; }
+@keyframes reelKB { from { transform: scale(1.02); } to { transform: scale(1.14) translate(0, 1.5%); } }
+.reel-grade { position: absolute; inset: 0; pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(10,11,13,.92) 0%, rgba(10,11,13,.66) 34%, rgba(10,11,13,.12) 64%, rgba(10,11,13,.35) 100%),
+    linear-gradient(0deg, rgba(10,11,13,.95) 0%, rgba(10,11,13,0) 38%),
+    linear-gradient(180deg, rgba(10,11,13,.7) 0%, rgba(10,11,13,0) 22%),
+    radial-gradient(120% 90% at 70% 40%, rgba(229,35,27,.12), transparent 60%);
+  box-shadow: inset 0 0 180px rgba(0,0,0,.65); }
+.reel::after { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .35; background: repeating-linear-gradient(0deg, transparent 0 2px, rgba(0,0,0,.25) 2px 3px); }
+/* glitch cut */
+.reel-flash { position: absolute; inset: 0; pointer-events: none; background: #fff; opacity: 0; mix-blend-mode: overlay; }
+.reel.cut .reel-flash { animation: reelFlash .3s steps(3) forwards; }
+.reel.cut .reel-layer.on { animation: reelGlitch .3s steps(4) forwards; }
+@keyframes reelFlash { 0% { opacity: .9; } 40% { opacity: .2; } 70% { opacity: .6; } 100% { opacity: 0; } }
+@keyframes reelGlitch {
+  0% { transform: translate(-1.5%, 0) scale(1.04); filter: contrast(1.6) saturate(1.6) hue-rotate(-20deg) drop-shadow(8px 0 0 rgba(255,52,39,.8)) drop-shadow(-8px 0 0 rgba(90,200,255,.7)); clip-path: inset(10% 0 30% 0); }
+  33% { transform: translate(1.2%, -.6%) scale(1.06); clip-path: inset(40% 0 8% 0); }
+  66% { transform: translate(-.6%, .4%) scale(1.02); clip-path: inset(0 0 55% 0); }
+  100% { transform: none; filter: contrast(1.12) saturate(1.08) brightness(.86); clip-path: inset(0); } }
+/* camera HUD */
+.reel-hud { position: absolute; inset: calc(var(--top-h) + 14px) var(--gut) 18px; pointer-events: none; z-index: 2;
+  font: 600 10.5px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.85); }
+.reel-hud .rec { position: absolute; top: 0; right: 0; display: inline-flex; gap: 8px; align-items: center; color: var(--red-2); }
+.reel-hud .rec i { width: 9px; height: 9px; border-radius: 50%; background: var(--red-2); box-shadow: 0 0 10px var(--red-2); animation: strobe 1.6s steps(1, end) infinite; }
+.reel-hud .tc { position: absolute; top: 20px; right: 0; font-size: 18px; color: #fff; letter-spacing: .04em; }
+.reel-hud .shot { position: absolute; bottom: 30px; right: 0; text-align: right; max-width: 60%; }
+.reel-hud .brand { position: absolute; bottom: 14px; right: 0; color: rgba(255,255,255,.45); font-size: 9.5px; }
+.reel-hud .ticks { position: absolute; bottom: 0; right: 0; display: flex; gap: 4px; width: min(320px, 50%); }
+.reel-hud .ticks b { flex: 1; height: 2px; background: rgba(255,255,255,.22); position: relative; overflow: hidden; }
+.reel-hud .ticks b.done { background: rgba(255,255,255,.7); }
+.reel-hud .ticks b.on::after { content: ''; position: absolute; inset: 0; background: var(--red-2); transform-origin: left; transform: scaleX(var(--sp, 0)); }
+@keyframes tickFill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+/* frame corners */
+.reel-hud::before, .reel-hud::after { content: ''; position: absolute; width: 26px; height: 26px; border: 0 solid rgba(255,255,255,.55); }
+.reel-hud::before { top: -6px; left: -6px; border-top-width: 1.5px; border-left-width: 1.5px; }
+.reel-hud::after { bottom: -6px; left: -6px; border-bottom-width: 1.5px; border-left-width: 1.5px; }
+.hero .wrap { z-index: 3; }
+.hero .stats > div { background: rgba(10,11,13,.45); }
+/* scroll: the reel pushes in and darkens as you leave */
+.reel { transform: scale(calc(1 + var(--x, 0) * .18 + var(--kick, 0) * .016)); filter: brightness(calc(1 - var(--x, 0) * .6 + var(--kick, 0) * .1)); }
+
+/* beat layer: every beat of the soundtrack (or the free clock at the same tempo) kicks the frame */
+.reel-kick { position: absolute; inset: 0; pointer-events: none; opacity: calc(var(--kick, 0) * .55);
+  background: radial-gradient(80% 70% at 50% 60%, transparent 45%, rgba(229, 35, 27, .55) 100%); mix-blend-mode: screen; }
+.reel.sync .reel-kick { opacity: calc(var(--kick, 0) * .85); }
+.hero h1 .red-line { text-shadow: 0 0 calc(var(--kick, 0) * 34px) rgba(255, 52, 39, calc(var(--kick, 0) * .9)); }
+.hero .laser { animation-duration: 5.455s; /* 2 bars @ 88 BPM */ height: calc(1px + var(--kick, 0) * 2px);
+  box-shadow: 0 0 calc(8px + var(--kick, 0) * 18px) calc(1px + var(--kick, 0) * 3px) rgba(255, 52, 39, .6); }
+.reel-snd { position: absolute; z-index: 4; top: calc(var(--top-h) + 58px); right: var(--gut); display: inline-flex; align-items: center; gap: 10px;
+  padding: 9px 14px; font: 600 10.5px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: #fff; cursor: pointer;
+  background: rgba(10, 11, 13, .55); border: 1px solid rgba(255, 255, 255, .25); backdrop-filter: blur(6px);
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%); transition: border-color .2s, background .2s; }
+.reel-snd:hover { border-color: var(--red-2); background: rgba(229, 35, 27, .25); }
+.reel-snd .eq { display: inline-flex; gap: 2px; align-items: flex-end; height: 12px; }
+.reel-snd .eq i { width: 2px; height: 30%; background: var(--red-2); }
+.reel.sync .reel-snd .eq i { height: calc(25% + var(--kick, 0) * 75%); }
+.reel.sync .reel-snd .eq i:nth-child(2) { height: calc(60% - var(--kick, 0) * 35%); }
+.reel.sync .reel-snd .eq i:nth-child(3) { height: calc(35% + var(--kick, 0) * 60%); }
+.reel.sync .reel-snd .eq i:nth-child(4) { height: calc(80% - var(--kick, 0) * 50%); }
+.reel:not(.sync) .reel-snd { animation: sndHint 1.364s steps(1, end) infinite; }
+@keyframes sndHint { 0%, 70% { border-color: rgba(255,255,255,.25); } 72%, 100% { border-color: var(--red-2); } }
+@media (max-width: 860px) {
+  .reel-grade { background: linear-gradient(0deg, rgba(10,11,13,.97) 0%, rgba(10,11,13,.55) 50%, rgba(10,11,13,.25) 100%), linear-gradient(180deg, rgba(10,11,13,.75), transparent 25%); }
+  .reel-hud .shot, .reel-hud .brand { display: none; }
+  .reel-hud .ticks { width: 50%; }
+  .reel-hud .tc { font-size: 14px; }
+}

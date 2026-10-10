@@ -54,7 +54,7 @@ function fmtRange(s: number, e: number, ru: boolean): string {
 }
 
 const STOP_NOTES: Record<string, [string, string]> = {
-  phuket: ['старт · виллы GTR Realty', 'start · GTR Realty villas'],
+  phuket: ['старт · Bangla Road, Патонг · GTR Rawai Hub', 'start · Bangla Road, Patong · GTR Rawai Hub'],
   samui: ['виллы над заливом · охота за тачками', 'villas over the gulf · car hunt'],
   phangan: ['ночь без сценария', 'an unscripted night'],
   chiangmai: ['храмы, горы, мастерские', 'temples, mountains, workshops'],

@@ -1,5 +1,6 @@
 'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { gridFor, type Grid } from './beatmap';
 
 export interface Track { title: string; src: string }
 // Used only if tracks.json is missing (it is generated at build time from public/assets/audio).
@@ -8,7 +9,7 @@ const POS_LS = 'gtrpht_track_pos';
 const IDX_LS = 'gtrpht_track_idx';
 
 declare global {
-  interface Window { __gtrBeat?: number }
+  interface Window { __gtrBeat?: number; __gtrAudio?: HTMLAudioElement; __gtrGrid?: Grid | null }
 }
 
 /** Playlist player + bass analyser feeding window.__gtrBeat (0..1) for the beat-synced canvases. */
@@ -31,6 +32,7 @@ export function useAudioPlayer() {
     idxRef.current = n;
     setIdx(n);
     a.src = list[n].src;
+    window.__gtrGrid = gridFor(list[n].src);
     a.loop = list.length === 1;
     a.load();
     try { localStorage.setItem(IDX_LS, String(n)); localStorage.removeItem(POS_LS); } catch { /* ignore */ }
@@ -40,6 +42,7 @@ export function useAudioPlayer() {
   useEffect(() => {
     const a = new Audio();
     audioRef.current = a;
+    window.__gtrAudio = a;
     a.preload = 'metadata';
     let alive = true;
 
@@ -110,6 +113,7 @@ export function useAudioPlayer() {
     return () => {
       alive = false;
       a.pause();
+      if (window.__gtrAudio === a) delete window.__gtrAudio;
       a.removeEventListener('timeupdate', onTime); a.removeEventListener('loadedmetadata', onMeta);
       a.removeEventListener('play', onPlay); a.removeEventListener('pause', onPause);
       a.removeEventListener('ended', onEnded); a.removeEventListener('error', onError);
