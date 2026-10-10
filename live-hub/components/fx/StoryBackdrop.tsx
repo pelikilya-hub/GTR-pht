@@ -9,6 +9,7 @@ import { useEffect, useRef } from 'react';
 const SCENES: Record<string, string> = {
   top: '/assets/places/phuket/03-aerial-beach.jpg',
   route: '/assets/story/bangkok-night.jpg',
+  rig: '/assets/video/car-3.jpg',
   live: '/assets/places/phuket/05-neon-night.jpg',
   cars: '/assets/cars/02.jpg',
   lines: '/assets/places/chiangmai/01-scene.jpg',
