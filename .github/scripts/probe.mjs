@@ -1,4 +1,4 @@
-// Production player probe: range support, media playback in Chrome (H.264) and WebKit, page errors.
+// Production player probe (re-run after the range fix): range support, media playback in Chrome (H.264) and WebKit, page errors.
 import { chromium, webkit } from 'playwright';
 import { execSync } from 'node:child_process';
 import fs from 'node:fs';
