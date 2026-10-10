@@ -9,6 +9,7 @@ import { Hero } from '@/components/Hero';
 import { RouteSection } from '@/components/RouteSection';
 import { LiveSection } from '@/components/LiveSection';
 import { Cars } from '@/components/Cars';
+import { Rig } from '@/components/Rig';
 import { Logbook } from '@/components/Logbook';
 import { Tiers } from '@/components/Tiers';
 import { Scales } from '@/components/Scales';
@@ -43,6 +44,7 @@ export default function HomeClient() {
         <main>
           <Hero />
           <RouteSection />
+          <Rig />
           <LiveSection />
           <Cars />
           <ContentLines />

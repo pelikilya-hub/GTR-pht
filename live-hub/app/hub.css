@@ -559,3 +559,43 @@ main > section { --p: 0; --e: 1; --x: 0; }
   .reel-hud .ticks { width: 50%; }
   .reel-hud .tc { font-size: 14px; }
 }
+
+/* ═══════════════ Борт тура / tour rig ═══════════════ */
+.rig-stage { position: relative; aspect-ratio: 16 / 8; min-height: 340px; overflow: hidden; background: #000;
+  clip-path: polygon(0 0, calc(100% - 28px) 0, 100% 28px, 100% 100%, 28px 100%, 0 calc(100% - 28px)); }
+.rig-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  transform: scale(calc(1.12 - var(--p, .5) * .12)) translate3d(0, calc((var(--p, .5) - .5) * -4%), 0); animation: rigIn .5s steps(4) both; }
+@keyframes rigIn { 0% { opacity: 0; filter: contrast(2) saturate(0); } 60% { opacity: 1; filter: contrast(1.4) hue-rotate(-20deg); } 100% { filter: none; } }
+.rig-grade { position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(0deg, rgba(10,11,13,.92) 0%, rgba(10,11,13,.2) 42%, transparent 60%), linear-gradient(90deg, rgba(10,11,13,.55), transparent 45%); }
+.rig-stage::after { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .3; background: repeating-linear-gradient(0deg, transparent 0 2px, rgba(0,0,0,.3) 2px 3px); }
+.rig-odo .meta { text-shadow: 0 1px 6px rgba(0,0,0,.9); color: rgba(255,255,255,.75); }
+.rig-odo { position: absolute; left: clamp(16px, 3vw, 34px); top: clamp(16px, 3vw, 30px); display: grid; gap: 6px; z-index: 2; }
+.rig-odo b { display: flex; gap: 3px; font: 700 clamp(26px, 3.8vw, 48px)/1 var(--mono); color: #fff; font-variant-numeric: tabular-nums; }
+.rig-odo b i { font-style: normal; padding: 4px 6px 2px; background: rgba(10,11,13,.6); border-bottom: 2px solid var(--red); }
+.rig-odo b i.z { color: rgba(255,255,255,.28); }
+.rig-angles { position: absolute; left: clamp(16px, 3vw, 34px); right: clamp(16px, 3vw, 34px); bottom: clamp(14px, 2.4vw, 26px); display: flex; gap: 10px; z-index: 2; }
+.rig-angles button { flex: 0 1 168px; position: relative; padding: 0; border: 0; background: none; cursor: pointer; text-align: left; color: var(--ink-2); }
+.rig-angles img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; opacity: .55; filter: grayscale(.6); transition: opacity .2s, filter .2s; border-bottom: 2px solid rgba(255,255,255,.2); }
+.rig-angles span { display: block; margin-top: 7px; font: 500 10px/1.2 var(--mono); letter-spacing: .14em; text-transform: uppercase; }
+.rig-angles button:hover img { opacity: .85; }
+.rig-angles button.on img { opacity: 1; filter: none; border-bottom-color: var(--red-2); }
+.rig-angles button.on { color: #fff; }
+.rig-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(24px, 5vw, 72px); margin-top: clamp(28px, 4vw, 48px); }
+.rig-sub { margin-bottom: 14px; color: var(--red-2); }
+.rig-list { list-style: none; margin: 0; padding: 0; }
+.rig-list li { display: grid; grid-template-columns: 54px 1fr; gap: 14px; padding: 16px 0; border-top: 1px solid rgba(255,255,255,.1); }
+.rig-list .num { font-size: 26px; line-height: 1; color: var(--red); }
+.rig-list h4 { margin: 0 0 6px; font: 800 17px/1.2 var(--display); text-transform: uppercase; letter-spacing: .01em; }
+.rig-list p { margin: 0; color: var(--ink-2); font-size: 14.5px; line-height: 1.6; }
+.rig-swatch { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 18px; font: 500 10.5px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-2); }
+.rig-swatch span { display: inline-flex; align-items: center; gap: 8px; }
+.rig-swatch i { width: 22px; height: 12px; border: 1px solid rgba(255,255,255,.3); clip-path: polygon(0 0, 100% 0, 100% 100%, 5px 100%, 0 calc(100% - 5px)); }
+.rig-family { margin-top: 22px; padding-top: 14px; border-top: 1px solid var(--red); color: var(--ink-3); }
+@media (max-width: 760px) {
+  .rig-stage { aspect-ratio: 4 / 5; min-height: 0; }
+  .rig-angles { gap: 6px; }
+  .rig-angles span { font-size: 8.5px; letter-spacing: .08em; }
+  .rig-cols { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) { .rig-video { animation: none; transform: none; } }
