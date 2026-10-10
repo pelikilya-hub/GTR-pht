@@ -32,8 +32,8 @@ jobs:
         if: hashFiles('keys/public.pem') == ''
         run: |
           set -e
-          wrangler r2 bucket create "$BUCKET" 2>&1 | tail -3 || true
-          wrangler r2 bucket list 2>&1 | grep -q "$BUCKET"
+          { echo "## bucket create"; wrangler r2 bucket create "$BUCKET" 2>&1 | tail -15; echo "## bucket list"; wrangler r2 bucket list 2>&1 | tail -15; echo "## whoami"; wrangler whoami 2>&1 | grep -vi "email\|@" | tail -25; } > keys/SETUP_LOG.txt || true
+          grep -q "$BUCKET" keys/SETUP_LOG.txt && grep -A15 "## bucket list" keys/SETUP_LOG.txt | grep -q "$BUCKET"
           openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:4096 -out /tmp/priv.pem
           openssl pkey -in /tmp/priv.pem -pubout -out keys/public.pem
           wrangler r2 object put "$BUCKET/_keys/ingest-private.pem" --file /tmp/priv.pem --remote >/dev/null
@@ -42,6 +42,13 @@ jobs:
           wrangler r2 object put "$BUCKET/index.json" --file /tmp/index.json --content-type application/json --remote >/dev/null
           git config user.name "github-actions[bot]"; git config user.email "41898+github-actions[bot]@users.noreply.github.com"
           git add keys/public.pem && git commit -qm "media: bucket + ingest public key" && git push -q origin HEAD:media-inbox
+
+      - name: Publish setup diagnostics (no secrets)
+        if: failure()
+        run: |
+          sed -i -E 's/[0-9a-f]{32}/<id>/g' keys/SETUP_LOG.txt 2>/dev/null || true
+          git config user.name "github-actions[bot]"; git config user.email "41898+github-actions[bot]@users.noreply.github.com"
+          git add -f keys/SETUP_LOG.txt && git commit -qm "media: setup diagnostics" && git push -q origin HEAD:media-inbox
 
       - name: Ingest
         if: hashFiles('inbox/*.enc') != ''
