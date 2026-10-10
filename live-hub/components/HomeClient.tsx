@@ -10,6 +10,7 @@ import { RouteSection } from '@/components/RouteSection';
 import { LiveSection } from '@/components/LiveSection';
 import { Cars } from '@/components/Cars';
 import { Rig } from '@/components/Rig';
+import { Realty } from '@/components/Realty';
 import { Logbook } from '@/components/Logbook';
 import { Tiers } from '@/components/Tiers';
 import { Scales } from '@/components/Scales';
@@ -25,6 +26,7 @@ import { RevealObserver } from '@/components/ui/Motion';
 import { StoryBackdrop } from '@/components/fx/StoryBackdrop';
 import { SfxBinder } from '@/components/fx/SfxBinder';
 import { ScrollFX } from '@/components/fx/ScrollFX';
+import { ButtonFX } from '@/components/fx/ButtonFX';
 
 // Client-only (app/page.tsx loads it with ssr:false): everything here is live —
 // countdown, GPS, chat, shared state — and has no SEO value server-rendered.
@@ -35,6 +37,7 @@ export default function HomeClient() {
       <RevealObserver />
       <SfxBinder />
       <ScrollFX />
+      <ButtonFX />
       <StoryBackdrop />
       <div className="hub">
         <Boot />
@@ -47,6 +50,7 @@ export default function HomeClient() {
           <Rig />
           <LiveSection />
           <Cars />
+          <Realty />
           <ContentLines />
           <Scales />
           <Places />

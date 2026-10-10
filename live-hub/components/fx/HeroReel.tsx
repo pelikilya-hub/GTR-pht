@@ -30,7 +30,6 @@ const shotAt = (b: number) => { let i = SHOTS.length - 1; while (i > 0 && STARTS
 export function HeroReel() {
   const [idx, setIdx] = useState(0);
   const [cut, setCut] = useState(false);
-  const [tc, setTc] = useState('00:00:00:00');
   const [still, setStill] = useState(false);
   const [bpm, setBpm] = useState(0); // >0 while the reel is clocked by a playing track
   const sync = bpm > 0;
@@ -38,6 +37,7 @@ export function HeroReel() {
   const box = useRef<HTMLDivElement | null>(null);
   const live = useRef(true);
   const idxRef = useRef(0);
+  const tcRef = useRef<HTMLSpanElement | null>(null);
 
   // reduced motion → one graded still, no cutting
   useEffect(() => {
@@ -72,7 +72,9 @@ export function HeroReel() {
     io.observe(el);
     const host = (el.closest('section') as HTMLElement | null) || el;
 
-    let raf = 0, last = performance.now(), own = 0, lastTc = 0, wasBpm = 0, cutT = 0;
+    let raf = 0, last = performance.now(), own = 0, lastTc = 0, wasBpm = 0, cutT = 0, lastKick = '', lastSp = '';
+    // phones: 2-digit steps so the whole hero isn't restyled on every frame
+    const coarse = window.matchMedia('(hover: none), (max-width: 760px)').matches;
     const tick = (now: number) => {
       raf = requestAnimationFrame(tick);
       const dt = Math.min(0.1, (now - last) / 1000); last = now;
@@ -91,8 +93,9 @@ export function HeroReel() {
       // kick envelope on every beat (stronger on the bar's downbeat) + shot progress for the HUD
       const down = Math.floor(Math.max(0, beat)) % 4 === 0;
       const kick = beat < 0 ? 0 : Math.pow(1 - frac, 3) * (down ? 1 : 0.55);
-      host.style.setProperty('--kick', kick.toFixed(3));
-      el.style.setProperty('--sp', Math.min(1, (lb - STARTS[i] + frac) / SHOTS[i].beats).toFixed(4));
+      const ks = kick.toFixed(coarse ? 1 : 2), sp = Math.min(1, (lb - STARTS[i] + frac) / SHOTS[i].beats).toFixed(coarse ? 2 : 3);
+      if (ks !== lastKick) { lastKick = ks; host.style.setProperty('--kick', ks); }
+      if (sp !== lastSp) { lastSp = sp; el.style.setProperty('--sp', sp); }
 
       if (i !== idxRef.current) {
         idxRef.current = i;
@@ -102,9 +105,9 @@ export function HeroReel() {
         cutT = window.setTimeout(() => setCut(false), 240);
         if (!synced) sfx('open');
       }
-      if (now - lastTc > 42) {
+      if (now - lastTc > 42 && tcRef.current) {
         lastTc = now;
-        setTc(`${pad(Math.floor(clock / 3600))}:${pad(Math.floor(clock / 60) % 60)}:${pad(Math.floor(clock) % 60)}:${pad(Math.floor((clock % 1) * 24))}`);
+        tcRef.current.textContent = (`${pad(Math.floor(clock / 3600))}:${pad(Math.floor(clock / 60) % 60)}:${pad(Math.floor(clock) % 60)}:${pad(Math.floor((clock % 1) * 24))}`);
       }
     };
     raf = requestAnimationFrame(tick);
@@ -140,7 +143,7 @@ export function HeroReel() {
       <div className="reel-kick" aria-hidden />
       <div className="reel-hud" aria-hidden>
         <span className="rec"><i />REC</span>
-        <span className="g tc">{tc}</span>
+        <span ref={tcRef} className="g tc">00:00:00:00</span>
         <span className="shot">SHOT {pad(idx + 1)} / {pad(SHOTS.length)} · {shot.label}</span>
         <span className="brand">BANGTAOSTYLE.COM · PROTOCOL 10.10</span>
         <div className="ticks">{SHOTS.map((_, i) => <b key={i} className={i < idx ? 'done' : i === idx ? 'on' : ''} />)}</div>

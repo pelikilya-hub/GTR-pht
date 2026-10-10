@@ -16,6 +16,9 @@ declare global {
  * - :root gets --v (scroll velocity, 0..1) and --lb (letterbox bar height) for
  *   motion blur / chromatic split and cinematic bars during fast moves.
  */
+/** Latest scroll progress per section id (JS readers use this instead of getComputedStyle, which forces a style flush). */
+export const scrollP: Record<string, number> = {};
+
 export function ScrollFX() {
   useEffect(() => {
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -29,25 +32,42 @@ export function ScrollFX() {
     });
     window.__lenis = lenis;
 
-    let raf = 0, vel = 0, lb = 0;
+    let raf = 0, vel = 0, lb = 0, lastV = '', lastLb = '';
+    // touch devices: coarser steps → far fewer style recalcs while flinging
+    const coarse = window.matchMedia('(hover: none), (max-width: 760px)').matches;
+    const step = coarse ? 0.025 : 0.0005;
+    const last = new WeakMap<HTMLElement, number[]>();
     const clamp = (x: number) => (x < 0 ? 0 : x > 1 ? 1 : x);
     const frame = (t: number) => {
       raf = requestAnimationFrame(frame);
       lenis.raf(t);
       if (reduce) return;
       const vh = window.innerHeight;
-      document.querySelectorAll<HTMLElement>('main > section').forEach((s) => {
-        const r = s.getBoundingClientRect();
+      // read every rect first, then write: interleaving forces a layout per section
+      const secs = document.querySelectorAll<HTMLElement>('main > section');
+      const rects = Array.from(secs, (s) => s.getBoundingClientRect());
+      secs.forEach((s, i) => {
+        const r = rects[i];
         if (r.bottom < -vh || r.top > vh * 2) return;
-        s.style.setProperty('--p', clamp((vh - r.top) / (vh + r.height)).toFixed(4));
-        s.style.setProperty('--e', clamp((vh - r.top) / (vh * 0.65)).toFixed(4));
-        s.style.setProperty('--x', clamp(-r.top / Math.max(1, r.height)).toFixed(4));
+        const v = [clamp((vh - r.top) / (vh + r.height)), clamp((vh - r.top) / (vh * 0.65)), clamp(-r.top / Math.max(1, r.height))];
+        if (s.id) scrollP[s.id] = v[0];
+        // Every write restyles the whole section subtree. Phones keep only the entrance (--e, settles
+        // at 1) and the hero dolly (--x); parallax (--p) stays parked at .5.
+        if (coarse) { v[0] = 0.5; if (i > 0) v[2] = 0; }
+        const prev = last.get(s);
+        if (prev && Math.abs(prev[0] - v[0]) < step && Math.abs(prev[1] - v[1]) < step && Math.abs(prev[2] - v[2]) < step
+          && !(v[1] === 1 && prev[1] !== 1) && !(v[1] === 0 && prev[1] !== 0)) return;
+        last.set(s, v);
+        s.style.setProperty('--p', v[0].toFixed(4));
+        s.style.setProperty('--e', v[1].toFixed(4));
+        s.style.setProperty('--x', v[2].toFixed(4));
       });
       const v = Math.min(1, Math.abs(lenis.velocity || 0) / 60);
       vel += (v - vel) * 0.12;
       lb += ((vel > 0.35 ? 1 : 0) - lb) * 0.06;
-      root.style.setProperty('--v', vel.toFixed(3));
-      root.style.setProperty('--lb', lb.toFixed(3));
+      const vs = vel.toFixed(coarse ? 2 : 3), ls = lb.toFixed(coarse ? 2 : 3);
+      if (vs !== lastV) { lastV = vs; root.style.setProperty('--v', vs); }
+      if (ls !== lastLb) { lastLb = ls; root.style.setProperty('--lb', ls); }
       root.style.setProperty('--sy', String(Math.round(lenis.scroll)));
     };
     raf = requestAnimationFrame(frame);

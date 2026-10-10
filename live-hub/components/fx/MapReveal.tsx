@@ -16,17 +16,22 @@ export function MapReveal() {
     if (reduce) { requestAnimationFrame(() => setGone(true)); return; }
     const ctx = cv.getContext('2d')!;
     const parent = cv.parentElement!;
-    const cell = 15;
-    let W = 0, H = 0, cols = 0, rows = 0, raf = 0, t0 = 0;
+    const lite = window.matchMedia('(hover: none), (max-width: 760px)').matches;
+    const cell = lite ? 18 : 15;
+    let W = 0, H = 0, cols = 0, rows = 0, raf = 0, t0 = 0, last = 0, near = false;
     let seed = new Float32Array(0);
     const size = () => {
-      const r = parent.getBoundingClientRect(), dpr = Math.min(1.5, devicePixelRatio || 1);
+      const r = parent.getBoundingClientRect(), dpr = lite ? 1 : Math.min(1.5, devicePixelRatio || 1);
       W = r.width; H = r.height; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       cols = Math.ceil(W / cell); rows = Math.ceil(H / cell);
       seed = new Float32Array(cols * rows).map(() => Math.random());
     };
     size();
     const draw = (t: number) => {
+      // idle veil (before the reveal) only needs a slow shimmer, and nothing at all while far off-screen
+      const gap = !t0 ? (near ? 140 : 1e9) : lite ? 33 : 0;
+      if (t - last < gap) { raf = requestAnimationFrame(draw); return; }
+      last = t;
       const p = t0 ? Math.min(1, (t - t0) / 2600) : 0;
       ctx.clearRect(0, 0, W, H);
       ctx.font = `${cell - 2}px "JetBrains Mono", monospace`;
@@ -48,9 +53,11 @@ export function MapReveal() {
       if (e.isIntersecting && !t0) { t0 = performance.now(); sfx('reveal'); }
     }, { threshold: 0.35 });
     io.observe(parent);
+    const nio = new IntersectionObserver(([e]) => { near = e.isIntersecting; if (near) last = 0; }, { rootMargin: '50% 0px' });
+    nio.observe(parent);
     raf = requestAnimationFrame(draw);
     window.addEventListener('resize', size);
-    return () => { io.disconnect(); cancelAnimationFrame(raf); window.removeEventListener('resize', size); };
+    return () => { io.disconnect(); nio.disconnect(); cancelAnimationFrame(raf); window.removeEventListener('resize', size); };
   }, []);
 
   if (gone) return null;

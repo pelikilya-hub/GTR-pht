@@ -83,6 +83,7 @@ every 20 s and when the tab regains focus.
 | `assets/places/**.jpg` | Wikimedia Commons, free licenses — authors on `/credits/` (`lib/photoCredits.json`) |
 | `assets/audio/*.mp3` | your tracks (any file name) + `night-drive.mp3`, a synthesized fallback loop |
 | crew portraits | generative glyph portraits for now |
+| `fonts/g/*.woff2` + `app/fonts.css` | self-hosted Google Fonts (OFL, latin + cyrillic): Unbounded (display), Rubik Glitch (Cyrillic glitch accents), Golos Text, JetBrains Mono |
 
 ## Pages
 

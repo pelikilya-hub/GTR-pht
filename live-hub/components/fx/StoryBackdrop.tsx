@@ -12,6 +12,7 @@ const SCENES: Record<string, string> = {
   rig: '/assets/video/car-3.jpg',
   live: '/assets/places/phuket/05-neon-night.jpg',
   cars: '/assets/cars/02.jpg',
+  realty: '/assets/places/samui/03-scene.jpg',
   lines: '/assets/places/chiangmai/01-scene.jpg',
   scales: '/assets/places/ayutthaya/02-scene.jpg',
   places: '/assets/story/north-mist.jpg',
@@ -35,6 +36,9 @@ export function StoryBackdrop() {
     const ctx = canvas.getContext('2d', { alpha: false });
     if (!ctx) return;
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // phones: fewer, bigger cells at ~10 fps and 1× pixels — the glyph field stays, the battery too
+    const lite = window.matchMedia('(hover: none), (max-width: 760px)').matches;
+    const interval = reduce ? 1000 : lite ? 100 : 50;
     const cache = new Map<string, Promise<HTMLImageElement>>();
     const load = (src: string) => {
       if (!cache.has(src)) cache.set(src, new Promise((res, rej) => { const i = new Image(); i.decoding = 'async'; i.onload = () => res(i); i.onerror = rej; i.src = src; }));
@@ -61,14 +65,15 @@ export function StoryBackdrop() {
     };
 
     const resize = () => {
-      dpr = Math.min(1.5, window.devicePixelRatio || 1);
+      dpr = lite ? 1 : Math.min(1.5, window.devicePixelRatio || 1);
       W = window.innerWidth; H = window.innerHeight;
-      cell = W < 600 ? 13 : 16;
+      cell = lite ? 17 : W < 600 ? 13 : 16;
       canvas.width = Math.floor(W * dpr); canvas.height = Math.floor(H * dpr);
       canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
       cols = Math.ceil(W / cell); rows = Math.ceil(H / cell);
       seed = new Float32Array(cols * rows).map(() => Math.random());
       chars = new Uint16Array(cols * rows).map(() => Math.floor(Math.random() * GLYPHS.length));
+      dirty = true; underFor = null;
       if (cur) cur = sample(cur.img);
       if (next) next = sample(next.img);
     };
@@ -84,36 +89,66 @@ export function StoryBackdrop() {
       }).catch(() => {});
     };
 
+    // Underlay (bg + dim photo) is cached per scene; in steady state only the ~2% of cells whose
+    // glyph flickers are repainted (copy the underlay cell back, draw the new glyph). Full redraws
+    // happen only while one scene dissolves into the next.
+    const under = document.createElement('canvas');
+    const uctx = under.getContext('2d', { alpha: false })!;
+    let underFor: Sampled | null = null, dirty = true;
+    const paintUnder = (base: Sampled) => {
+      under.width = canvas.width; under.height = canvas.height;
+      uctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      uctx.fillStyle = '#0a0b0d'; uctx.fillRect(0, 0, W, H);
+      const s = Math.max(W / base.img.width, H / base.img.height);
+      uctx.globalAlpha = 0.16;
+      uctx.drawImage(base.img, (W - base.img.width * s) / 2, (H - base.img.height * s) / 2, base.img.width * s, base.img.height * s);
+      uctx.globalAlpha = 1;
+      underFor = base;
+    };
+    const glyph = (i: number, x: number, y: number, l: number, edge: boolean) => {
+      const a = edge ? 0.9 : Math.min(0.55, (l - 0.15) * 0.75);
+      ctx.fillStyle = edge ? `rgba(255,52,39,${a})` : l > 0.62 ? `rgba(255,255,255,${a})` : `rgba(229,35,27,${a * 0.9})`;
+      ctx.fillText(GLYPHS[chars[i]], x * cell, y * cell);
+    };
+
     const draw = (t: number) => {
       raf = requestAnimationFrame(draw);
-      if (!visible || t - lastT < (reduce ? 1000 : 50)) return;
+      if (!visible || t - lastT < interval) return;
       const dt = Math.min(200, t - lastT); lastT = t;
-      if (next) { mix = Math.min(1, mix + dt / 1400); if (mix >= 1) { cur = next; next = null; mix = 1; } }
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.fillStyle = '#0a0b0d'; ctx.fillRect(0, 0, W, H);
+      if (next) { mix = Math.min(1, mix + dt / 1400); if (mix >= 1) { cur = next; next = null; mix = 1; dirty = true; } }
       if (!cur) return;
-      // dim photo underlay so the image is legible behind the glyphs
       const base = next && mix > 0.5 ? next : cur;
-      const s = Math.max(W / base.img.width, H / base.img.height);
-      ctx.globalAlpha = 0.16;
-      ctx.drawImage(base.img, (W - base.img.width * s) / 2, (H - base.img.height * s) / 2, base.img.width * s, base.img.height * s);
-      ctx.globalAlpha = 1;
+      if (underFor !== base || under.width !== canvas.width) { paintUnder(base); dirty = true; }
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.font = `${cell - 3}px "JetBrains Mono", monospace`;
       ctx.textBaseline = 'top';
       const flick = reduce ? 0 : 0.02;
-      for (let y = 0; y < rows; y++) {
-        for (let x = 0; x < cols; x++) {
-          const i = y * cols + x;
-          const fromNext = next && seed[i] < mix;
-          const src = fromNext ? next! : cur;
-          const l = src.lum[i];
-          const edge = next && Math.abs(seed[i] - mix) < 0.06;
-          if (l < 0.18 && !edge) continue;
-          if (Math.random() < flick) chars[i] = Math.floor(Math.random() * GLYPHS.length);
-          const a = edge ? 0.9 : Math.min(0.55, (l - 0.15) * 0.75);
-          ctx.fillStyle = edge ? `rgba(255,52,39,${a})` : l > 0.62 ? `rgba(255,255,255,${a})` : `rgba(229,35,27,${a * 0.9})`;
-          ctx.fillText(GLYPHS[chars[i]], x * cell, y * cell);
+
+      if (next || dirty) {
+        ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(under, 0, 0); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        for (let y = 0; y < rows; y++) {
+          for (let x = 0; x < cols; x++) {
+            const i = y * cols + x;
+            const src = next && seed[i] < mix ? next : cur;
+            const l = src.lum[i];
+            const edge = !!next && Math.abs(seed[i] - mix) < 0.06;
+            if (l < 0.18 && !edge) continue;
+            if (Math.random() < flick) chars[i] = Math.floor(Math.random() * GLYPHS.length);
+            glyph(i, x, y, l, edge);
+          }
         }
+        dirty = false;
+        return;
+      }
+      const n = Math.ceil(cols * rows * flick), cd = cell * dpr;
+      for (let k = 0; k < n; k++) {
+        const i = Math.floor(Math.random() * cols * rows);
+        const l = cur.lum[i];
+        if (l < 0.18) continue;
+        const x = i % cols, y = (i - x) / cols;
+        chars[i] = Math.floor(Math.random() * GLYPHS.length);
+        ctx.drawImage(under, x * cd, y * cd, cd, cd, x * cell, y * cell, cell, cell);
+        glyph(i, x, y, l, false);
       }
     };
 

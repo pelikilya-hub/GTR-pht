@@ -7,6 +7,7 @@ import { LEGS, STOPS, pathUpTo, pathRange, pToLatLng, type LatLng } from '@/lib/
 import { PLACE_SRCS } from '@/lib/i18n';
 import { sfx } from '@/lib/sfx';
 import { MapReveal } from './fx/MapReveal';
+import { scrollP } from './fx/ScrollFX';
 import { SectionHead } from './ui/Motion';
 
 const STYLE_URL = 'https://tiles.openfreemap.org/styles/positron';
@@ -162,16 +163,21 @@ export function RouteSection() {
         const steps = [[0, 4, 3], [0.5, 4, 2.5], [1, 4, 2], [1.5, 4, 1.5], [2, 4, 1], [2.5, 4, 0.5], [3, 4, 0], [0, 0.5, 3, 3.5], [0, 1, 3, 3], [0, 1.5, 3, 2.5], [0, 2, 3, 2], [0, 2.5, 3, 1.5], [0, 3, 3, 1], [0, 3.5, 3, 0.5]];
         let k = 0, last = 0;
         const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        // only animate while the map is on screen (MapLibre repaints on every paint/data change)
+        let onScreen = false;
+        const vio = new IntersectionObserver(([e]) => { onScreen = e.isIntersecting; }, { threshold: 0.01 });
+        vio.observe(map.getContainer());
+        map.once('remove', () => vio.disconnect());
         const tick = (ts: number) => {
           raf = requestAnimationFrame(tick);
-          if (reduce || ts - last < 70) return;
+          if (reduce || !onScreen || document.hidden || ts - last < 70) return;
           last = ts; k = (k + 1) % steps.length;
           if (map.getLayer('plan')) map.setPaintProperty('plan', 'line-dasharray', steps[k]);
-          const sec = document.getElementById('route');
-          const pp = sec ? parseFloat(getComputedStyle(sec).getPropertyValue('--p') || '0') : 0;
+          const pp = scrollP.route ?? 0;
           if (!map.isMoving() && !popupRef.current?.isOpen()) {
             const pitch = Math.sin(Math.min(1, Math.max(0, pp)) * Math.PI) * 52;
-            map.jumpTo({ pitch, bearing: (pp - 0.5) * -18 });
+            // re-render the map only when the camera actually moved
+            if (Math.abs(map.getPitch() - pitch) > 0.25) map.jumpTo({ pitch, bearing: (pp - 0.5) * -18 });
           }
           const head = ((ts / 16000) % 1) * (LEGS.length + 0.6);
           (map.getSource('laser') as ML.GeoJSONSource | undefined)?.setData(lineFC(pathRange(head - 0.6, head)));
