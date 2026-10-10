@@ -128,7 +128,7 @@ export function MediaLibrary({ say }: { say: (m: string) => void }) {
                       {k === 'image' && <img src={url(f)} alt={name} />}
                       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                         <a className="btn btn-sm" href={url(f, true)}>⬇ СКАЧАТЬ</a>
-                        <button className="btn btn-sm" onClick={() => copy(f)}>🔗 ССЫЛКА НА 12 Ч</button>
+                        <button className="btn btn-sm" onClick={() => copy(f)}>ССЫЛКА НА 12 Ч</button>
                       </div>
                     </div>
                   )}

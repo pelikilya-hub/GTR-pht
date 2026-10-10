@@ -51,7 +51,7 @@ export function Topbar() {
             <button className={ru ? 'on' : ''} onClick={() => setLang('ru')} style={{ height: 30, minHeight: 30, padding: '0 10px' }}>RU</button>
             <button className={!ru ? 'on' : ''} onClick={() => setLang('en')} style={{ height: 30, minHeight: 30, padding: '0 10px' }}>EN</button>
           </div>
-          <button className="chip hide-sm" style={{ cursor: 'pointer', height: 30 }} title={ru ? 'Звуки интерфейса' : 'UI sounds'} onClick={() => { unlockSfx(); setSfxEnabled(!snd); }}>{snd ? '🔊' : '🔇'}</button>
+          <button className="chip hide-sm" style={{ cursor: 'pointer', height: 30 }} title={ru ? 'Звуки интерфейса' : 'UI sounds'} onClick={() => { unlockSfx(); setSfxEnabled(!snd); }}><span className={'sfx-ico' + (snd ? ' on' : '')} aria-hidden />{ru ? 'ЗВУКИ' : 'SFX'}</button>
           <button className="btn btn-sm hide-sm" onClick={() => openAuth()} style={{ minHeight: 38 }}>
             {me ? me.nick.toUpperCase().slice(0, 12) : ru ? 'Войти' : 'Sign in'}
           </button>
@@ -71,7 +71,7 @@ export function Topbar() {
               <button className={ru ? 'on' : ''} onClick={() => setLang('ru')}>RU</button>
               <button className={!ru ? 'on' : ''} onClick={() => setLang('en')}>EN</button>
             </div>
-            <button className="chip" style={{ height: 38, cursor: 'pointer' }} onClick={() => { unlockSfx(); setSfxEnabled(!snd); }}>{snd ? '🔊' : '🔇'} {ru ? 'Звук' : 'Sound'}</button>
+            <button className="chip" style={{ height: 38, cursor: 'pointer' }} onClick={() => { unlockSfx(); setSfxEnabled(!snd); }}>{ru ? 'Звук' : 'Sound'}</button>
           </div>
           <Link href="/console/" style={{ fontSize: 18, color: 'var(--red-2)', border: 0, marginTop: 18 }}>{ru ? 'Консоль экипажа →' : 'Crew console →'}</Link>
         </div>

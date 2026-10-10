@@ -32,7 +32,7 @@ export function GtrReality() {
                 <div style={{ fontFamily: 'var(--display)', fontWeight: 800, fontSize: 19, marginTop: 8 }}>{t.gtrGoodTitle}</div>
                 <div style={{ fontSize: 14, lineHeight: 1.6, color: 'var(--ink-2)', marginTop: 6 }}>{t.gtrGoodDesc}</div>
               </div>
-              <div style={{ fontSize: 40, color: 'var(--blue)', animation: 'spin 18s linear infinite' }}>☸</div>
+              <div className="line-mark" aria-hidden style={{ background: 'var(--blue)', width: 14, height: 14 }} />
             </div>
           </div>
         </div>
