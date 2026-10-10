@@ -11,6 +11,9 @@
  *  /api/state           PUT   → crew-only partial update of the shared state
  *  /api/pos             POST  → crew-only GPS push (plain {lat,lng,ts} or OwnTracks {_type:'location',lat,lon,tst})
  *  /api/crew/check      GET   → 204 if the X-Crew-Key header matches CREW_KEY, else 401
+ *  /api/media/list      GET   → crew-only: files in the R2 media library + a 12 h read token
+ *  /api/media/file/<p>  GET   → crew token (?t=) or key: stream a library file (byte ranges, ?dl=1 to download)
+ *  /api/media/upload    PUT   → crew-only: stream a file into the library (?path=raw/…/name.mp4)
  *  /ws/:room            WS    → room signaling (presence, track announcements, tally, commands)
  *  /chat/ws             WS    → live chat (history, rate limit, crew moderation with ?key=CREW_KEY)
  *  everything else            → static assets from ./out (the Next.js export)
@@ -32,6 +35,7 @@ export interface Env {
   TURN_KEY_ID?: string;
   TURN_KEY_TOKEN?: string;
   MAKE_WEBHOOK_URL?: string;
+  MEDIA?: R2Bucket;
 }
 
 const RT_BASE = 'https://rtc.live.cloudflare.com/v1';
@@ -82,6 +86,7 @@ interface HubPatch {
   posts?: { id: string; ts: number; member: string; type: string; text: string; link?: string }[];
   tour?: { start: string | null };
   garage?: { id: string; name: string; year: string; city: string; stage: string; paid: string; note: string; img: string; ts: number }[];
+  promo?: { a: string; b: string }[];
 }
 const CAR_STAGES = ['hunt', 'bought', 'restore', 'parts', 'done', 'sold'];
 
@@ -145,6 +150,10 @@ function validatePatch(b: Record<string, unknown>): HubPatch | string {
       };
     });
   }
+  if (b.promo !== undefined) {
+    if (!Array.isArray(b.promo)) return 'promo must be an array';
+    out.promo = b.promo.slice(0, 12).map((x) => { const c = (x || {}) as Record<string, unknown>; return { a: str(c.a, 48), b: str(c.b, 48) }; }).filter((c) => c.a);
+  }
   return out;
 }
 
@@ -170,6 +179,8 @@ async function handleApi(req: Request, env: Env, url: URL): Promise<Response> {
   if (p === '/api/health') return json({ ok: true, sfu: !!env.REALTIME_APP_ID, turn: !!env.TURN_KEY_ID, hook: !!env.MAKE_WEBHOOK_URL, crew: !!env.CREW_KEY });
 
   if (p === '/api/crew/check') return isCrew(env, req, url) ? new Response(null, { status: 204, headers: CORS }) : bad('crew key required', 401);
+
+  if (p.startsWith('/api/media/')) return handleMedia(req, env, url);
 
   if (p === '/api/state' && req.method === 'GET') {
     const r = await hubStub(env).fetch('https://hub/state');
@@ -451,6 +462,7 @@ interface HubStateData {
   posts?: unknown[];
   tour?: unknown;
   garage?: unknown[];
+  promo?: unknown[];
 }
 
 export class HubState implements DurableObject {
@@ -556,4 +568,115 @@ export class ChatRoom implements DurableObject {
 
   async webSocketClose() { this.broadcast({ type: 'online', n: Math.max(0, this.ctx.getWebSockets().length - 1) }); }
   async webSocketError() { this.broadcast({ type: 'online', n: Math.max(0, this.ctx.getWebSockets().length - 1) }); }
+}
+
+
+/* ── media library (R2 bucket "bangtaostyle-media", fed by the encrypted media-inbox workflow) ── */
+const MEDIA_ROOTS = ['raw/', 'photos/', 'audio/', 'edits/', 'crew/'];
+const MEDIA_MAX_UPLOAD = 95 * 1024 * 1024; // Worker request bodies are capped at 100 MB
+const TOKEN_TTL = 12 * 3600;
+
+function mediaPath(raw: string): string | null {
+  let p: string;
+  try { p = decodeURIComponent(raw).replace(/^\/+/, ''); } catch { return null; }
+  if (!p || p.length > 300 || p.includes('..') || p.includes('\\') || /[\x00-\x1f]/.test(p)) return null;
+  // the ingest private key and the raw index never leave the bucket
+  if (!MEDIA_ROOTS.some((r) => p.startsWith(r))) return null;
+  return p;
+}
+
+async function hmacHex(key: string, msg: string): Promise<string> {
+  const k = await crypto.subtle.importKey('raw', new TextEncoder().encode(key), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const sig = new Uint8Array(await crypto.subtle.sign('HMAC', k, new TextEncoder().encode(msg)));
+  return [...sig].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+async function mediaToken(env: Env): Promise<string> {
+  const exp = Math.floor(Date.now() / 1000) + TOKEN_TTL;
+  return `${exp}.${(await hmacHex(env.CREW_KEY || '', 'media:' + exp)).slice(0, 40)}`;
+}
+async function mediaTokenOk(env: Env, t: string | null): Promise<boolean> {
+  if (!env.CREW_KEY || !t) return false;
+  const [exp, sig] = t.split('.');
+  if (!exp || !sig || !/^\d+$/.test(exp) || Number(exp) < Date.now() / 1000) return false;
+  return safeEqual(sig, (await hmacHex(env.CREW_KEY, 'media:' + exp)).slice(0, 40));
+}
+
+interface MediaMeta { path: string; duration?: number | null; size_px?: string | null; added?: string }
+
+async function handleMedia(req: Request, env: Env, url: URL): Promise<Response> {
+  if (!env.MEDIA) return bad('media library not configured', 503);
+  const p = url.pathname;
+
+  if (p === '/api/media/list' && req.method === 'GET') {
+    if (!isCrew(env, req, url)) return bad('crew key required', 401);
+    const meta = new Map<string, MediaMeta>();
+    try {
+      const idx = await env.MEDIA.get('index.json');
+      if (idx) for (const f of ((await idx.json()) as { files?: MediaMeta[] }).files || []) meta.set(f.path, f);
+    } catch { /* index is optional metadata */ }
+    const files: Record<string, unknown>[] = [];
+    let cursor: string | undefined;
+    for (let page = 0; page < 10; page++) {
+      const res = await env.MEDIA.list({ cursor, limit: 1000, include: ['httpMetadata'] });
+      for (const o of res.objects) {
+        if (!mediaPath(o.key)) continue;
+        const m = meta.get(o.key);
+        files.push({ path: o.key, size: o.size, uploaded: o.uploaded.toISOString(), type: o.httpMetadata?.contentType || '', duration: m?.duration ?? null, size_px: m?.size_px ?? null });
+      }
+      if (!res.truncated) break;
+      cursor = res.cursor;
+    }
+    return json({ files, token: await mediaToken(env), ttl: TOKEN_TTL });
+  }
+
+  if (p.startsWith('/api/media/file/') && (req.method === 'GET' || req.method === 'HEAD')) {
+    if (!(await mediaTokenOk(env, url.searchParams.get('t'))) && !isCrew(env, req, url)) return bad('crew token required', 401);
+    const key = mediaPath(p.slice('/api/media/file/'.length));
+    if (!key) return bad('bad path', 400);
+    const head = await env.MEDIA.head(key);
+    if (!head) return bad('not found', 404);
+    const size = head.size;
+    const h = new Headers({ 'Accept-Ranges': 'bytes', 'Cache-Control': 'private, max-age=3600', ETag: head.httpEtag, 'Content-Type': head.httpMetadata?.contentType || 'application/octet-stream', ...CORS });
+    if (url.searchParams.get('dl')) h.set('Content-Disposition', `attachment; filename="${key.split('/').pop()!.replace(/"/g, '')}"`);
+    const range = req.headers.get('Range');
+    const m = range ? range.match(/^bytes=(\d*)-(\d*)$/) : null;
+    if (!m || (m[1] === '' && m[2] === '')) {
+      h.set('Content-Length', String(size));
+      if (req.method === 'HEAD') return new Response(null, { status: 200, headers: h });
+      const obj = await env.MEDIA.get(key);
+      return new Response(obj?.body ?? null, { status: obj ? 200 : 404, headers: h });
+    }
+    let start: number, end: number;
+    if (m[1] === '') { start = Math.max(0, size - Number(m[2])); end = size - 1; }
+    else { start = Number(m[1]); end = m[2] === '' ? size - 1 : Math.min(Number(m[2]), size - 1); }
+    if (start >= size || start > end) { h.set('Content-Range', `bytes */${size}`); return new Response(null, { status: 416, headers: h }); }
+    h.set('Content-Range', `bytes ${start}-${end}/${size}`);
+    h.set('Content-Length', String(end - start + 1));
+    if (req.method === 'HEAD') return new Response(null, { status: 206, headers: h });
+    const obj = await env.MEDIA.get(key, { range: { offset: start, length: end - start + 1 } });
+    return new Response(obj?.body ?? null, { status: 206, headers: h });
+  }
+
+  if (p === '/api/media/upload' && req.method === 'PUT') {
+    if (!isCrew(env, req, url)) return bad('crew key required', 401);
+    const key = mediaPath(url.searchParams.get('path') || '');
+    if (!key || key.endsWith('/')) return bad('path must be under raw/, photos/, audio/, edits/ or crew/', 400);
+    const len = Number(req.headers.get('Content-Length') || 0);
+    if (!len) return bad('Content-Length required', 411);
+    if (len > MEDIA_MAX_UPLOAD) return bad('file too large for the browser upload (max 95 MB) — send it to the chat instead', 413);
+    if (!req.body) return bad('empty body', 400);
+    const type = req.headers.get('Content-Type') || 'application/octet-stream';
+    const put = await env.MEDIA.put(key, req.body, { httpMetadata: { contentType: type } });
+    // keep the index in step (best effort; the list endpoint reads R2 directly anyway)
+    try {
+      const idx = await env.MEDIA.get('index.json');
+      const data = idx ? ((await idx.json()) as { files: MediaMeta[] }) : { files: [] };
+      data.files = (data.files || []).filter((f) => f.path !== key);
+      data.files.push({ path: key, added: new Date().toISOString(), ...({ size: put?.size ?? len, type, by: 'console' } as object) } as MediaMeta);
+      await env.MEDIA.put('index.json', JSON.stringify(data, null, 1), { httpMetadata: { contentType: 'application/json' } });
+    } catch { /* ignore */ }
+    return json({ ok: true, path: key, size: put?.size ?? len });
+  }
+
+  return bad('not found', 404);
 }

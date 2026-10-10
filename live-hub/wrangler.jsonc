@@ -21,6 +21,8 @@
     { "tag": "v2", "new_sqlite_classes": ["HubState"] },
     { "tag": "v3", "new_sqlite_classes": ["ChatRoom"] }
   ],
+  // media library (content factory): private bucket fed by the encrypted media-inbox workflow
+  "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "bangtaostyle-media" }],
   "observability": { "enabled": true },
   // Public hostnames. The zone bangtaostyle.com is on the same Cloudflare account, so
   // `wrangler deploy` creates the DNS records + certificate itself (no dashboard step).

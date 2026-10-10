@@ -2,7 +2,7 @@
 import { useHub } from '@/lib/HubContext';
 import { HeroReel } from './fx/HeroReel';
 import { Count } from './ui/Motion';
-import { CodeText } from './fx/CodeText';
+import { HeroTitles } from './fx/HeroTitles';
 
 export function Hero() {
   const { t, lang, journey, scrollToId } = useHub();
@@ -31,10 +31,7 @@ export function Hero() {
               <span className="kicker">{t.tagline}</span>
               <span className="tag">🎬 {ru ? 'Первая съёмка · Bangla Road, Патонг' : 'First shoot · Bangla Road, Patong'}</span>
             </div>
-            <h1 aria-label={t.heroA + ' ' + t.heroB}>
-              <CodeText text={t.heroA} speed={0.8} /><br />
-              <CodeText text={t.heroB} speed={0.8} alt={false} accent="none" className="red-line" />
-            </h1>
+            <HeroTitles />
             <p className="lead rv" style={{ ['--d' as string]: '.25s' }}>{t.heroSub}</p>
             <div className="hero-cta rv" style={{ ['--d' as string]: '.35s' }}>
               <button className="btn btn-red" onClick={() => scrollToId('live')}>
