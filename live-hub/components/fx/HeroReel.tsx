@@ -16,7 +16,7 @@ type Shot = {
  * slow exhale), Ilia at the villa, party, fire show, sunset — intercut with the Bangtaostyle pickup. Cuts land on the beat grid of whatever playlist
  * track is playing (lib/beatmap.ts): the reel is then clocked by audio.currentTime; without sound it
  * runs its own clock at the soundtrack's 88 BPM. Shot lengths are in "units": one beat for slow
- * tracks, two beats above 120 BPM. 48 units = 12 bars per loop. `-slow` clips are motion-interpolated
+ * tracks, two beats above 120 BPM. 52 units = 13 bars per loop. `-slow` clips are motion-interpolated
  * half-speed renders, so the speed ramps into slow-mo stay smooth.
  */
 const SHOTS: Shot[] = [
@@ -34,6 +34,8 @@ const SHOTS: Shot[] = [
   { kind: 'video', src: '/assets/video/v-fire-slow.mp4', beats: 4, rate: [1.6, 0.7], fx: 'strobe', pos: '50% 35%', label: 'FIRE SHOW · SLOW BURN' },
   { kind: 'video', src: '/assets/video/d-road.mp4', beats: 2, rate: 1.4, fx: 'zoom', label: 'NEON RUN' },
   { kind: 'video', src: '/assets/video/g-exhale-slow.mp4', beats: 4, rate: [1.2, 0.8], fx: 'glitch', pos: '8% 40%', label: 'EXHALE · SLOW' },
+  // chest is covered in the clip itself (black below 72–80% of the frame), so no crop can reveal it
+  { kind: 'video', src: '/assets/video/g-red.mp4', beats: 4, rate: [1.1, 0.9], fx: 'strobe', pos: '50% 30%', label: 'RED ROOM · IGNITION' },
   { kind: 'video', src: '/assets/video/car-3.mp4', from: 0.6, beats: 2, fx: 'zoom', label: 'COAST RUN · ANDAMAN' },
   { kind: 'video', src: '/assets/video/car-2.mp4', from: 6.0, beats: 2, fx: 'glitch', label: 'SMOKE · MOONLIGHT' },
   { kind: 'video', src: '/assets/video/v-walk-slow.mp4', beats: 2, rate: [1.2, 0.75], fx: 'zoom', pos: '52% 40%', label: 'SUNSET · SCROLL' },
