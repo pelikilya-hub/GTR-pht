@@ -23,6 +23,7 @@ import { Footer } from '@/components/Footer';
 import { RevealObserver } from '@/components/ui/Motion';
 import { StoryBackdrop } from '@/components/fx/StoryBackdrop';
 import { SfxBinder } from '@/components/fx/SfxBinder';
+import { ScrollFX } from '@/components/fx/ScrollFX';
 
 // Client-only (app/page.tsx loads it with ssr:false): everything here is live —
 // countdown, GPS, chat, shared state — and has no SEO value server-rendered.
@@ -32,6 +33,7 @@ export default function HomeClient() {
       <VendorScripts />
       <RevealObserver />
       <SfxBinder />
+      <ScrollFX />
       <StoryBackdrop />
       <div className="hub">
         <Boot />

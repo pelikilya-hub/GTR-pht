@@ -31,7 +31,7 @@ async function ensureCrew(){
   for(var i=0;i<3;i++){
     var r=null; try{ r=await fetch(API_BASE+'/api/crew/check',{headers:{'X-Crew-Key':crewKey()},cache:'no-store'}); }catch(e){ return true; }
     if(r.ok||r.status!==401) return true;
-    var k=window.prompt(i?'Ключ не подошёл. Ключ экипажа GTR|PHT:':'Ключ экипажа GTR|PHT (один раз на устройство):');
+    var k=window.prompt(i?'Ключ не подошёл. Ключ экипажа Bangtaostyle.com:':'Ключ экипажа Bangtaostyle.com (один раз на устройство):');
     if(k==null) return false;
     try{ localStorage.setItem('gtrpht_crew_key',k.trim()); }catch(e){}
   }
@@ -94,7 +94,7 @@ class GTRCamera extends HTMLElement{
     this.style.cssText='display:block;font-family:'+MONO+';color:'+INK+';-webkit-user-select:none;user-select:none';
     var w=el('div','border:1px solid '+BRD+';background:'+BG2+';overflow:hidden');
     var hdr=el('div','display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid #1E1E23;flex-wrap:wrap');
-    hdr.appendChild(el('span','font-family:'+HEAD+';font-weight:900;font-size:14px;letter-spacing:.06em;color:'+RED2,{textContent:'GTR|PHT'}));
+    hdr.appendChild(el('span','font-family:'+HEAD+';font-weight:900;font-size:14px;letter-spacing:.06em;color:'+RED2,{textContent:'BANGTAOSTYLE.COM'}));
     hdr.appendChild(el('span','font-size:9px;letter-spacing:.18em;color:'+DIM2,{textContent:'КАМЕРА · REALTIME'}));
     hdr.appendChild(el('span','flex:1'));
     this.liveDot=el('span',statusDot(DIM2)+';width:10px;height:10px'); hdr.appendChild(this.liveDot);
@@ -263,7 +263,7 @@ class GTRSwitcher extends HTMLElement{
     this.style.cssText='display:block;font-family:'+MONO+';color:'+INK+(this.fill?';height:100%':'')+';-webkit-user-select:none;user-select:none';
     var w=el('div','display:flex;flex-direction:column;gap:8px'+(this.fill?';height:100%':''));
     var bar=el('div','display:flex;gap:8px;align-items:center;flex-wrap:wrap');
-    bar.appendChild(el('span','font-family:'+HEAD+';font-weight:900;font-size:12px;letter-spacing:.06em;color:'+RED2,{textContent:'GTR|PHT'}));
+    bar.appendChild(el('span','font-family:'+HEAD+';font-weight:900;font-size:12px;letter-spacing:.06em;color:'+RED2,{textContent:'BANGTAOSTYLE.COM'}));
     bar.appendChild(el('span','font-size:9px;letter-spacing:.18em;color:'+DIM2,{textContent:dir?'ПУЛЬТ · REALTIME':'МУЛЬТИВЬЮ'}));
     bar.appendChild(el('span','flex:1'));
     if(dir){

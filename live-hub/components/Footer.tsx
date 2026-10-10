@@ -9,7 +9,7 @@ export function Footer() {
     <footer className="foot">
       <div className="wrap" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(260px,100%),1fr))', gap: 32, alignItems: 'end' }}>
         <div>
-          <div className="logo" style={{ fontSize: 'clamp(48px,8vw,110px)', letterSpacing: '-.04em', lineHeight: .9 }}>GTR<i>|</i>PHT</div>
+          <div className="logo" style={{ fontSize: 'clamp(48px,8vw,110px)', letterSpacing: '-.04em', lineHeight: .9 }}>BANGTAOSTYLE<i>.COM</i></div>
           <div className="meta" style={{ marginTop: 16 }}>{t.f2}</div>
         </div>
         <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap', justifyContent: 'flex-end' }}>

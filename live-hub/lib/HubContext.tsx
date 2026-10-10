@@ -103,20 +103,22 @@ export function HubProvider({ children }: { children: React.ReactNode }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps -- gen is a version counter, not read in the body
   const integrations = useMemo(() => ls<Integrations>('gtrpht_integrations', {}), [gen]);
 
-  // Live tab title: "● ДЕНЬ 12/30 · GTR|PHT LIVE", "T-5 · GTR|PHT", "СКОРО · GTR|PHT"
+  // Live tab title: "● ДЕНЬ 12/30 · BANGTAOSTYLE.COM", "T-5 · BANGTAOSTYLE.COM", "СКОРО · BANGTAOSTYLE.COM"
   useEffect(() => {
     const ru = lang === 'ru';
-    const s = journey.phase === 'live' ? '● ' + (ru ? 'ДЕНЬ ' : 'DAY ') + journey.day + '/' + journey.totalDays + ' · GTR|PHT LIVE'
-      : journey.phase === 'countdown' ? 'T-' + journey.cd.d + ' · GTR|PHT'
-        : journey.phase === 'done' ? 'GTR|PHT · FINISH' : (ru ? 'СКОРО' : 'SOON') + ' · GTR|PHT';
+    const s = journey.phase === 'live' ? '● ' + (ru ? 'ДЕНЬ ' : 'DAY ') + journey.day + '/' + journey.totalDays + ' · BANGTAOSTYLE.COM'
+      : journey.phase === 'countdown' ? 'T-' + journey.cd.d + ' · BANGTAOSTYLE.COM'
+        : journey.phase === 'done' ? 'BANGTAOSTYLE.COM · FINISH' : (ru ? 'СКОРО' : 'SOON') + ' · BANGTAOSTYLE.COM';
     if (document.title !== s) document.title = s;
   }, [journey.phase, journey.day, journey.totalDays, journey.cd.d, lang]);
 
   const scrollToId = (id: string) => {
     const el = document.getElementById(id);
     if (!el) return;
+    if (window.__lenis) { window.__lenis.scrollTo(el, { offset: -74, duration: 1.6 }); return; }
     window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 74, behavior: 'smooth' });
   };
+
 
   const [authUi, setAuthUi] = useState<AuthUiState>({ open: false, tab: 'login', role: 'sub', nick: '', contact: '', pass: '', err: '' });
   const openAuth: HubValue['openAuth'] = (opts) => setAuthUi((s) => ({ ...s, open: true, tab: opts?.tab ?? s.tab, err: opts?.err ?? '' }));

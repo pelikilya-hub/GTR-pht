@@ -1,5 +1,5 @@
 /**
- * GTR|PHT tour model — ring route Phuket → Samui → Phangan → Chiang Mai → Ayutthaya → Bangkok
+ * Bangtaostyle.com tour model — ring route Phuket → Samui → Phangan → Chiang Mai → Ayutthaya → Bangkok
  * → Pattaya → Phuket, finishing on Phuket on 15 Nov 2026.
  *
  * The start date is configured by the crew (shared state `tour.start`). Until it is set the hub

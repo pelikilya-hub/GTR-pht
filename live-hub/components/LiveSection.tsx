@@ -77,7 +77,7 @@ export function LiveSection() {
 
   const share = (() => {
     const u = typeof location !== 'undefined' ? location.href.split('#')[0] : '';
-    const txt = ru ? 'GTR|PHT — кольцо Таиланда в прямом эфире' : 'GTR|PHT — the Thailand loop, live';
+    const txt = ru ? 'Bangtaostyle.com — кольцо Таиланда в прямом эфире' : 'Bangtaostyle.com — the Thailand loop, live';
     const op = (h: string) => { try { window.open(h, '_blank'); } catch { /* ignore */ } };
     return [
       { n: 'COPY LINK', go: () => { try { navigator.clipboard.writeText(u).then(() => notify(t.toastCopied)).catch(() => notify(u)); } catch { notify(u); } } },

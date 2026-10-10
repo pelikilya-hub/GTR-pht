@@ -120,7 +120,7 @@ export function RouteSection() {
       const map = new maplibregl.Map({
         container: box.current, style, attributionControl: { compact: true },
         bounds: [[97.6, 7.4], [101.4, 19.4]], fitBoundsOptions: { padding: narrow ? 30 : { top: 40, bottom: 40, left: 420, right: 60 } },
-        cooperativeGestures: true, dragRotate: false, pitchWithRotate: false, maxZoom: 14,
+        cooperativeGestures: true, dragRotate: false, pitchWithRotate: false, maxZoom: 14, maxPitch: 60,
       });
       map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
       mapRef.current = map;
@@ -167,6 +167,12 @@ export function RouteSection() {
           if (reduce || ts - last < 70) return;
           last = ts; k = (k + 1) % steps.length;
           if (map.getLayer('plan')) map.setPaintProperty('plan', 'line-dasharray', steps[k]);
+          const sec = document.getElementById('route');
+          const pp = sec ? parseFloat(getComputedStyle(sec).getPropertyValue('--p') || '0') : 0;
+          if (!map.isMoving() && !popupRef.current?.isOpen()) {
+            const pitch = Math.sin(Math.min(1, Math.max(0, pp)) * Math.PI) * 52;
+            map.jumpTo({ pitch, bearing: (pp - 0.5) * -18 });
+          }
           const head = ((ts / 16000) % 1) * (LEGS.length + 0.6);
           (map.getSource('laser') as ML.GeoJSONSource | undefined)?.setData(lineFC(pathRange(head - 0.6, head)));
         };
