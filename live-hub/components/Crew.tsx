@@ -1,6 +1,7 @@
 'use client';
 import { useHub } from '@/lib/HubContext';
 import { GtrDeity } from './GtrDeity';
+import { ClassifiedPortrait } from './fx/ClassifiedPortrait';
 import { SectionHead } from './ui/Motion';
 
 // Real portraits go to public/assets/crew/<id>.jpg; until then each card shows a generative glyph portrait.
@@ -18,7 +19,7 @@ export function Crew() {
               <div style={{ height: 340, position: 'relative', background: '#09090b' }}>
                 {idx === 0
                   ? <img src="/assets/crew/ilia-bangla.jpg" alt={c.name} loading="lazy" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '50% 18%' }} />
-                  : <GtrDeity variant={ART[idx] || 'ilia'} />}
+                  : idx === 1 ? <ClassifiedPortrait /> : <GtrDeity variant={ART[idx] || 'ilia'} />}
                 <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,transparent 55%,rgba(8,8,10,.95))' }} />
                 <div style={{ position: 'absolute', left: 22, bottom: 18 }}>
                   <div className="kicker" style={{ fontSize: 10 }}>{c.role}</div>

@@ -94,7 +94,7 @@ const RU: Dict = {
   crewTitle: 'ЭКИПАЖ ПРОТОКОЛА',
   crew: [
     { name: 'ILIA', role: 'ГОЛОС ПРОТОКОЛА', desc: 'Эфиры, разговоры, смысл. Держит связь с аудиторией из любой точки маршрута.', ph: 'фото ILIA — перетащи сюда' },
-    { name: 'GTR', role: 'ПИЛОТ', desc: '3 540 км за рулём. Машина, паромы, техника и охота за тачками — его зона протокола.', ph: 'фото GTR — перетащи сюда' },
+    { name: 'GTR', role: 'УЧАСТНИК 02 · ОБРАЗ ЗАСЕКРЕЧЕН', desc: 'Роковая королева баварского премиума. Интересная история, тяга к болтам, маслу и приключениям. Кто она — узнаешь в эфире.', ph: 'фото GTR — перетащи сюда' },
     { name: 'НОВЫЙ ЧЛЕН', role: 'ОПЕРАТОР', desc: 'Камера, монтаж на ходу, дрон. Третий глаз протокола — снимает то, что не видит экипаж.', ph: 'фото оператора — перетащи сюда' },
   ],
   spTitle: 'СПОНСОРСКИЕ СЛОТЫ', spSub: 'ИНТЕГРАЦИИ: БОРТ МАШИНЫ · ОВЕРЛЕЙ ЭФИРА · ДЖИНГЛ · НАТИВНЫЕ ТОЧКИ МАРШРУТА',
@@ -230,7 +230,7 @@ const EN: Dict = {
   crewTitle: 'THE CREW',
   crew: [
     { name: 'ILIA', role: 'VOICE OF PROTOCOL', desc: 'Streams, talk, meaning. Keeps the line to the audience open from any point of the route.', ph: 'ILIA photo — drop here' },
-    { name: 'GTR', role: 'PILOT', desc: '3,540 km behind the wheel. Car, ferries, tech and the car hunt — his zone of the protocol.', ph: 'GTR photo — drop here' },
+    { name: 'GTR', role: 'MEMBER 02 · IDENTITY CLASSIFIED', desc: 'The femme fatale of Bavarian premium. A story worth hearing, a thing for bolts, oil and adventure. Who she is — you’ll see on stream.', ph: 'GTR photo — drop here' },
     { name: 'NEW MEMBER', role: 'OPERATOR', desc: 'Camera, on-the-fly editing, drone. The protocol’s third eye — shoots what the crew doesn’t see.', ph: 'operator photo — drop here' },
   ],
   spTitle: 'SPONSOR SLOTS', spSub: 'INTEGRATIONS: CAR LIVERY · STREAM OVERLAY · JINGLE · NATIVE ROUTE SPOTS',

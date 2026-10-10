@@ -821,3 +821,43 @@ main > section { --p: 0; --e: 1; --x: 0; }
 .player-facade::before { content: ''; position: absolute; inset: 0; background: rgba(10, 11, 13, .72); }
 .player-facade > * { position: relative; }
 .player-facade .pf-title { font: 800 clamp(18px, 2.6vw, 30px)/1.1 var(--display); letter-spacing: -.01em; max-width: 520px; text-transform: uppercase; }
+
+/* crew console · media library */
+.ml-up { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 14px; }
+.ml-prog { display: grid; grid-template-columns: minmax(0, 1fr) 120px 40px; gap: 10px; align-items: center; font-size: 13px; }
+.ml-prog > span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ml-list { margin-top: 16px; border-top: 1px solid var(--line); max-height: 70vh; overflow-y: auto; }
+.ml-row { border-bottom: 1px solid var(--line); }
+.ml-main { width: 100%; display: flex; align-items: center; gap: 12px; padding: 12px 4px; background: none; border: 0; color: inherit; cursor: pointer; text-align: left; min-height: 52px; }
+.ml-main:hover, .ml-row.open .ml-main { background: rgba(255, 255, 255, .03); }
+.ml-ic { width: 28px; flex: none; text-align: center; color: var(--red-2); font-size: 15px; }
+.ml-name { flex: 1; min-width: 0; display: grid; gap: 3px; }
+.ml-name b { font: 600 14px/1.25 var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ml-name .meta { font-size: 9.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ml-info { flex: none; font-size: 10px; text-align: right; }
+.ml-view { display: grid; gap: 12px; padding: 4px 4px 16px 44px; }
+.ml-view video, .ml-view img { max-width: min(100%, 720px); max-height: 60vh; background: #000; display: block; }
+.ml-view audio { width: min(100%, 520px); }
+@media (max-width: 560px) {
+  .ml-info { display: none; }
+  .ml-view { padding-left: 4px; }
+  .ml-row.open .ml-info { display: block; }
+}
+
+/* hero title cards (components/fx/HeroTitles.tsx) */
+.hero-titles { margin-top: 22px; }
+.ht-k { display: flex; gap: 14px; align-items: center; color: var(--red-2); animation: htIn .5s steps(4) both; }
+.ht-k .ht-n { color: var(--ink-3); }
+@keyframes htIn { 0% { opacity: 0; transform: translateX(-12px); } 100% { opacity: 1; transform: none; } }
+.hero-titles h1 { margin-top: 10px; min-height: 1.92em; }
+.hero-titles h1.ht-cast { letter-spacing: .02em; }
+.hero-titles h1.ht-cast .ct-w.ct-done.ct-red { color: var(--red); }
+
+/* crew · participant 02 — classified portrait */
+.classified { position: absolute; inset: 0; background: #09090b; }
+.classified canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.cl-stamp { position: absolute; top: 34px; right: -6px; transform: rotate(8deg); padding: 6px 14px; border: 2px solid var(--red-2);
+  color: var(--red-2); font: 800 15px/1 var(--display); letter-spacing: .12em; background: rgba(9, 9, 11, .6); animation: clStamp 3.2s steps(1, end) infinite; }
+@keyframes clStamp { 0%, 92% { opacity: 1; } 93%, 95% { opacity: .2; } 96% { opacity: 1; } }
+.cl-hud { position: absolute; top: 12px; left: 14px; right: 14px; display: flex; flex-direction: column; gap: 4px; font-size: 9px; color: var(--ink-3); }
+.cl-hud span:first-child { color: #fff; }

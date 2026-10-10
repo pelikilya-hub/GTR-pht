@@ -5,6 +5,7 @@ import { getCrewKey, setCrewKey, pushShared, pullShared } from '@/lib/sharedStat
 import { ls } from '@/lib/storage';
 import type { Car } from './Cars';
 import { DEFAULT_START } from '@/lib/journey';
+import { MediaLibrary } from './MediaLibrary';
 
 type Post = { id: string; ts: number; member: string; type: 'post' | 'mat' | 'hyp' | 'obs'; text: string; link?: string };
 const STATUSES: [string, string][] = [['drive', 'В ПУТИ'], ['base', 'НА БАЗЕ'], ['ferry', 'ПАРОМ'], ['live', 'В ЭФИРЕ'], ['stop', 'СТОП']];
@@ -14,6 +15,19 @@ const CH = ['twitch', 'youtube', 'kick', 'vk', 'telegram', 'tiktok'];
 /** ICT wall-clock "YYYY-MM-DDTHH:mm" ⇄ ISO */
 const toLocal = (iso?: string | null) => (iso ? new Date(Date.parse(iso) + 7 * 3600e3).toISOString().slice(0, 16) : '');
 const fromLocal = (v: string) => (v ? new Date(Date.parse(v + ':00Z') - 7 * 3600e3).toISOString() : null);
+
+/** campaign stage for the console hint — mirrors lib/promo.ts promoStage() */
+function promoStageLabel(startLocal: string): string {
+  const ms = startLocal ? Date.parse(startLocal + ':00Z') - 7 * 3600e3 : NaN;
+  if (!isFinite(ms)) return 'интрига (дата старта не задана)';
+  const left = ms - Date.now(), d = Math.ceil(left / 864e5);
+  if (Date.now() > Date.parse('2026-11-15T20:00:00+07:00')) return 'после финиша';
+  if (left <= 0) return 'тур в эфире';
+  if (d > 7) return `интрига · до старта ${d} дн.`;
+  if (d >= 3) return `раскрытие · до старта ${d} дн.`;
+  if (left > 864e5) return `призыв · до старта ${d} дн.`;
+  return 'день старта';
+}
 
 function Card({ title, children, note }: { title: string; children: React.ReactNode; note?: string }) {
   return (
@@ -38,6 +52,7 @@ export default function Console() {
   const [channels, setChannels] = useState<Record<string, string>>({});
   const [ints, setInts] = useState({ payUrl: '', posUrl: '' });
   const [gpsAuto, setGpsAuto] = useState(false);
+  const [promo, setPromo] = useState('');
   const watch = useRef<number | null>(null);
 
   const say = (m: string) => { setMsg(m); setTimeout(() => setMsg(''), 3500); };
@@ -50,6 +65,7 @@ export default function Console() {
     setChannels(ls<Record<string, string>>('gtrpht_channels', {}));
     const i = ls<{ payUrl?: string; posUrl?: string }>('gtrpht_integrations', {});
     setInts({ payUrl: i.payUrl || '', posUrl: i.posUrl || '' });
+    setPromo(ls<{ a: string; b?: string }[]>('gtrpht_promo', []).map((c) => c.a + (c.b ? ' / ' + c.b : '')).join('\n'));
   };
   const check = async (k: string) => {
     const r = await fetch('/api/crew/check', { headers: { 'X-Crew-Key': k }, cache: 'no-store' }).catch(() => null);
@@ -188,6 +204,18 @@ export default function Console() {
           <label style={{ display: 'grid', gridTemplateColumns: '90px 1fr', gap: 8, alignItems: 'center' }}><span className="meta">gps url</span>{inp(ints.posUrl, (v) => setInts({ ...ints, posUrl: v }), 'https://… (необязательно)')}</label>
           <button className="btn btn-red btn-sm" onClick={() => save({ channels, integrations: ints }, 'Каналы сохранены')}>СОХРАНИТЬ</button>
         </Card>
+
+        <Card title="PR-КАМПАНИЯ · ТИТРЫ НА ГЛАВНОЙ" note="Титры на главной меняются под бит трека. Порядок: бренд → «УЧАСТНИКИ ILIA | GTR» → ваши тизеры → отсчёт → прогрев текущей стадии (меняется сам: интрига > 7 дней, раскрытие 7–3, призыв 2–1, день старта, эфир, финиш). Одна строка = одна карточка, «/» делит на белую и красную строку, до 12 карточек.">
+          <div className="meta">СЕЙЧАС: {promoStageLabel(start)}</div>
+          <textarea className="field" style={{ minHeight: 140, fontFamily: 'var(--mono)', fontSize: 13 }} value={promo} onChange={(e) => setPromo(e.target.value)}
+            placeholder={'Bangla Road / 25.10\nТачка №1 / уже в гараже\nКто третий? / узнаешь в эфире'} />
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button className="btn btn-red btn-sm" style={{ flex: 1 }} onClick={() => save({ promo: promo.split('\n').map((l) => l.trim()).filter(Boolean).slice(0, 12).map((l) => { const [a, ...b] = l.split('/'); return { a: a.trim().slice(0, 48), b: b.join('/').trim().slice(0, 48) }; }) }, 'Тизеры на главной обновлены')}>СОХРАНИТЬ ТИЗЕРЫ</button>
+            <button className="btn btn-sm" onClick={() => { setPromo(''); save({ promo: [] }, 'Только автоматический прогрев'); }}>ОЧИСТИТЬ</button>
+          </div>
+        </Card>
+
+        {ok && <MediaLibrary say={say} />}
       </div>
     </div>
   );

@@ -15,6 +15,7 @@ const MAP = {
   posts: 'gtrpht_posts',
   tour: 'gtrpht_tour',
   garage: 'gtrpht_garage',
+  promo: 'gtrpht_promo',
 } as const;
 type SharedKey = keyof typeof MAP;
 
