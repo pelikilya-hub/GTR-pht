@@ -129,9 +129,12 @@ export function HeroReel() {
       ) : SHOTS.map((s, i) => {
         const on = i === idx;
         const near = on || i === (idx + 1) % SHOTS.length;
+        // only the current shot and the next one exist in the DOM: every <video> holds a decoder
+        // and frame buffers, and seven of them is enough for iOS to kill the tab
+        if (!near) return null;
         return s.kind === 'video' ? (
           <video key={i} ref={(el) => { vids.current[i] = el; }} className={'reel-layer' + (on ? ' on' : '')}
-            src={s.src} muted playsInline loop preload={near ? 'auto' : 'metadata'} aria-hidden
+            src={s.src} muted playsInline loop preload="auto" aria-hidden
             poster={s.src.replace('.mp4', '.jpg')} />
         ) : (
            

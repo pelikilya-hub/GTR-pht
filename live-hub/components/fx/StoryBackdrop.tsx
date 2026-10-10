@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 /**
  * Full-viewport backdrop that tells the route's story while you scroll:
@@ -29,15 +29,18 @@ interface Sampled { cols: number; rows: number; lum: Float32Array; img: HTMLImag
 
 export function StoryBackdrop() {
   const cv = useRef<HTMLCanvasElement | null>(null);
+  // Phones: a fixed full-screen canvas under the content makes the browser composite the whole page
+  // into dozens of layers (→ iOS kills and reloads the tab). They get pre-rendered per-section
+  // backgrounds instead (public/assets/codebg, scripts/gen-codebg.py, CSS in hub.css).
+  const [lite] = useState(() => window.matchMedia('(hover: none), (max-width: 760px)').matches);
 
   useEffect(() => {
     const canvas = cv.current;
-    if (!canvas) return;
+    if (lite || !canvas) return;
     const ctx = canvas.getContext('2d', { alpha: false });
     if (!ctx) return;
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     // phones: fewer, bigger cells at ~10 fps and 1× pixels — the glyph field stays, the battery too
-    const lite = window.matchMedia('(hover: none), (max-width: 760px)').matches;
     const interval = reduce ? 1000 : lite ? 100 : 50;
     const cache = new Map<string, Promise<HTMLImageElement>>();
     const load = (src: string) => {
@@ -177,8 +180,9 @@ export function StoryBackdrop() {
       window.removeEventListener('resize', resize); window.removeEventListener('scroll', pick);
       document.removeEventListener('visibilitychange', onVis);
     };
-  }, []);
+  }, [lite]);
 
+  if (lite) return null;
   return (
     <div className="story-bg" aria-hidden>
       <canvas ref={cv} />

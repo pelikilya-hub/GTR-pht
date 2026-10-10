@@ -15,7 +15,7 @@ export function ContentLines() {
                 <span style={{ fontSize: 22, lineHeight: 1 }} aria-hidden>{['🧘', '🔥', '🏝️', '🎧', '🏎️', '🤝'][i] || '◆'}</span>
                 <span className="meta" style={{ color: ln.accent }}>{ln.code}</span>
               </div>
-              <div style={{ fontFamily: 'var(--display)', fontWeight: 900, fontSize: 'clamp(28px,2.6vw,38px)', letterSpacing: '-.035em', lineHeight: 1, overflowWrap: 'anywhere' }}>{ln.title}</div>
+              <div className="cl-title" style={{ fontFamily: 'var(--display)', fontWeight: 900, fontSize: 'clamp(24px,2.3vw,34px)', letterSpacing: '-.02em', lineHeight: 1 }}>{ln.title}</div>
               <div style={{ fontSize: 15, lineHeight: 1.6, color: 'var(--ink-2)', flex: 1, maxWidth: 380 }}>{ln.desc}</div>
               <div className="meta" style={{ fontSize: 9.5 }}>{ln.foot}</div>
             </div>

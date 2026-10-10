@@ -21,23 +21,36 @@ export function CodeText({ text, as: Tag = 'span', className, alt = true, accent
     const el = ref.current;
     if (!el) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { const r = requestAnimationFrame(() => setK(total)); return () => cancelAnimationFrame(r); }
-    let raf = 0;
-    const io = new IntersectionObserver(([e]) => {
-      if (!e.isIntersecting || started.current) return;
-      started.current = true;
+    let raf = 0, done = false;
+    const run = () => {
+      cancelAnimationFrame(raf);
       const t0 = performance.now(), dur = (420 + total * 28) / speed;
       const step = (t: number) => {
         const p = Math.min(1, (t - t0) / dur);
         setK(Math.floor(p * total));
         setTick((x) => x + 1);
         if (Math.random() < 0.35) sfx('decode');
-        if (p < 1) raf = requestAnimationFrame(step);
+        if (p < 1) raf = requestAnimationFrame(step); else done = true;
       };
       raf = requestAnimationFrame(step);
+    };
+    // Text changed after the first reveal (language switch, saved language loading late):
+    // decode the new text right away instead of waiting for an intersection that already happened.
+    if (started.current) { run(); return () => { cancelAnimationFrame(raf); if (!done) setK(total); }; }
+    const io = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting || started.current) return;
+      started.current = true;
+      io.disconnect();
+      run();
     }, { threshold: 0.4 });
     io.observe(el);
-    return () => { io.disconnect(); cancelAnimationFrame(raf); };
-  }, [total, speed]);
+    // never leave a heading stuck in noise if the observer can't fire (tall/odd layouts, TV browsers)
+    const safety = window.setTimeout(() => {
+      const r = el.getBoundingClientRect();
+      if (!started.current && r.bottom > 0 && r.top < window.innerHeight) { started.current = true; io.disconnect(); run(); }
+    }, 2500);
+    return () => { io.disconnect(); clearTimeout(safety); cancelAnimationFrame(raf); };
+  }, [text, total, speed]);
 
   const words = text.split(/(\s+)/);
   const starts: number[] = [];
