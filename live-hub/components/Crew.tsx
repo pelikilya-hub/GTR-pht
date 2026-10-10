@@ -16,7 +16,9 @@ export function Crew() {
           {t.crew.map((c, idx) => (
             <article key={c.name} className="panel rv" style={{ overflow: 'hidden', ['--d' as string]: `${idx * 0.06}s` }}>
               <div style={{ height: 340, position: 'relative', background: '#09090b' }}>
-                <GtrDeity variant={ART[idx] || 'ilia'} />
+                {idx === 0
+                  ? <img src="/assets/crew/ilia-bangla.jpg" alt={c.name} loading="lazy" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '50% 18%' }} />
+                  : <GtrDeity variant={ART[idx] || 'ilia'} />}
                 <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,transparent 55%,rgba(8,8,10,.95))' }} />
                 <div style={{ position: 'absolute', left: 22, bottom: 18 }}>
                   <div className="kicker" style={{ fontSize: 10 }}>{c.role}</div>

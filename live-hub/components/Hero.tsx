@@ -1,6 +1,6 @@
 'use client';
 import { useHub } from '@/lib/HubContext';
-import { GtrDeity } from './GtrDeity';
+import { HeroReel } from './fx/HeroReel';
 import { Count } from './ui/Motion';
 import { CodeText } from './fx/CodeText';
 
@@ -22,18 +22,14 @@ export function Hero() {
 
   return (
     <section className="hero" id="top" data-screen-label="hero">
-      <div className="grid-bg" aria-hidden />
+      <HeroReel />
       <div className="laser" aria-hidden />
-      <div className="impulse thin strobe" aria-hidden style={{ left: '58%' }} />
-      <div className="hero-art" aria-hidden>
-        <GtrDeity variant="thailand" />
-      </div>
       <div className="wrap" style={{ position: 'relative', width: '100%' }}>
         <div className="hero-grid">
           <div>
             <div className="rv" style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
               <span className="kicker">{t.tagline}</span>
-              <span className="tag">🇹🇭 {ru ? 'Кольцо · осень 2026' : 'Loop · autumn 2026'}</span>
+              <span className="tag">🎬 {ru ? 'Первая съёмка · Bangla Road, Патонг' : 'First shoot · Bangla Road, Patong'}</span>
             </div>
             <h1 aria-label={t.heroA + ' ' + t.heroB}>
               <CodeText text={t.heroA} speed={0.8} /><br />
