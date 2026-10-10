@@ -1,0 +1,149 @@
+{
+ "ranges": {
+  "/assets/audio/01-gtr-phuket-bangtao-style.mp3": [
+   "HTTP/2 200 \r",
+   "content-type: audio/mpeg\r",
+   "content-length: 5127082"
+  ],
+  "/assets/video/v-walk-slow.mp4": [
+   "HTTP/2 200 \r",
+   "content-type: video/mp4\r",
+   "content-length: 153345"
+  ],
+  "/assets/video/g-smoke.mp4": [
+   "HTTP/2 200 \r",
+   "content-type: video/mp4\r",
+   "content-length: 318473"
+  ],
+  "/assets/video/car-2.mp4": [
+   "HTTP/2 200 \r",
+   "content-type: video/mp4\r",
+   "content-length: 987687"
+  ]
+ },
+ "browsers": {
+  "chrome": {
+   "errors": [],
+   "failed": [
+    "https://bangtaostyle.com/assets/video/car-2.mp4 net::ERR_ABORTED"
+   ],
+   "reel": [
+    {
+     "src": "g-lips.mp4",
+     "rs": 1,
+     "paused": false,
+     "t": 0,
+     "err": null,
+     "rate": 0.5455489331029251
+    },
+    {
+     "src": "car-2.mp4",
+     "rs": 4,
+     "paused": true,
+     "t": 0,
+     "err": null,
+     "rate": 1
+    }
+   ],
+   "canH264": "probably",
+   "audio": {
+    "play": "ok",
+    "t1": 3.01,
+    "paused": false,
+    "dur": 214.759979,
+    "err": null,
+    "src": "01-gtr-phuket-bangtao-style.mp3",
+    "afterSeek": 2.5,
+    "buffered": [
+     0,
+     175.7
+    ]
+   },
+   "reelAfter": {
+    "shot": "SHOT 04 / 19 · NIGHT DRIFT · BANGTAO STYLE",
+    "cls": "reel sync",
+    "vids": [
+     {
+      "src": "car-2.mp4",
+      "rs": 4,
+      "paused": false,
+      "t": 0.61,
+      "err": null,
+      "rate": 1.25
+     },
+     {
+      "src": "g-laugh.mp4",
+      "rs": 4,
+      "paused": true,
+      "t": 0,
+      "err": null,
+      "rate": 1
+     }
+    ]
+   },
+   "iframes": []
+  },
+  "webkit": {
+   "errors": [],
+   "failed": [],
+   "reel": [
+    {
+     "src": "g-lips.mp4",
+     "rs": 4,
+     "paused": false,
+     "t": 0.18,
+     "err": null,
+     "rate": 0.8
+    },
+    {
+     "src": "car-2.mp4",
+     "rs": 4,
+     "paused": true,
+     "t": 0,
+     "err": null,
+     "rate": 1
+    }
+   ],
+   "canH264": "probably",
+   "audio": {
+    "play": "ok",
+    "t1": 4.06,
+    "paused": false,
+    "dur": 214.8,
+    "err": null,
+    "src": "01-gtr-phuket-bangtao-style.mp3",
+    "afterSeek": 123.5,
+    "buffered": [
+     0,
+     214.8
+    ]
+   },
+   "reelAfter": {
+    "shot": "SHOT 17 / 19 · SUNSET · SCROLL",
+    "cls": "reel sync",
+    "vids": [
+     {
+      "src": "v-walk-slow.mp4",
+      "rs": 4,
+      "paused": false,
+      "t": 0,
+      "err": null,
+      "rate": 0.75
+     },
+     {
+      "src": "car-1.mp4",
+      "rs": 4,
+      "paused": true,
+      "t": 0,
+      "err": null,
+      "rate": 1
+     }
+    ]
+   },
+   "iframes": []
+  }
+ },
+ "state": {
+  "v": 0
+ }
+}
