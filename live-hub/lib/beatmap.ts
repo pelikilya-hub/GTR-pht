@@ -9,5 +9,8 @@ export const BEATMAP: Record<string, Grid> = {
   '03-midnight-circuit.mp3': { bpm: 142, offset: 0.032 },
   '04-longlost-i-hate-everything-about-you.mp3': { bpm: 85, offset: 2.839 },
   '05-concrete-heartbeat.mp3': { bpm: 122, offset: 1.724 },
+  '06-bang-tao-style.mp3': { bpm: 87.44, offset: 1.683 },
+  '07-tin-moonshine.mp3': { bpm: 139.86, offset: 1.737 },
+  '08-untitled.mp3': { bpm: 86, offset: 0.356 },
 };
 export const gridFor = (src: string): Grid | null => BEATMAP[decodeURIComponent(src.split('/').pop() || '')] || null;
