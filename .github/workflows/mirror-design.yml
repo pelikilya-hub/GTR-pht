@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with: { node-version: 22 }
-      - run: npm i --no-save playwright@1.56.1 >/dev/null && npx playwright install --with-deps chromium webkit >/dev/null
+      - run: npm i --no-save playwright@1.56.1 >/dev/null && true
       - run: node .github/scripts/probe.mjs
       - name: Commit results (public data only)
         run: |
