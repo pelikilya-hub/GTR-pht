@@ -287,7 +287,7 @@ export default {
       return env.ROOM.get(id).fetch(req);
     }
 
-    if (/^\/assets\/(audio|video)\//.test(url.pathname) && (req.method === 'GET' || req.method === 'HEAD')) return serveMedia(req, env);
+    if (/^\/assets\/(audio|video|scales)\/.+\.(mp3|m4a|mp4|webm)$/.test(url.pathname) && (req.method === 'GET' || req.method === 'HEAD')) return serveMedia(req, env);
 
     return env.ASSETS.fetch(req);
   },
