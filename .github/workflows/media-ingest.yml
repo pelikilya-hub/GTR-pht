@@ -1,0 +1,74 @@
+name: Media ingest → R2
+
+# Content factory inbox. Files arrive here ENCRYPTED (AES-256-CBC, per-batch key wrapped with RSA-OAEP);
+# the private RSA key lives only in the private R2 bucket, so plaintext never touches git.
+#  - setup: creates the bucket + keypair (runs when keys/public.pem is missing)
+#  - ingest: decrypts inbox/*.enc, uploads to r2://bangtaostyle-media/<path>, appends the index, empties the inbox
+
+on:
+  push:
+    branches: [media-inbox]
+
+permissions:
+  contents: write
+
+concurrency: { group: media-ingest, cancel-in-progress: false }
+
+env:
+  BUCKET: bangtaostyle-media
+  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with: { node-version: 22 }
+      - run: npm i -g wrangler@4 >/dev/null 2>&1 && wrangler --version
+
+      - name: Setup (bucket + keypair) if needed
+        if: hashFiles('keys/public.pem') == ''
+        run: |
+          set -e
+          wrangler r2 bucket create "$BUCKET" 2>&1 | tail -3 || true
+          wrangler r2 bucket list 2>&1 | grep -q "$BUCKET"
+          openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:4096 -out /tmp/priv.pem
+          openssl pkey -in /tmp/priv.pem -pubout -out keys/public.pem
+          wrangler r2 object put "$BUCKET/_keys/ingest-private.pem" --file /tmp/priv.pem --remote >/dev/null
+          shred -u /tmp/priv.pem
+          echo '{"files":[]}' > /tmp/index.json
+          wrangler r2 object put "$BUCKET/index.json" --file /tmp/index.json --content-type application/json --remote >/dev/null
+          git config user.name "github-actions[bot]"; git config user.email "41898+github-actions[bot]@users.noreply.github.com"
+          git add keys/public.pem && git commit -qm "media: bucket + ingest public key" && git push -q origin HEAD:media-inbox
+
+      - name: Ingest
+        if: hashFiles('inbox/*.enc') != ''
+        run: |
+          set -e
+          wrangler r2 object get "$BUCKET/_keys/ingest-private.pem" --file /tmp/priv.pem --remote >/dev/null
+          wrangler r2 object get "$BUCKET/index.json" --file /tmp/index.json --remote >/dev/null || echo '{"files":[]}' > /tmp/index.json
+          sudo apt-get -qq install -y ffmpeg >/dev/null 2>&1 || true
+          for enc in inbox/*.enc; do
+            base="${enc%.enc}"
+            KEY=$(base64 -d "$base.key" | openssl pkeyutl -decrypt -inkey /tmp/priv.pem -pkeyopt rsa_padding_mode:oaep -pkeyopt rsa_oaep_md:sha256)
+            dest=$(cat "$base.path")
+            openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -pass "pass:$KEY" -in "$enc" -out /tmp/file
+            size=$(stat -c %s /tmp/file); sha=$(sha256sum /tmp/file | cut -c1-16)
+            dur=$(ffprobe -v error -show_entries format=duration -of csv=p=0 /tmp/file 2>/dev/null || echo "")
+            wh=$(ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 /tmp/file 2>/dev/null | head -1 || echo "")
+            ct=$(file -b --mime-type /tmp/file)
+            wrangler r2 object put "$BUCKET/$dest" --file /tmp/file --content-type "$ct" --remote >/dev/null
+            node -e 'const fs=require("fs");const i=JSON.parse(fs.readFileSync("/tmp/index.json"));const [p,s,h,d,w,c]=process.argv.slice(1);i.files=i.files.filter(f=>f.path!==p);i.files.push({path:p,size:+s,sha:h,duration:d?+(+d).toFixed(2):null,size_px:w||null,type:c,added:new Date().toISOString()});fs.writeFileSync("/tmp/index.json",JSON.stringify(i,null,1))' "$dest" "$size" "$sha" "$dur" "$wh" "$ct"
+            echo "stored $dest ($size bytes, ${wh:-n/a}, ${dur:-n/a}s)"
+            rm -f /tmp/file
+          done
+          wrangler r2 object put "$BUCKET/index.json" --file /tmp/index.json --content-type application/json --remote >/dev/null
+          shred -u /tmp/priv.pem
+          # public log without file contents: paths + sizes only
+          node -e 'const i=require("/tmp/index.json");console.log(i.files.map(f=>f.path+"  "+f.size+"  "+(f.size_px||"")+"  "+(f.duration||"")).join("\n"))' > keys/LAST_INDEX.txt
+          git config user.name "github-actions[bot]"; git config user.email "41898+github-actions[bot]@users.noreply.github.com"
+          git rm -q inbox/*.enc inbox/*.key inbox/*.path
+          git add keys/LAST_INDEX.txt
+          git commit -qm "media: ingested $(ls -1 inbox 2>/dev/null | wc -l) → R2" && git push -q origin HEAD:media-inbox
