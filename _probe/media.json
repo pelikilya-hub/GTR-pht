@@ -1,0 +1,8 @@
+{
+ "list_no_key": "401",
+ "file_bad_token": "401",
+ "keys_path": "401",
+ "health": "{\"ok\":true,\"sfu\":true,\"turn\":true,\"hook\":true,\"crew\":true}",
+ "home": "200",
+ "console": "200"
+}
