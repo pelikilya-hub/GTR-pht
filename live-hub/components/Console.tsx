@@ -105,7 +105,7 @@ export default function Console() {
   return (
     <div className="hub" style={{ padding: '0 0 80px' }}>
       <header className="top scrolled"><div className="top-in">
-        <Link href="/" className="logo">GTR<i>|</i>PHT</Link>
+        <Link href="/" className="logo">BANGTAOSTYLE<i>.COM</i></Link>
         <span className="meta">КОНСОЛЬ ЭКИПАЖА</span>
         <div className="top-sp" />
         <Link href="/camera/" className="chip">КАМЕРА</Link>

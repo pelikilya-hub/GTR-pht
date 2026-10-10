@@ -16,7 +16,7 @@ export function AudioBar() {
       {count > 1 && <button className="skip" onClick={prev} aria-label="previous">⏮</button>}
       <div className="eq" aria-hidden><i /><i /><i /><i /></div>
       <div style={{ minWidth: 0, flex: '0 1 200px' }}>
-        <div className="meta meta-t" style={{ fontSize: 9 }}>GTR|PHT · SOUNDTRACK{count > 1 ? ` · ${idx + 1}/${count}` : ''}</div>
+        <div className="meta meta-t" style={{ fontSize: 9 }}>BANGTAOSTYLE.COM · SOUNDTRACK{count > 1 ? ` · ${idx + 1}/${count}` : ''}</div>
         <div style={{ fontFamily: 'var(--display)', fontWeight: 700, fontSize: 13.5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{title}</div>
       </div>
       <div onClick={(e) => { const r = e.currentTarget.getBoundingClientRect(); seek((e.clientX - r.left) / r.width); }} style={{ flex: 1, height: 28, display: 'flex', alignItems: 'center', cursor: 'pointer', minWidth: 40 }}>

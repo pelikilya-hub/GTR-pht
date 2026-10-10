@@ -158,7 +158,7 @@ function Corners() {
 function ModalHeader({ tag, onClose }: { tag: string; onClose: () => void }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '16px 20px', borderBottom: '1px solid #1C1C20' }}>
-      <span style={{ fontFamily: "'Inter Tight',sans-serif", fontWeight: 900, fontSize: 14, letterSpacing: '.05em', color: '#ECE9E4' }}>GTR<span style={{ color: '#E5372C' }}>|</span>PHT</span>
+      <span style={{ fontFamily: "'Inter Tight',sans-serif", fontWeight: 900, fontSize: 14, letterSpacing: '.05em', color: '#ECE9E4' }}>BANGTAOSTYLE<span style={{ color: '#E5372C' }}>.COM</span></span>
       <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, letterSpacing: '.2em', color: '#55545C' }}>{tag}</span>
       <span style={{ flex: 1 }} />
       <button onClick={onClose} style={{ background: 'none', border: '1px solid #2A2A30', color: '#8E8C94', fontFamily: "'JetBrains Mono',monospace", fontSize: 11, padding: '6px 10px', cursor: 'pointer', minHeight: 32 }}>✕</button>

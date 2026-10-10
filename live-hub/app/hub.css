@@ -1,4 +1,4 @@
-/* ═══════════════ GTR|PHT · design system (GTR brandbook v1.0) ═══════════════
+/* ═══════════════ BANGTAOSTYLE.COM · design system (GTR brandbook v1.0) ═══════════════
    Tokens and components follow the GTR brandbook / GTR Event (src/gtr/gtr.css):
    Void black, one signal red, square geometry with cut corners, mono uppercase
    labels, numbered eyebrows, grain + scanlines. Display face: Inter Tight. */
@@ -52,7 +52,7 @@ body::after {
 .sec { position: relative; padding: clamp(64px, 9vw, 120px) 0 0; counter-increment: sec; }
 .hub main { counter-reset: sec; }
 .sec::before { /* section separator with index, like the brandbook's ".no" */
-  content: counter(sec, decimal-leading-zero) ' / GTR|PHT'; position: absolute; top: clamp(26px, 4vw, 44px); right: var(--gut);
+  content: counter(sec, decimal-leading-zero) ' / BANGTAOSTYLE.COM'; position: absolute; top: clamp(26px, 4vw, 44px); right: var(--gut);
   font: 500 11px/1 var(--mono); letter-spacing: .15em; color: var(--ink-4);
 }
 .sec-head { display: flex; align-items: flex-end; gap: 24px; flex-wrap: wrap; margin-bottom: clamp(26px, 4vw, 44px); }
@@ -438,3 +438,49 @@ body::before, body::after { z-index: 1; }
   .car-mosaic { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 150px; }
   .car-shot:nth-child(5) { grid-column: span 1; }
 }
+
+/* ═══════════════ Cinematic scroll (driven by ScrollFX: --p, --e, --x, --v, --lb) ═══════════════ */
+:root { --v: 0; --lb: 0; }
+main > section { --p: 0; --e: 1; --x: 0; }
+
+/* letterbox bars that slide in on fast moves, like a film cut */
+.lb { position: fixed; left: 0; right: 0; height: calc(var(--lb) * 7vh); background: #000; z-index: 1050; pointer-events: none; }
+.lb-top { top: 0; } .lb-bot { bottom: 0; }
+
+/* backdrop: slow dolly zoom with page depth + motion blur on speed */
+.story-bg canvas { transform: scale(calc(1.04 + var(--v) * .06)); filter: blur(calc(var(--v) * 2px)); transition: filter .2s; }
+
+/* hero: camera pulls through the headline as you leave */
+.hero h1 { transform: translate3d(0, calc(var(--x) * -18vh), 0) scale(calc(1 + var(--x) * .35)); filter: blur(calc(var(--x) * 10px)); opacity: calc(1 - var(--x) * 1.4); transform-origin: 0 60%; will-change: transform, filter; }
+.hero .lead, .hero-cta { transform: translate3d(0, calc(var(--x) * -8vh), 0); opacity: calc(1 - var(--x) * 2); }
+.hero-status { transform: translate3d(0, calc(var(--x) * -30vh), 0) rotate(calc(var(--x) * -3deg)); }
+.hero-art { transform: scale(calc(1 + var(--x) * .5)) translate3d(0, calc(var(--x) * 10vh), 0); opacity: calc(.95 - var(--x)); }
+.hero .stats { transform: translate3d(0, calc(var(--x) * -4vh), 0); }
+
+/* section heads: focus-pull in (blur → sharp, tracking tightens) */
+.sec .sec-head .h2 { filter: blur(calc((1 - var(--e)) * 9px)); letter-spacing: calc(-.025em + (1 - var(--e)) * .18em); opacity: calc(.15 + var(--e) * .85);
+  text-shadow: calc(var(--v) * 4px) 0 rgba(255, 52, 39, .75), calc(var(--v) * -4px) 0 rgba(90, 200, 255, .5); }
+.hero h1 { text-shadow: calc(var(--v) * 5px) 0 rgba(255, 52, 39, .75), calc(var(--v) * -5px) 0 rgba(90, 200, 255, .45); }
+.sec .sec-head .kicker { transform: translate3d(calc((1 - var(--e)) * -40px), 0, 0); }
+
+/* big media: rise from depth and settle */
+.map-shell, .drone-shot, .scales-stage, .player { transform: perspective(1400px) translate3d(0, calc((1 - var(--e)) * 70px), 0) rotateX(calc((1 - var(--e)) * 14deg)) scale(calc(.9 + var(--e) * .1)); transform-origin: 50% 100%; }
+
+/* parallax inside frames */
+.car-shot img, .place .ph img, .car-card .img img { transform: translate3d(0, calc((var(--p) - .5) * -9%), 0) scale(1.18); }
+.car-shot:hover img { transform: translate3d(0, calc((var(--p) - .5) * -9%), 0) scale(1.24); }
+.place .ph img { animation: none; }
+.car-mosaic .car-shot:nth-child(odd) { transform: translate3d(0, calc((var(--p) - .5) * 26px), 0); }
+.car-mosaic .car-shot:nth-child(even) { transform: translate3d(0, calc((var(--p) - .5) * -26px), 0); }
+
+/* stops rail drifts sideways with the scroll */
+.stops { transform: translate3d(calc((.5 - var(--p)) * 8vw), 0, 0); }
+
+@media (prefers-reduced-motion: reduce) {
+  .lb { display: none; }
+  .hero h1, .hero .lead, .hero-cta, .hero-status, .hero-art, .hero .stats, .sec .sec-head .h2, .sec .sec-head .kicker,
+  .map-shell, .drone-shot, .scales-stage, .player, .car-shot img, .place .ph img, .car-mosaic .car-shot, .stops { transform: none !important; filter: none !important; opacity: 1 !important; }
+}
+.hub { overflow-x: clip; }
+@media (max-width: 560px) { .logo { font-size: 15px; letter-spacing: .02em; } }
+@media (max-width: 360px) { .logo { font-size: 13px; } .top .chip { padding: 0 6px; } }

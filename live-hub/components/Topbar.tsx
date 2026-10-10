@@ -38,7 +38,7 @@ export function Topbar() {
     <>
       <header className={'top' + (scrolled ? ' scrolled' : '')}>
         <div className="top-in">
-          <a href="#top" className="logo" onClick={() => setMenu(false)}>GTR<i>|</i>PHT</a>
+          <a href="#top" className="logo" onClick={() => setMenu(false)}>BANGTAOSTYLE<i>.COM</i></a>
           <nav className="nav">
             {t.nav.map(([id, label]) => <a key={id} href={'#' + id}>{label}</a>)}
           </nav>
@@ -47,11 +47,11 @@ export function Topbar() {
             <span className={'dot' + (live ? ' live' : '')} />
             {live ? 'LIVE · ' : ''}{status}
           </span>
-          <div className="seg" style={{ padding: 3 }}>
+          <div className="seg hide-sm" style={{ padding: 3 }}>
             <button className={ru ? 'on' : ''} onClick={() => setLang('ru')} style={{ height: 30, minHeight: 30, padding: '0 10px' }}>RU</button>
             <button className={!ru ? 'on' : ''} onClick={() => setLang('en')} style={{ height: 30, minHeight: 30, padding: '0 10px' }}>EN</button>
           </div>
-          <button className="chip" style={{ cursor: 'pointer', height: 30 }} title={ru ? 'Звуки интерфейса' : 'UI sounds'} onClick={() => { unlockSfx(); setSfxEnabled(!snd); }}>{snd ? '🔊' : '🔇'}</button>
+          <button className="chip hide-sm" style={{ cursor: 'pointer', height: 30 }} title={ru ? 'Звуки интерфейса' : 'UI sounds'} onClick={() => { unlockSfx(); setSfxEnabled(!snd); }}>{snd ? '🔊' : '🔇'}</button>
           <button className="btn btn-sm hide-sm" onClick={() => openAuth()} style={{ minHeight: 38 }}>
             {me ? me.nick.toUpperCase().slice(0, 12) : ru ? 'Войти' : 'Sign in'}
           </button>
@@ -66,6 +66,13 @@ export function Topbar() {
         <div className="sheet" onClick={() => setMenu(false)}>
           {t.nav.map(([id, label]) => <a key={id} href={'#' + id}>{label}</a>)}
           <a href="#" onClick={(e) => { e.preventDefault(); setMenu(false); openAuth(); }}>{me ? me.nick : ru ? 'Войти' : 'Sign in'}</a>
+          <div style={{ display: 'flex', gap: 10, marginTop: 18 }} onClick={(e) => e.stopPropagation()}>
+            <div className="seg">
+              <button className={ru ? 'on' : ''} onClick={() => setLang('ru')}>RU</button>
+              <button className={!ru ? 'on' : ''} onClick={() => setLang('en')}>EN</button>
+            </div>
+            <button className="chip" style={{ height: 38, cursor: 'pointer' }} onClick={() => { unlockSfx(); setSfxEnabled(!snd); }}>{snd ? '🔊' : '🔇'} {ru ? 'Звук' : 'Sound'}</button>
+          </div>
           <Link href="/console/" style={{ fontSize: 18, color: 'var(--red-2)', border: 0, marginTop: 18 }}>{ru ? 'Консоль экипажа →' : 'Crew console →'}</Link>
         </div>
       )}

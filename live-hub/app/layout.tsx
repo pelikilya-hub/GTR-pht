@@ -3,7 +3,7 @@ import './globals.css';
 import './hub.css';
 
 export const metadata: Metadata = {
-  title: 'GTR|PHT LIVE HUB',
+  title: 'BANGTAOSTYLE.COM · LIVE',
   description: 'Кольцо Таиланда в прямом эфире: Пхукет → Самуи → Панган → Чиангмай → Аюттхая → Бангкок → Паттайя → Пхукет',
 };
 
