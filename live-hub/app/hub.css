@@ -811,3 +811,13 @@ main > section { --p: 0; --e: 1; --x: 0; }
   @keyframes reelZoomLite { 0% { transform: scale(1.25); } 100% { transform: none; } }
 }
 @media (hover: none), (max-width: 760px) { .reel-layer { filter: none; } }
+/* audio dock states */
+.audio.loading .eq i { animation: eqWait 1s steps(2, end) infinite; height: 6px; }
+@keyframes eqWait { 0% { opacity: 1; } 50% { opacity: .25; } }
+.audio.error .play { background: var(--ink-3); }
+.audio.error .meta-t:first-child { color: var(--red-2); }
+.player-facade { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 0 24px; text-align: center;
+  background: radial-gradient(60% 60% at 50% 40%, rgba(229, 55, 44, .14), transparent 70%), url('/assets/video/car-2.jpg') center / cover; }
+.player-facade::before { content: ''; position: absolute; inset: 0; background: rgba(10, 11, 13, .72); }
+.player-facade > * { position: relative; }
+.player-facade .pf-title { font: 800 clamp(18px, 2.6vw, 30px)/1.1 var(--display); letter-spacing: -.01em; max-width: 520px; text-transform: uppercase; }

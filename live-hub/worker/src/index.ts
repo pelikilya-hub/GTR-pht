@@ -276,9 +276,48 @@ export default {
       return env.ROOM.get(id).fetch(req);
     }
 
+    if (/^\/assets\/(audio|video)\//.test(url.pathname) && (req.method === 'GET' || req.method === 'HEAD')) return serveMedia(req, env);
+
     return env.ASSETS.fetch(req);
   },
 };
+
+/**
+ * Audio / video with HTTP byte ranges. The static-asset server answers every request with a full
+ * 200, which breaks seeking in Chrome and makes iOS Safari refuse or drop media playback (it requires
+ * 206 Partial Content). Files here are small (≤ 6 MB), so slicing the asset body is cheap.
+ */
+async function serveMedia(req: Request, env: Env): Promise<Response> {
+  const plain = new Request(req.url, { method: 'GET', headers: { Accept: req.headers.get('Accept') || '*/*' } });
+  const res = await env.ASSETS.fetch(plain);
+  if (res.status !== 200) return res;
+  const h = new Headers(res.headers);
+  h.set('Accept-Ranges', 'bytes');
+  h.set('Cache-Control', /\.json$/.test(new URL(req.url).pathname) ? 'no-cache' : 'public, max-age=86400, stale-while-revalidate=604800');
+  h.delete('Content-Encoding');
+  const etag = h.get('ETag');
+  if (etag && req.headers.get('If-None-Match') === etag) return new Response(null, { status: 304, headers: h });
+
+  const range = req.headers.get('Range');
+  const ifRange = req.headers.get('If-Range');
+  const body = await res.arrayBuffer();
+  const size = body.byteLength;
+  const m = range && (!ifRange || ifRange === etag) ? range.match(/^bytes=(\d*)-(\d*)$/) : null;
+  if (!m || (m[1] === '' && m[2] === '')) {
+    h.set('Content-Length', String(size));
+    return new Response(req.method === 'HEAD' ? null : body, { status: 200, headers: h });
+  }
+  let start: number, end: number;
+  if (m[1] === '') { start = Math.max(0, size - Number(m[2])); end = size - 1; } // suffix: last N bytes
+  else { start = Number(m[1]); end = m[2] === '' ? size - 1 : Math.min(Number(m[2]), size - 1); }
+  if (start >= size || start > end) {
+    h.set('Content-Range', `bytes */${size}`);
+    return new Response(null, { status: 416, headers: h });
+  }
+  h.set('Content-Range', `bytes ${start}-${end}/${size}`);
+  h.set('Content-Length', String(end - start + 1));
+  return new Response(req.method === 'HEAD' ? null : body.slice(start, end + 1), { status: 206, headers: h });
+}
 
 /* ───────────────────────── Room signaling (Durable Object) ─────────────────────────
  * One instance per room. Uses the WebSocket Hibernation API, so an idle room costs nothing.
