@@ -949,3 +949,15 @@ html.is-app input, html.is-app textarea { -webkit-user-select: text; user-select
   .burger { flex: none; width: 40px; height: 40px; }
 }
 .ai-share::before { top: -4px; height: 10px; } .ai-share::after { top: -5px; }
+
+/* brand markers instead of emoji */
+.step-tag { font: 600 10px/1 var(--mono); letter-spacing: .2em; color: var(--red-2); border: 1px solid rgba(255, 52, 39, .45); padding: 5px 7px; align-self: flex-start; }
+.line-mark { display: inline-block; width: 10px; height: 10px; flex: none; clip-path: polygon(0 0, 100% 0, 100% 60%, 60% 100%, 0 100%); }
+.rec-dot { width: 14px; height: 14px; border-radius: 50%; flex: none; background: radial-gradient(circle at 35% 30%, #ff8a80, #e5231b 55%, #7d0d08); box-shadow: 0 0 10px rgba(255, 52, 39, .6); }
+/* phones: section code backdrops dimmer — headings and copy must read first */
+@media (hover: none), (max-width: 760px) {
+  main > section.sec::after { opacity: .36; }
+  .sec-head .h2, .sec-head .lead { text-shadow: 0 2px 14px rgba(10, 11, 13, .95), 0 0 2px rgba(10, 11, 13, .9); }
+}
+.sfx-ico { width: 8px; height: 8px; border-radius: 50%; background: var(--ink-3); margin-right: 6px; display: inline-block; }
+.sfx-ico.on { background: var(--red-2); box-shadow: 0 0 6px var(--red-2); }
