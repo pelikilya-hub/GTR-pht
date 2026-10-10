@@ -130,7 +130,7 @@ export function RouteSection() {
         container: box.current, style, attributionControl: { compact: true },
         bounds: [[97.6, 7.4], [101.4, 19.4]], fitBoundsOptions: { padding: narrow ? 30 : { top: 40, bottom: 40, left: 420, right: 60 } },
         cooperativeGestures: true, dragRotate: false, pitchWithRotate: false, maxZoom: 14, maxPitch: 60,
-        pixelRatio: Math.min(window.matchMedia('(hover: none), (max-width: 760px)').matches ? 1.5 : 2, window.devicePixelRatio || 1),
+        pixelRatio: Math.min(2, window.devicePixelRatio || 1), // crisp on 3× phones without the full 3× GPU cost,
         maxTileCacheSize: 60,
       });
       map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');

@@ -5,6 +5,8 @@ import { sfx } from '@/lib/sfx';
 type Fx = 'glitch' | 'flash' | 'whip' | 'zoom' | 'rgb' | 'strobe';
 type Shot = {
   kind: 'video' | 'image'; src: string; from?: number; beats: number; label: string; pos?: string;
+  /** phone (portrait) cut of a long clip: /assets/video/<v>-v.mp4 starting at the in-point; default is <src>-v.mp4 */
+  v?: string;
   /** playback speed: fixed, or a ramp [start, end] eased across the shot (fast → slow-mo hits) */
   rate?: number | [number, number];
   /** transition into this shot */
@@ -23,12 +25,12 @@ const SHOTS: Shot[] = [
   { kind: 'video', src: '/assets/video/v-walk-slow.mp4', beats: 2, rate: [1.05, 0.85], fx: 'flash', pos: '52% 40%', label: 'POOLSIDE · ON THE PHONE' },
   { kind: 'video', src: '/assets/video/d-wheel.mp4', beats: 2, rate: 0.8, fx: 'whip', label: 'BMW · NIGHT START' },
   { kind: 'video', src: '/assets/video/g-lips.mp4', beats: 4, rate: [0.8, 0.5], fx: 'zoom', pos: '47% 40%', label: 'NIGHT · GLOSS' },
-  { kind: 'video', src: '/assets/video/car-2.mp4', from: 0.2, beats: 2, rate: 1.25, fx: 'whip', label: 'NIGHT DRIFT · BANGTAO STYLE' },
+  { kind: 'video', src: '/assets/video/car-2.mp4', from: 0.2, v: 'car-2a', beats: 2, rate: 1.25, fx: 'whip', label: 'NIGHT DRIFT · BANGTAO STYLE' },
   { kind: 'video', src: '/assets/video/g-laugh.mp4', beats: 2, rate: 1.2, fx: 'rgb', pos: '74% 30%', label: 'SHOTGUN SEAT · LAUGHS' },
   { kind: 'video', src: '/assets/video/v-sofa.mp4', beats: 2, rate: 1.5, fx: 'glitch', label: 'RECHARGE · BEFORE THE DRIVE' },
   { kind: 'video', src: '/assets/video/g-light.mp4', beats: 2, fx: 'strobe', pos: '18% 40%', label: 'LIGHT UP' },
   { kind: 'video', src: '/assets/video/g-smoke.mp4', beats: 4, rate: 1.2, fx: 'flash', pos: '8% 40%', label: 'SMOKE BREAK · STREETLIGHT' },
-  { kind: 'video', src: '/assets/video/car-1.mp4', from: 5.6, beats: 2, fx: 'rgb', label: 'WHEELS · BTS ORANGE' },
+  { kind: 'video', src: '/assets/video/car-1.mp4', from: 5.6, v: 'car-1a', beats: 2, fx: 'rgb', label: 'WHEELS · BTS ORANGE' },
   { kind: 'image', src: '/assets/crew/ilia-bangla.jpg', beats: 2, fx: 'flash', label: 'BANGLA ROAD · PATONG', pos: '50% 22%' },
   { kind: 'video', src: '/assets/video/v-sax.mp4', beats: 2, fx: 'whip', pos: '55% 40%', label: 'PARTY · SAX LIVE' },
   { kind: 'video', src: '/assets/video/v-fire-slow.mp4', beats: 4, rate: [1.6, 0.7], fx: 'strobe', pos: '50% 35%', label: 'FIRE SHOW · SLOW BURN' },
@@ -36,10 +38,10 @@ const SHOTS: Shot[] = [
   { kind: 'video', src: '/assets/video/g-exhale-slow.mp4', beats: 4, rate: [1.2, 0.8], fx: 'glitch', pos: '8% 40%', label: 'EXHALE · SLOW' },
   // chest is covered in the clip itself (black below 72–80% of the frame), so no crop can reveal it
   { kind: 'video', src: '/assets/video/g-red.mp4', beats: 4, rate: [1.1, 0.9], fx: 'strobe', pos: '50% 30%', label: 'RED ROOM · IGNITION' },
-  { kind: 'video', src: '/assets/video/car-3.mp4', from: 0.6, beats: 2, fx: 'zoom', label: 'COAST RUN · ANDAMAN' },
-  { kind: 'video', src: '/assets/video/car-2.mp4', from: 6.0, beats: 2, fx: 'glitch', label: 'SMOKE · MOONLIGHT' },
+  { kind: 'video', src: '/assets/video/car-3.mp4', from: 0.6, v: 'car-3a', beats: 2, fx: 'zoom', label: 'BACKROAD · PALMS' },
+  { kind: 'video', src: '/assets/video/car-2.mp4', from: 6.0, v: 'car-2b', beats: 2, fx: 'glitch', label: 'SMOKE · MOONLIGHT' },
   { kind: 'video', src: '/assets/video/v-walk-slow.mp4', beats: 2, rate: [1.2, 0.75], fx: 'zoom', pos: '52% 40%', label: 'SUNSET · SCROLL' },
-  { kind: 'video', src: '/assets/video/car-1.mp4', from: 9.0, beats: 2, rate: 1.2, fx: 'whip', label: 'HOOD · BANGTAOSTYLE.COM' },
+  { kind: 'video', src: '/assets/video/car-1.mp4', from: 9.0, v: 'car-1b', beats: 2, rate: 1.2, fx: 'whip', label: 'HOOD · BANGTAOSTYLE.COM' },
   { kind: 'video', src: '/assets/video/v-palms.mp4', beats: 4, rate: [1, 0.6], fx: 'flash', pos: '45% 50%', label: 'SUNSET · PROTOCOL 10.10' },
 ];
 const LOOP = SHOTS.reduce((s, x) => s + x.beats, 0);
@@ -47,6 +49,12 @@ const STARTS = SHOTS.map((_, i) => SHOTS.slice(0, i).reduce((s, x) => s + x.beat
 const FREE_BPM = 88;
 
 const pad = (n: number, l = 2) => String(n).padStart(l, '0');
+// Phones in portrait get dedicated 9:16 720×1280 cuts made from the original footage (full source height,
+// subject already framed), instead of a narrow strip of the 960×540 desktop clip: ~2–4× more real detail.
+const PORTRAIT = typeof window !== 'undefined' && window.matchMedia('(orientation: portrait) and (max-width: 900px)').matches;
+const srcOf = (s: Shot) => (s.kind !== 'video' || !PORTRAIT ? s.src : s.v ? `/assets/video/${s.v}-v.mp4` : s.src.replace('.mp4', '-v.mp4'));
+const fromOf = (s: Shot) => (PORTRAIT && s.v ? 0 : s.from || 0);
+const posOf = (s: Shot) => (PORTRAIT && s.kind === 'video' ? '50% 50%' : s.pos);
 const ease = (x: number) => x * x * (3 - 2 * x);
 const rateAt = (r: Shot['rate'], p: number) => (Array.isArray(r) ? r[0] + (r[1] - r[0]) * ease(p) : r ?? 1);
 const shotAt = (b: number) => { let i = SHOTS.length - 1; while (i > 0 && STARTS[i] > b) i--; return i; };
@@ -79,7 +87,7 @@ export function HeroReel() {
     const shot = SHOTS[idx];
     const v = vids.current[idx];
     if (shot.kind === 'video' && v) {
-      try { v.currentTime = shot.from || 0; v.playbackRate = rateAt(shot.rate, 0); } catch { /* not loaded yet */ }
+      try { v.currentTime = fromOf(shot); v.playbackRate = rateAt(shot.rate, 0); } catch { /* not loaded yet */ }
       if (live.current) v.play().catch(() => {});
     }
     vids.current.forEach((o, i) => { if (o && i !== idx) o.pause(); });
@@ -159,21 +167,22 @@ export function HeroReel() {
     <div ref={box} className={'reel' + (cut ? ' cut fx-' + fx : '') + (sync ? ' sync' : '')}>
       {still ? (
          
-        <img className="reel-layer on" src="/assets/video/v-walk-slow.jpg" alt="" style={{ objectPosition: "52% 45%" }} />
+        <img className="reel-layer on" src={PORTRAIT ? '/assets/video/v-walk-slow-v.jpg' : '/assets/video/v-walk-slow.jpg'} alt="" style={{ objectPosition: PORTRAIT ? '50% 50%' : '52% 45%' }} />
       ) : SHOTS.map((s, i) => {
         const on = i === idx;
         const near = on || i === (idx + 1) % SHOTS.length;
         // only the current shot and the next one exist in the DOM: every <video> holds a decoder
         // and frame buffers, and seven of them is enough for iOS to kill the tab
         if (!near) return null;
-        return s.kind === 'video' && !broken.has(s.src) ? (
+        const src = srcOf(s);
+        return s.kind === 'video' && !broken.has(src) ? (
           <video key={i} ref={(el) => { vids.current[i] = el; }} className={'reel-layer' + (on ? ' on' : '')}
-            src={s.src} muted playsInline loop preload="auto" aria-hidden
-            onError={() => setBroken((b) => new Set(b).add(s.src))} style={{ objectPosition: s.pos }}
-            poster={s.src.replace('.mp4', '.jpg')} />
+            src={src} muted playsInline loop preload="auto" aria-hidden
+            onError={() => setBroken((b) => new Set(b).add(src))} style={{ objectPosition: posOf(s) }}
+            poster={src.replace('.mp4', '.jpg')} />
         ) : (
            
-          <img key={i} className={'reel-layer kb' + (on ? ' on' : '')} src={s.kind === 'video' ? s.src.replace('.mp4', '.jpg') : s.src} alt="" style={{ objectPosition: s.pos }} />
+          <img key={i} className={'reel-layer kb' + (on ? ' on' : '')} src={s.kind === 'video' ? src.replace('.mp4', '.jpg') : s.src} alt="" style={{ objectPosition: posOf(s) }} />
         );
       })}
       <div className="reel-grade" aria-hidden />
