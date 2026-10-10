@@ -15,3 +15,6 @@ raw/2026-10-10/villa-day-ai-720p.mp4  13185104  1280x720  15.04
 edits/2026-10-10/capcut-kit-gtr-phuket.zip  18591388    
 raw/2026-10-10/pickup-beach-ai.mp4  14417660  1104x816  12.04
 audio/concrete-heartbeat.mp3  7468092  360x360  308.93
+audio/untitled.mp3  4341981  360x360  188.88
+audio/bang-tao-style.mp3  3359061  360x360  135.26
+audio/tin-moonshine.mp3  3225585  360x360  131.16
