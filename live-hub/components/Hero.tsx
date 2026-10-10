@@ -1,14 +1,25 @@
 'use client';
+import { useEffect, useRef } from 'react';
 import { useHub } from '@/lib/HubContext';
 import { HeroReel } from './fx/HeroReel';
 import { Count } from './ui/Motion';
 import { HeroTitles } from './fx/HeroTitles';
+import { RecStart } from './RecStart';
 
 export function Hero() {
   const { t, lang, journey, scrollToId } = useHub();
   const ru = lang === 'ru';
   const loc = ru ? 'ru-RU' : 'en-US';
   const { phase, cd } = journey;
+  const sec = useRef<HTMLElement | null>(null);
+  // while the first screen is on, REC/START is the sound control → the dock player steps aside on phones
+  useEffect(() => {
+    const el = sec.current?.querySelector('.hero-first');
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => document.documentElement.classList.toggle('at-hero', e.intersectionRatio > 0.6), { threshold: [0, 0.6, 1] });
+    io.observe(el);
+    return () => { io.disconnect(); document.documentElement.classList.remove('at-hero'); };
+  }, []);
 
   const ticker = [
     <>{journey.startLabel}</>,
@@ -21,27 +32,29 @@ export function Hero() {
   ];
 
   return (
-    <section className="hero" id="top" data-screen-label="hero">
+    <section ref={sec} className="hero" id="top" data-screen-label="hero">
       <HeroReel />
       <div className="laser" aria-hidden />
       <div className="wrap" style={{ position: 'relative', width: '100%' }}>
         <div className="hero-grid">
-          <div>
-            <div className="rv" style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
+          {/* first screen on phones: only the video, small title cards and the REC/START button */}
+          <div className="hero-first">
+            <div className="hero-kick rv">
               <span className="kicker">{t.tagline}</span>
-              <span className="tag">🎬 {ru ? 'Первая съёмка · Bangla Road, Патонг' : 'First shoot · Bangla Road, Patong'}</span>
+              <span className="tag">{ru ? 'Первая съёмка · Bangla Road, Патонг' : 'First shoot · Bangla Road, Patong'}</span>
             </div>
             <HeroTitles />
             {/* the tour's meaning now plays as title cards (HeroTitles); the paragraph stays for search + screen readers only */}
             <p className="sr-only">{t.heroSub}</p>
-            <div className="hero-cta rv" style={{ ['--d' as string]: '.35s' }}>
-              <button className="btn btn-red" onClick={() => scrollToId('live')}>
-                <span className={'dot' + (phase === 'live' ? ' live' : '')} style={{ background: '#fff' }} />
-                {t.ctaWatch}
-              </button>
-              <button className="btn" onClick={() => scrollToId('route')}>{ru ? 'Смотреть маршрут' : 'See the route'}</button>
-              <button className="btn" onClick={() => scrollToId('cars')}>{ru ? 'Охота за тачками' : 'Car hunt'}</button>
-            </div>
+            <RecStart ru={ru} />
+          </div>
+          <div className="hero-cta rv" style={{ ['--d' as string]: '.35s' }}>
+            <button className="btn btn-red" onClick={() => scrollToId('live')}>
+              <span className={'dot' + (phase === 'live' ? ' live' : '')} style={{ background: '#fff' }} />
+              {t.ctaWatch}
+            </button>
+            <button className="btn" onClick={() => scrollToId('route')}>{ru ? 'Смотреть маршрут' : 'See the route'}</button>
+            <button className="btn" onClick={() => scrollToId('cars')}>{ru ? 'Охота за тачками' : 'Car hunt'}</button>
           </div>
 
           <div className="glass hero-status rv" style={{ ['--d' as string]: '.3s' }}>
