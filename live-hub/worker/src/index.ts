@@ -182,6 +182,23 @@ async function handleApi(req: Request, env: Env, url: URL): Promise<Response> {
 
   if (p.startsWith('/api/media/')) return handleMedia(req, env, url);
 
+  // guests pick GTR Event happenings along the route: GET counts, POST {id} = one vote per visitor per event
+  if (p === '/api/route-votes') {
+    if (req.method === 'GET') {
+      const r = await hubStub(env).fetch('https://hub/votes');
+      return new Response(await r.text(), { headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', ...CORS } });
+    }
+    if (req.method === 'POST') {
+      const b = (await req.json().catch(() => null)) as { id?: unknown } | null;
+      const id = typeof b?.id === 'string' ? b.id.trim().slice(0, 80) : '';
+      if (!id || !/^[\w:.\-]+$/.test(id)) return bad('bad id');
+      const ip = req.headers.get('CF-Connecting-IP') || '0';
+      const voter = (await hmacHex(env.CREW_KEY || 'bts', 'voter:' + ip)).slice(0, 16);
+      const r = await hubStub(env).fetch('https://hub/votes', { method: 'POST', body: JSON.stringify({ id, voter }) });
+      return new Response(await r.text(), { headers: { 'Content-Type': 'application/json', ...CORS } });
+    }
+  }
+
   if (p === '/api/state' && req.method === 'GET') {
     const r = await hubStub(env).fetch('https://hub/state');
     return new Response(r.body, { status: r.status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', ...CORS } });
@@ -469,6 +486,20 @@ export class HubState implements DurableObject {
   constructor(private ctx: DurableObjectState) {}
 
   async fetch(req: Request): Promise<Response> {
+    const path = new URL(req.url).pathname;
+    // route-event votes ("хочу сюда"): counts + one vote per voter hash per event, kept apart from 'state'
+    if (path === '/votes') {
+      const votes = (await this.ctx.storage.get<Record<string, number>>('votes')) || {};
+      if (req.method === 'POST') {
+        const { id, voter } = (await req.json()) as { id: string; voter: string };
+        const seenKey = 'v:' + voter + ':' + id;
+        if (!(await this.ctx.storage.get(seenKey))) {
+          if (Object.keys(votes).length < 2000 || votes[id]) votes[id] = (votes[id] || 0) + 1;
+          await this.ctx.storage.put({ votes, [seenKey]: 1 });
+        }
+      }
+      return new Response(JSON.stringify({ votes }), { headers: { 'Content-Type': 'application/json' } });
+    }
     const cur = ((await this.ctx.storage.get<HubStateData>('state')) || { v: 0 }) as HubStateData;
     if (req.method === 'PUT') {
       const patch = (await req.json()) as Partial<HubStateData>;

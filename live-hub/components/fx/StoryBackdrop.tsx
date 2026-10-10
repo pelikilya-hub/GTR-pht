@@ -10,6 +10,7 @@ const SCENES: Record<string, string> = {
   top: '/assets/places/phuket/03-aerial-beach.jpg',
   route: '/assets/story/bangkok-night.jpg',
   rig: '/assets/video/car-3.jpg',
+  events: '/assets/places/phuket/05-neon-night.jpg',
   live: '/assets/places/phuket/05-neon-night.jpg',
   cars: '/assets/cars/02.jpg',
   realty: '/assets/places/samui/03-scene.jpg',
