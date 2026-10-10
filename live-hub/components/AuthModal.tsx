@@ -38,22 +38,22 @@ export function AuthModal() {
           <ModalHeader tag="ЛИЧНЫЙ КОНТУР" onClose={closeAuth} />
           <div style={{ padding: '22px 20px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-              <div style={{ width: 52, height: 52, border: `1px solid ${role.col}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Inter Tight',sans-serif", fontWeight: 900, fontSize: 20, color: role.col, background: '#101013' }}>
+              <div style={{ width: 52, height: 52, border: `1px solid ${role.col}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--display)', fontWeight: 900, fontSize: 20, color: role.col, background: '#101013' }}>
                 {me.nick.slice(0, 1).toUpperCase()}
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontFamily: "'Inter Tight',sans-serif", fontWeight: 700, fontSize: 16, color: '#ECE9E4', overflow: 'hidden', textOverflow: 'ellipsis' }}>{me.nick}</div>
+                <div style={{ fontFamily: 'var(--display)', fontWeight: 700, fontSize: 16, color: '#ECE9E4', overflow: 'hidden', textOverflow: 'ellipsis' }}>{me.nick}</div>
                 <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9.5, letterSpacing: '.14em', color: role.col, marginTop: 4 }}>{role.label}</div>
               </div>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 18 }}>
               <div style={{ border: '1px solid #1E1E23', background: '#101013', padding: 12 }}>
                 <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 8.5, letterSpacing: '.16em', color: '#55545C' }}>ВНЕСЕНО</div>
-                <div style={{ fontFamily: "'Inter Tight',sans-serif", fontWeight: 900, fontSize: 17, color: '#ECE9E4', marginTop: 5 }}>{rub(me.given)}</div>
+                <div style={{ fontFamily: 'var(--display)', fontWeight: 900, fontSize: 17, color: '#ECE9E4', marginTop: 5 }}>{rub(me.given)}</div>
               </div>
               <div style={{ border: '1px solid #1E1E23', background: '#101013', padding: 12 }}>
                 <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 8.5, letterSpacing: '.16em', color: '#55545C' }}>ГОЛОСОВ</div>
-                <div style={{ fontFamily: "'Inter Tight',sans-serif", fontWeight: 900, fontSize: 17, color: '#ECE9E4', marginTop: 5 }}>{me.votes}</div>
+                <div style={{ fontFamily: 'var(--display)', fontWeight: 900, fontSize: 17, color: '#ECE9E4', marginTop: 5 }}>{me.votes}</div>
               </div>
             </div>
             <div style={{ border: `1px solid ${accessBorder}`, background: accessBg, padding: 14, marginTop: 8 }}>
@@ -64,7 +64,7 @@ export function AuthModal() {
               ID: {me.id}<br />КОНТАКТ: {me.contact}<br />С НАМИ С: {new Date(me.since).toLocaleDateString('ru-RU')}
             </div>
             <div style={{ display: 'flex', gap: 8, marginTop: 16, flexWrap: 'wrap' }}>
-              <button onClick={() => { closeAuth(); setTimeout(() => scrollToId('scales'), 120); }} style={{ flex: 1, minWidth: 140, background: '#E5372C', border: '1px solid #E5372C', color: '#0B0B0C', fontFamily: "'Inter Tight',sans-serif", fontWeight: 700, fontSize: 11, letterSpacing: '.08em', padding: 14, cursor: 'pointer', minHeight: 44 }}>К ВЕСАМ ⇄</button>
+              <button onClick={() => { closeAuth(); setTimeout(() => scrollToId('scales'), 120); }} style={{ flex: 1, minWidth: 140, background: '#E5372C', border: '1px solid #E5372C', color: '#0B0B0C', fontFamily: 'var(--display)', fontWeight: 700, fontSize: 11, letterSpacing: '.08em', padding: 14, cursor: 'pointer', minHeight: 44 }}>К ВЕСАМ ⇄</button>
               <button onClick={() => { auth.logout(); closeAuth(); notify('Ты вышел. Донаты и голоса сохранены.'); }} style={{ background: 'none', border: '1px solid #2A2A30', color: '#8E8C94', fontFamily: "'JetBrains Mono',monospace", fontSize: 10, letterSpacing: '.1em', padding: '12px 16px', cursor: 'pointer', minHeight: 44 }}>ВЫЙТИ</button>
             </div>
           </div>
@@ -126,7 +126,7 @@ export function AuthModal() {
           {authUi.err && (
             <div style={{ border: '1px solid #6E2A24', background: 'rgba(229,55,44,.07)', color: '#FF8A7C', fontFamily: "'JetBrains Mono',monospace", fontSize: 10.5, letterSpacing: '.04em', lineHeight: 1.6, padding: 11, marginTop: 12 }}>{authUi.err}</div>
           )}
-          <button onClick={submitAuth} style={{ width: '100%', background: '#E5372C', border: '1px solid #E5372C', color: '#0B0B0C', fontFamily: "'Inter Tight',sans-serif", fontWeight: 900, fontSize: 13, letterSpacing: '.08em', padding: 16, cursor: 'pointer', marginTop: 16, minHeight: 52 }}>
+          <button onClick={submitAuth} style={{ width: '100%', background: '#E5372C', border: '1px solid #E5372C', color: '#0B0B0C', fontFamily: 'var(--display)', fontWeight: 900, fontSize: 13, letterSpacing: '.08em', padding: 16, cursor: 'pointer', marginTop: 16, minHeight: 52 }}>
             {reg ? 'СОЗДАТЬ АККАУНТ' : 'ВОЙТИ В ПРОТОКОЛ'}
           </button>
           <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, letterSpacing: '.04em', lineHeight: 1.8, color: '#4A4950', marginTop: 14 }}>
@@ -158,7 +158,7 @@ function Corners() {
 function ModalHeader({ tag, onClose }: { tag: string; onClose: () => void }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '16px 20px', borderBottom: '1px solid #1C1C20' }}>
-      <span style={{ fontFamily: "'Inter Tight',sans-serif", fontWeight: 900, fontSize: 14, letterSpacing: '.05em', color: '#ECE9E4' }}>BANGTAOSTYLE<span style={{ color: '#E5372C' }}>.COM</span></span>
+      <span style={{ fontFamily: 'var(--display)', fontWeight: 900, fontSize: 14, letterSpacing: '.05em', color: '#ECE9E4' }}>BANGTAOSTYLE<span style={{ color: '#E5372C' }}>.COM</span></span>
       <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, letterSpacing: '.2em', color: '#55545C' }}>{tag}</span>
       <span style={{ flex: 1 }} />
       <button onClick={onClose} style={{ background: 'none', border: '1px solid #2A2A30', color: '#8E8C94', fontFamily: "'JetBrains Mono',monospace", fontSize: 11, padding: '6px 10px', cursor: 'pointer', minHeight: 32 }}>✕</button>

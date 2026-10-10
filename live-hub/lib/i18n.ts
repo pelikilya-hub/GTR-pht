@@ -167,7 +167,7 @@ const RU: Dict = {
   chEmptyNote: 'Канал не подключён. Открой «⚙ Настроить каналы», впиши хэндл — плеер появится здесь.',
   chLinkNote: 'Платформа не отдаёт встраиваемый live-плеер — эфир откроется на самой платформе.',
   chWatchBtn: 'ОТКРЫТЬ ЭФИР ↗', shareLbl: 'ПОДЕЛИТЬСЯ ЭФИРОМ:', toastCopied: 'Ссылка скопирована',
-  nav: [['route', 'Маршрут'], ['rig', 'Борт'], ['live', 'Эфир'], ['cars', 'Тачки'], ['scales', 'Весы'], ['places', 'Места'], ['crew', 'Экипаж']],
+  nav: [['route', 'Маршрут'], ['rig', 'Борт'], ['live', 'Эфир'], ['cars', 'Тачки'], ['realty', 'Объекты'], ['scales', 'Весы'], ['places', 'Места'], ['crew', 'Экипаж']],
   carsKicker: 'LINE 05 · CARS', carsTitle: 'Охота за редкими тачками',
   carsLead: 'По пути ищем редкие машины: японская классика, забытые купе, проекты из гаражей. Берём дёшево, восстанавливаем, охотимся за запчастями по рынкам Бангкока и Паттайи — и показываем каждый шаг в эфире.',
   carsSteps: [
@@ -303,7 +303,7 @@ const EN: Dict = {
   chEmptyNote: 'Channel not connected. Open “⚙ Set up channels”, enter a handle — the player appears here.',
   chLinkNote: 'This platform has no embeddable live player — the stream opens on the platform itself.',
   chWatchBtn: 'OPEN STREAM ↗', shareLbl: 'SHARE THE STREAM:', toastCopied: 'Link copied',
-  nav: [['route', 'Route'], ['rig', 'Rig'], ['live', 'Live'], ['cars', 'Cars'], ['scales', 'Scales'], ['places', 'Places'], ['crew', 'Crew']],
+  nav: [['route', 'Route'], ['rig', 'Rig'], ['live', 'Live'], ['cars', 'Cars'], ['realty', 'Realty'], ['scales', 'Scales'], ['places', 'Places'], ['crew', 'Crew']],
   carsKicker: 'LINE 05 · CARS', carsTitle: 'Hunting rare cars',
   carsLead: 'Along the way we hunt rare cars: Japanese classics, forgotten coupés, garage projects. We buy cheap, restore, chase parts across the markets of Bangkok and Pattaya — and stream every step.',
   carsSteps: [

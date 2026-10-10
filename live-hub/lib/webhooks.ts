@@ -9,7 +9,8 @@ export type HubWebhookEvent =
   | 'boost_donate'
   | 'invite_submit'
   | 'city_donate'
-  | 'car_tip';
+  | 'car_tip'
+  | 'realty_lead';
 
 export interface HubWebhookPayload {
   [key: string]: unknown;
