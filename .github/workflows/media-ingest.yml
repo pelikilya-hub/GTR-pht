@@ -33,8 +33,9 @@ jobs:
         run: |
           set -e
           mkdir -p keys inbox
-          { echo "## bucket create"; wrangler r2 bucket create "$BUCKET" 2>&1 | tail -15; echo "## bucket list"; wrangler r2 bucket list 2>&1 | tail -15; echo "## whoami"; wrangler whoami 2>&1 | grep -vi "email\|@" | tail -25; } > keys/SETUP_LOG.txt || true
-          grep -q "$BUCKET" keys/SETUP_LOG.txt && grep -A15 "## bucket list" keys/SETUP_LOG.txt | grep -q "$BUCKET"
+          wrangler r2 bucket create "$BUCKET" > /tmp/create.txt 2>&1 || grep -q "already exists, and you own it" /tmp/create.txt
+          wrangler r2 bucket list 2>/dev/null | grep -q "name: *$BUCKET$"
+          echo "bucket $BUCKET ready" > keys/SETUP_LOG.txt
           openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:4096 -out /tmp/priv.pem
           openssl pkey -in /tmp/priv.pem -pubout -out keys/public.pem
           wrangler r2 object put "$BUCKET/_keys/ingest-private.pem" --file /tmp/priv.pem --remote >/dev/null
