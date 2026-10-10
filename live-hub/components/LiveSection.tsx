@@ -34,6 +34,9 @@ export function LiveSection() {
   const { t, lang, journey, notify, bump, integrations } = useHub();
   const ru = lang === 'ru';
   const [platTab, setPlatTab] = useState('twitch');
+  // The embed (Twitch / YouTube / Kick / VK) is a heavy page of its own: before the stream it only
+  // loads on request, during the stream it loads by itself. Switching platform re-arms it.
+  const [armedFor, setArmedFor] = useState<string | null>(null);
   const [chOpen, setChOpen] = useState(false);
   const [chDraft, setChDraft] = useState<Channels | null>(null);
   const ch = ls<Channels>('gtrpht_channels', {});
@@ -108,7 +111,19 @@ export function LiveSection() {
               <div className="panel" style={{ padding: 12 }}><gtr-multiview room="gtrpht" /></div>
             ) : (
               <div className="player">
-                {embMode === 'iframe' && <iframe src={embSrc} title="live player" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowFullScreen />}
+                {embMode === 'iframe' && (journey.phase === 'live' || armedFor === embSrc) && (
+                  <iframe key={embSrc} src={embSrc} title="live player" loading="lazy" referrerPolicy="strict-origin-when-cross-origin"
+                    allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowFullScreen />
+                )}
+                {embMode === 'iframe' && journey.phase !== 'live' && armedFor !== embSrc && (
+                  <div className="player-facade">
+                    <div className="kicker">{t.standby}</div>
+                    <div className="pf-title">{t.firstStream}</div>
+                    <button type="button" className="btn btn-red" onClick={() => setArmedFor(embSrc)}>
+                      ▶ {ru ? 'Открыть плеер' : 'Open player'} · {PDEFS.find(([k]) => k === platTab)?.[1] || platTab}
+                    </button>
+                  </div>
+                )}
                 {embMode !== 'iframe' && (
                   <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 18, padding: '0 24px', textAlign: 'center', background: 'radial-gradient(60% 60% at 50% 40%, rgba(229,55,44,.14), transparent 70%)' }}>
                     <div style={{ position: 'absolute', left: 0, right: 0, height: '40%', background: 'linear-gradient(180deg,transparent,rgba(229,55,44,.06),transparent)', animation: 'omScan 5s linear infinite' }} />
