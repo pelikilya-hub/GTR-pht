@@ -27,6 +27,10 @@ const ROLES: { ru: [string, string]; en: [string, string] }[] = [
   { ru: ['Носитель бренда', 'Reels, shorts, сторис — и магнит у входа GTR Rawai Hub.'], en: ['Brand carrier', 'Reels, shorts, stories — and a magnet at the GTR Rawai Hub door.'] },
 ];
 
+// phones (portrait): 4:5 720×900 cuts made from the original footage, matching the 4:5 stage
+const PORTRAIT = typeof window !== 'undefined' && window.matchMedia('(orientation: portrait) and (max-width: 760px)').matches;
+const rsrc = (src: string) => (PORTRAIT ? src.replace('.mp4', '-r.mp4') : src);
+
 export function Rig() {
   const { lang, journey } = useHub();
   const ru = lang === 'ru';
@@ -61,7 +65,7 @@ export function Rig() {
         />
 
         <div className="rig-stage rv">
-          <video key={ang} ref={vid} className="rig-video" src={ANGLES[ang].src} poster={ANGLES[ang].src.replace('.mp4', '.jpg')}
+          <video key={ang} ref={vid} className="rig-video" src={rsrc(ANGLES[ang].src)} poster={rsrc(ANGLES[ang].src).replace('.mp4', '.jpg')}
             muted playsInline loop preload="none" aria-label={ru ? 'Пикап Bangtaostyle' : 'Bangtaostyle pickup'} />
           <div className="rig-grade" aria-hidden />
           <div className="rig-odo" aria-label={(ru ? 'Пробег тура ' : 'Tour odometer ') + journey.km + ' km'}>

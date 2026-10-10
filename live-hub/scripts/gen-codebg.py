@@ -3,7 +3,7 @@ images for phones, where a fixed full-screen canvas makes the browser composite 
 into dozens of layers and run out of memory.
 
 usage: python gen-codebg.py <ffmpeg-free python with Pillow>  (run from live-hub/)
-Writes public/assets/codebg/<section>.jpg at 780x1688 (390x844 css @2x). Mirrors SCENES and the
+Writes public/assets/codebg/<section>.jpg at 1170x2532 (390x844 css @3x). Mirrors SCENES and the
 glyph shading of components/fx/StoryBackdrop.tsx — keep the two in sync.
 """
 import random
@@ -17,7 +17,7 @@ SCENES = {
     'tiers': 'places/bangkok/01-scene.jpg', 'invite': 'places/phangan/02-scene.jpg', 'sponsors': 'cars/06.jpg',
 }
 GLYPHS = 'กขคงจฉชซญฎฐณดตถทธนบปผพฟภมยรลวศษสหอฮ0123456789ABCDEF#%&$'
-W, H, CELL = 780, 1688, 30
+W, H, CELL = 1170, 2532, 45  # 390x844 css @3x
 thai = ImageFont.truetype('/usr/share/fonts/opentype/tlwg/Loma-Bold.otf', CELL - 8)
 latin = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf', CELL - 9)
 
@@ -43,5 +43,5 @@ for key, src in SCENES.items():
             col = (255, 255, 255, int(a * 255)) if l > 0.62 else (229, 35, 27, int(a * 0.9 * 255))
             g = rnd.choice(GLYPHS)
             d.text((x * CELL, y * CELL), g, font=thai if ord(g) > 0x0E00 else latin, fill=col)
-    out.save(f'public/assets/codebg/{key}.jpg', quality=70, optimize=True, progressive=True)
+    out.save(f'public/assets/codebg/{key}.jpg', quality=68, optimize=True, progressive=True)
     print(key)

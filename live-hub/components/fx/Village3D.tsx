@@ -95,7 +95,7 @@ export function Village3D({ kind, ru }: { kind: VillageKind; ru: boolean }) {
 
     const resize = () => {
       const r = canvas.getBoundingClientRect();
-      dpr = Math.min(lite ? 1.5 : 2, window.devicePixelRatio || 1);
+      dpr = Math.min(2, window.devicePixelRatio || 1);
       W = r.width; H = r.height;
       canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
     };
