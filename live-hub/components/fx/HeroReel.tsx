@@ -156,12 +156,6 @@ export function HeroReel() {
     return () => { io.disconnect(); cancelAnimationFrame(raf); clearTimeout(cutT); };
   }, [still]);
 
-  const toggleSound = () => {
-    const a = window.__gtrAudio;
-    if (!a) return;
-    if (a.paused) a.play().catch(() => {}); else a.pause();
-  };
-
   const shot = SHOTS[idx];
   return (
     <div ref={box} className={'reel' + (cut ? ' cut fx-' + fx : '') + (sync ? ' sync' : '')}>
@@ -195,13 +189,6 @@ export function HeroReel() {
         <span className="brand">BANGTAOSTYLE.COM · PROTOCOL 10.10</span>
         <div className="ticks">{SHOTS.map((_, i) => <b key={i} className={i < idx ? 'done' : i === idx ? 'on' : ''} />)}</div>
       </div>
-      {!still && (
-        <button type="button" className="reel-snd" data-audio-ui onClick={toggleSound}
-          aria-label={sync ? 'Pause soundtrack' : 'Play soundtrack'}>
-          <span className="eq" aria-hidden><i /><i /><i /><i /></span>
-          {sync ? `IN SYNC · ${Math.round(bpm)} BPM` : 'SOUND ON · SOUNDTRACK'}
-        </button>
-      )}
     </div>
   );
 }

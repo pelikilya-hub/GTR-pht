@@ -1,0 +1,26 @@
+{
+  "id": "/",
+  "name": "BANGTAOSTYLE.COM — кольцо Таиланда в прямом эфире",
+  "short_name": "BANGTAOSTYLE",
+  "description": "Кольцо Таиланда в прямом эфире: Пхукет → Самуи → Панган → Чиангмай → Аюттхая → Бангкок → Паттайя → Пхукет. Эфир, карта, чат.",
+  "lang": "ru",
+  "start_url": "/?source=app",
+  "scope": "/",
+  "display": "fullscreen",
+  "display_override": ["fullscreen", "standalone"],
+  "orientation": "portrait",
+  "background_color": "#0a0b0d",
+  "theme_color": "#0a0b0d",
+  "categories": ["entertainment", "travel", "lifestyle"],
+  "icons": [
+    { "src": "/app/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/app/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/app/icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/app/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Эфир", "url": "/?source=app#live", "icons": [{ "src": "/app/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Маршрут", "url": "/?source=app#route", "icons": [{ "src": "/app/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Консоль экипажа", "url": "/console/", "icons": [{ "src": "/app/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

@@ -27,6 +27,7 @@ import { StoryBackdrop } from '@/components/fx/StoryBackdrop';
 import { SfxBinder } from '@/components/fx/SfxBinder';
 import { ScrollFX } from '@/components/fx/ScrollFX';
 import { ButtonFX } from '@/components/fx/ButtonFX';
+import { AppInstall } from '@/components/AppInstall';
 
 // Client-only (app/page.tsx loads it with ssr:false): everything here is live —
 // countdown, GPS, chat, shared state — and has no SEO value server-rendered.
@@ -63,6 +64,7 @@ export default function HomeClient() {
         </main>
         <Footer />
         <AudioBar />
+        <AppInstall />
       </div>
     </HubProvider>
   );
