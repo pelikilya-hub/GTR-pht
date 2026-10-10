@@ -18,3 +18,8 @@ audio/concrete-heartbeat.mp3  7468092  360x360  308.93
 audio/untitled.mp3  4341981  360x360  188.88
 audio/bang-tao-style.mp3  3359061  360x360  135.26
 audio/tin-moonshine.mp3  3225585  360x360  131.16
+raw/2026-10-10/neon-villa-stretch-IMG_5144.mov  14461251  1920x1080  11.23
+raw/2026-10-10/neon-villa-pool-IMG_5145.mov  16855115  1920x1080  12.77
+edits/2026-10-10/reel-concrete-heartbeat-1080x1920-v2.mp4  24941948  1080x1920  23.6
+edits/2026-10-10/reel-gtr-phuket-1080x1920-v2.mp4  21480847  1080x1920  21.83
+raw/2026-10-10/neon-villa-sit-phone-IMG_5159.mov  11259656  1920x1080x  12.5
