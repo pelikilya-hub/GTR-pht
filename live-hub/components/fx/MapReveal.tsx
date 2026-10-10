@@ -56,8 +56,11 @@ export function MapReveal() {
     const nio = new IntersectionObserver(([e]) => { near = e.isIntersecting; if (near) last = 0; }, { rootMargin: '50% 0px' });
     nio.observe(parent);
     raf = requestAnimationFrame(draw);
-    window.addEventListener('resize', size);
-    return () => { io.disconnect(); nio.disconnect(); cancelAnimationFrame(raf); window.removeEventListener('resize', size); };
+    // iOS fires resize when the URL bar collapses; only a width change needs a new canvas
+    let lastW = window.innerWidth;
+    const onResize = () => { if (window.innerWidth !== lastW) { lastW = window.innerWidth; size(); } };
+    window.addEventListener('resize', onResize);
+    return () => { io.disconnect(); nio.disconnect(); cancelAnimationFrame(raf); window.removeEventListener('resize', onResize); };
   }, []);
 
   if (gone) return null;

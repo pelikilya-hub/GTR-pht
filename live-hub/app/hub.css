@@ -633,9 +633,9 @@ main > section { --p: 0; --e: 1; --x: 0; }
   .stats > div, .cd > div { background: rgba(10, 11, 13, .7); }
   .top.scrolled { background: rgba(8, 8, 10, .94); }
   .story-bg canvas { filter: none; transform: none; transition: none; }
-  .hero h1 { filter: none; text-shadow: none; will-change: transform, opacity; }
+  .hero h1 { filter: none; text-shadow: none; }
   .hero h1 .red-line { text-shadow: none; }
-  .sec .sec-head .h2 { filter: none; letter-spacing: -.02em; will-change: opacity, transform; }
+  .sec .sec-head .h2 { filter: none; letter-spacing: -.02em; }
   .reel { filter: none; }
   .reel::after { display: none; }
   .ct-w { text-shadow: none; }
@@ -648,7 +648,7 @@ main > section { --p: 0; --e: 1; --x: 0; }
 }
 
 /* ═══════════════ Living buttons (components/fx/ButtonFX.tsx) ═══════════════ */
-.btn { transform: translate3d(var(--mx, 0), var(--my, 0), 0); transition: background-position .24s var(--ease), border-color .18s, color .18s, transform .35s cubic-bezier(.2, 1.4, .4, 1); overflow: hidden; }
+.btn { transform: translate(var(--mx, 0), var(--my, 0)); transition: background-position .24s var(--ease), border-color .18s, color .18s, transform .35s cubic-bezier(.2, 1.4, .4, 1); overflow: hidden; }
 .btn:hover { transition: background-position .24s var(--ease), border-color .18s, color .18s, transform .12s linear; }
 /* corner ticks open up on hover */
 .btn::before { content: ''; position: absolute; inset: 4px; pointer-events: none; opacity: .0;
@@ -667,9 +667,9 @@ main > section { --p: 0; --e: 1; --x: 0; }
 @keyframes btnBurst { from { transform: scale(0); opacity: 1; } to { transform: scale(40); opacity: 0; } }
 .btn-kick { animation: btnKick .28s steps(3) 1; }
 @keyframes btnKick {
-  0% { transform: translate3d(calc(var(--mx, 0px) + 3px), var(--my, 0), 0) skewX(-6deg); text-shadow: -2px 0 var(--red-2), 2px 0 #5ac8ff; }
-  50% { transform: translate3d(calc(var(--mx, 0px) - 2px), var(--my, 0), 0) skewX(4deg); text-shadow: 2px 0 var(--red-2), -2px 0 #5ac8ff; }
-  100% { transform: translate3d(var(--mx, 0), var(--my, 0), 0); text-shadow: none; } }
+  0% { transform: translate(calc(var(--mx, 0px) + 3px), var(--my, 0)) skewX(-6deg); text-shadow: -2px 0 var(--red-2), 2px 0 #5ac8ff; }
+  50% { transform: translate(calc(var(--mx, 0px) - 2px), var(--my, 0)) skewX(4deg); text-shadow: 2px 0 var(--red-2), -2px 0 #5ac8ff; }
+  100% { transform: translate(var(--mx, 0), var(--my, 0)); text-shadow: none; } }
 .btn:active { filter: none; }
 @media (hover: none) { .btn::before { display: none; } }
 @media (prefers-reduced-motion: reduce) { .btn, .btn-red, .btn-red .dot { animation: none; transform: none; } }
@@ -725,4 +725,64 @@ main > section { --p: 0; --e: 1; --x: 0; }
   body::before, body::after { display: none; }
   .reel-kick, .reel-flash, .btn-burst { mix-blend-mode: normal; }
   .reel-flash { background: rgba(255, 255, 255, .35); }
+}
+
+/* ═══════════════ Phones: static code backdrop per section (replaces the fixed live canvas) ═══════════════ */
+@media (hover: none), (max-width: 760px) {
+  .story-bg { display: none; }
+  main > section.sec { isolation: isolate; }
+  main > section.sec::after { content: ''; position: absolute; left: 0; right: 0; top: 0; z-index: -1; pointer-events: none;
+    height: min(100%, 216vw);
+    background:
+      linear-gradient(180deg, rgba(10, 11, 13, .6), transparent 22%, transparent 62%, var(--bg) 100%),
+      radial-gradient(120% 80% at 50% 40%, rgba(10, 11, 13, .2), rgba(10, 11, 13, .78) 75%),
+      var(--codebg, none) center top / 100% auto no-repeat; }
+  #route { --codebg: url('/assets/codebg/route.jpg'); }
+  #rig { --codebg: url('/assets/codebg/rig.jpg'); }
+  #live { --codebg: url('/assets/codebg/live.jpg'); }
+  #cars { --codebg: url('/assets/codebg/cars.jpg'); }
+  #realty { --codebg: url('/assets/codebg/realty.jpg'); }
+  #lines { --codebg: url('/assets/codebg/lines.jpg'); }
+  #scales { --codebg: url('/assets/codebg/scales.jpg'); }
+  #places { --codebg: url('/assets/codebg/places.jpg'); }
+  #logbook { --codebg: url('/assets/codebg/logbook.jpg'); }
+  #gtr-reality { --codebg: url('/assets/codebg/gtr-reality.jpg'); }
+  #crew { --codebg: url('/assets/codebg/crew.jpg'); }
+  #tiers { --codebg: url('/assets/codebg/tiers.jpg'); }
+  #invite { --codebg: url('/assets/codebg/invite.jpg'); }
+  #sponsors { --codebg: url('/assets/codebg/sponsors.jpg'); }
+}
+
+/* ═══════════════ Phones: memory diet ═══════════════
+   Every 3D transform / will-change becomes its own GPU layer at 3× pixel density; with the long
+   page that was ~1.2 GB and iOS reloaded the tab. Phones get flat 2D motion only, and sections
+   that are off-screen are not rendered at all (content-visibility). */
+@media (hover: none), (max-width: 760px) {
+  .hero h1 { transform: translate(0, calc(var(--x, 0) * -10vh)); will-change: auto; }
+  .hero .lead, .hero-cta, .hero .stats { transform: none; }
+  .hero-status { transform: none; }
+  .sec .sec-head .kicker { transform: none; }
+  .map-shell, .drone-shot, .scales-stage, .player { transform: none !important; opacity: 1; }
+  .car-shot img, .place .ph img, .car-card .img img, .car-shot:hover img { transform: none; }
+  .car-mosaic .car-shot:nth-child(odd), .car-mosaic .car-shot:nth-child(even) { transform: none; }
+  .stops { transform: none; }
+  .rig-video { transform: none; animation: none; }
+  .reel { transform: none; }
+  .reel-layer.kb.on { animation: none; }
+  .btn { transform: none; transition: background-position .24s var(--ease), border-color .18s, color .18s; }
+  main > section.sec { content-visibility: auto; contain-intrinsic-size: auto 1400px; }
+  main > section#route, main > section#live { content-visibility: visible; } /* map / player measure themselves */
+}
+/* touch: comfortable tap targets */
+@media (hover: none) {
+  .top .seg button { height: 40px !important; min-height: 40px !important; min-width: 44px; }
+  a.chip, button.chip { min-height: 40px; padding: 0 14px; }
+}
+@media (max-width: 560px) {
+  .cl-title { font-size: min(7.2vw, 30px) !important; }
+  .tip-row { grid-template-columns: 1fr !important; }
+}
+@media (max-height: 520px) {
+  .reel-snd, .reel-hud .tc, .reel-hud .rec { display: none; }
+  .hero h1 { font-size: clamp(26px, 6.2vh + 1.5vw, 52px); }
 }

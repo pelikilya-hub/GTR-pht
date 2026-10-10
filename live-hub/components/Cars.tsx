@@ -19,6 +19,14 @@ const SHOTS: [string, string, string][] = [
   ['/assets/cars/09.jpg', 'RX-7 под снегом', 'RX-7 in the snow'],
 ];
 
+// A garage card without its own photo gets a gallery shot of the same model, never a random one.
+const MODEL_SHOT: [RegExp, number][] = [[/supra/i, 3], [/skyline|gt-?r|r3[234]/i, 2], [/911|porsche/i, 7], [/rx-?7|mazda/i, 8]];
+const NEUTRAL = [0, 1, 4, 5, 6]; // graveyard, breaker yard, impound, barn, parts — no specific model
+function shotFor(name: string, i: number) {
+  const hit = MODEL_SHOT.find(([re]) => re.test(name));
+  return SHOTS[hit ? hit[1] : NEUTRAL[i % NEUTRAL.length]][0];
+}
+
 export function Cars() {
   const { t, lang, notify, auth, now } = useHub();
   const ru = lang === 'ru';
@@ -76,7 +84,7 @@ export function Cars() {
                 {garage.map((c) => (
                   <article key={c.id} className="panel car-card">
                     <div className="img">
-                      <img src={c.img || SHOTS[(garage.indexOf(c) + 2) % SHOTS.length][0]} alt={c.name} loading="lazy" />
+                      <img src={c.img || shotFor(c.name, garage.indexOf(c))} alt={c.name} loading="lazy" />
                       <span className={'chip' + (c.stage === 'done' ? ' on' : '')} style={{ position: 'absolute', top: 12, left: 12, background: 'rgba(8,8,10,.7)' }}>{t.carStages[c.stage] || c.stage}</span>
                     </div>
                     <div style={{ padding: 18 }}>
@@ -95,7 +103,7 @@ export function Cars() {
             <p style={{ color: 'var(--ink-2)', fontSize: 14.5, lineHeight: 1.6, margin: '8px 0 18px' }}>{t.carsTipLead}</p>
             <div style={{ display: 'grid', gap: 10 }}>
               <input className="field" value={tip.car} onChange={(e) => setTip({ ...tip, car: e.target.value })} placeholder={t.carsTipCar} />
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              <div className="tip-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                 <input className="field" value={tip.where} onChange={(e) => setTip({ ...tip, where: e.target.value })} placeholder={t.carsTipWhere} />
                 <input className="field" value={tip.price} onChange={(e) => setTip({ ...tip, price: e.target.value })} placeholder={t.carsTipPrice} />
               </div>

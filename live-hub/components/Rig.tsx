@@ -39,7 +39,10 @@ export function Rig() {
     const v = vid.current;
     if (!v) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) v.play().catch(() => {}); else v.pause(); }, { threshold: 0.15 });
+    // nothing is fetched or decoded until the block is close; paused (and its buffer released) when far
+    const io = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) { if (v.preload !== 'auto') v.preload = 'auto'; v.play().catch(() => {}); } else v.pause();
+    }, { threshold: 0.15, rootMargin: '25% 0px' });
     io.observe(v);
     return () => io.disconnect();
   }, [ang]);
@@ -59,7 +62,7 @@ export function Rig() {
 
         <div className="rig-stage rv">
           <video key={ang} ref={vid} className="rig-video" src={ANGLES[ang].src} poster={ANGLES[ang].src.replace('.mp4', '.jpg')}
-            muted playsInline loop autoPlay preload="metadata" aria-label={ru ? 'Пикап Bangtaostyle' : 'Bangtaostyle pickup'} />
+            muted playsInline loop preload="none" aria-label={ru ? 'Пикап Bangtaostyle' : 'Bangtaostyle pickup'} />
           <div className="rig-grade" aria-hidden />
           <div className="rig-odo" aria-label={(ru ? 'Пробег тура ' : 'Tour odometer ') + journey.km + ' km'}>
             <span className="meta">{ru ? 'ОДОМЕТР ТУРА' : 'TOUR ODOMETER'}</span>
