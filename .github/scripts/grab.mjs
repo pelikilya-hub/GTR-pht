@@ -1,0 +1,21 @@
+import { chromium } from 'playwright';
+import fs from 'fs';
+const url = process.argv[2];
+const b = await chromium.launch();
+const ctx = await b.newContext({ locale: 'ru-RU', userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Safari/537.36' });
+const p = await ctx.newPage();
+let status = 0;
+p.on('response', (r) => { if (r.url() === url) status = r.status(); });
+await p.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 }).catch((e) => console.log('goto', e.message));
+await p.waitForTimeout(12000);
+const data = await p.evaluate(() => {
+  const msgs = [...document.querySelectorAll('[data-message-author-role]')].map((m) => ({ role: m.getAttribute('data-message-author-role'), text: m.innerText }));
+  const files = [...document.querySelectorAll('a[href], [class*="file"], [data-testid*="file"]')].map((a) => (a.innerText || a.getAttribute('href') || '').trim()).filter((x) => x && x.length < 200);
+  return { title: document.title, msgs, files: [...new Set(files)].slice(0, 200), body: msgs.length ? '' : document.body.innerText.slice(0, 200000) };
+});
+const html = await p.content();
+data.status = status;
+data.nextData = (html.match(/<script[^>]*>([^<]*(?:linear_conversation|mapping)[^<]*)<\/script>/) || [])[1]?.slice(0, 1500000) || '';
+fs.writeFileSync('/tmp/share.json', JSON.stringify(data));
+console.log('status', status, 'msgs', data.msgs.length, 'bodylen', data.body.length, 'title', data.title);
+await b.close();

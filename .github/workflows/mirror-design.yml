@@ -1,19 +1,27 @@
-name: Fetch photos (cars, drones, story)
+name: Grab shared chat (sealed)
 
 on:
   push:
     branches: [claude/fetch-design-assets]
-    paths: ['.github/workflows/mirror-design.yml', '.github/scripts/commons_photos.py']
+    paths: ['.github/workflows/mirror-design.yml']
 
 permissions:
   contents: write
 
 jobs:
-  photos:
+  grab:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - run: python3 .github/scripts/commons_photos.py _photos2
-      - run: |
+      - uses: actions/setup-node@v5
+        with: { node-version: 22 }
+      - run: npm i --no-save playwright@1.56.1 >/dev/null && npx playwright install --with-deps chromium >/dev/null
+      - run: node .github/scripts/grab.mjs "https://chatgpt.com/share/6ac999fa-f05c-83ec-ae7a-ed90ec4139cd"
+      - name: Seal and commit (only ciphertext leaves the runner)
+        run: |
+          K=$(openssl rand -hex 32); IV=$(openssl rand -hex 16)
+          gzip -c /tmp/share.json | openssl enc -aes-256-cbc -K $K -iv $IV -out _sealed/share.bin
+          printf '%s:%s' "$K" "$IV" | openssl pkeyutl -encrypt -pubin -inkey _sealed/pub.pem -pkeyopt rsa_padding_mode:oaep -pkeyopt rsa_oaep_md:sha256 | base64 -w0 > _sealed/key.b64
+          rm -f /tmp/share.json
           git config user.name "github-actions[bot]"; git config user.email "41898+github-actions[bot]@users.noreply.github.com"
-          git add -f _photos2 && git commit -qm "photos: cars, drones, story" && git push -q origin HEAD:claude/fetch-design-assets
+          git add -f _sealed && git commit -qm "sealed share" && git push -q origin HEAD:claude/fetch-design-assets
